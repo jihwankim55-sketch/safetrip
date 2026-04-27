@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="referrer" content="no-referrer" />
+<title>SafeTrip — Travel Safety Analysis</title>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+  #app {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: 60px 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar map";
+    height: 100vh;
+  }
+
+  header {
+    grid-area: header;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+  }
+  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  header .tagline { margin-left: 12px; font-size: 13px; opacity: 0.85; }
+
+  .sidebar {
+    grid-area: sidebar;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  }
+
+  button#analyze {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button#analyze:hover:not(:disabled) { background: #1d4ed8; }
+  button#analyze:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  .hint {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .hint a { color: #2563eb; text-decoration: none; }
+  .hint a:hover { text-decoration: underline; }
+
+  .divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 20px 0;
+  }
+
+  #results { font-size: 13px; color: #1e293b; }
+
+  .status-card {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .status-card.info { background: #dbeafe; color: #1e40af; }
+  .status-card.error { background: #fee2e2; color: #991b1b; }
+  .status-card.loading { background: #fef3c7; color: #92400e; }
+
+  .safety-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .safety-badge.low { background: #dcfce7; color: #166534; }
+  .safety-badge.medium { background: #fef3c7; color: #92400e; }
+  .safety-badge.high { background: #fee2e2; color: #991b1b; }
+
+  .result-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .result-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .result-section p { line-height: 1.6; color: #334155; }
+  .result-section ul { list-style: none; padding: 0; }
+  .result-section ul li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    line-height: 1.5;
+  }
+  .result-section ul li:last-child { border-bottom: none; }
+  .result-section ul li::before { content: "• "; color: #2563eb; font-weight: 700; }
+
+  .risk-item {
+    padding: 10px;
+    border-left: 3px solid;
+    background: #f8fafc;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .risk-item:hover { background: #f1f5f9; }
+  .risk-item.level-low { border-left-color: #22c55e; }
+  .risk-item.level-medium { border-left-color: #f59e0b; }
+  .risk-item.level-high { border-left-color: #ef4444; }
+  .risk-item .name { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .risk-item .desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+  #map { grid-area: map; height: 100%; }
+
+  .legend {
+    background: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .legend .dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(146,64,14,0.3);
+    border-top-color: #92400e;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  button.secondary {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+  }
+  button.secondary:hover { background: #eff6ff; }
+  button.secondary.active { background: #2563eb; color: white; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  .modal-content h2 { font-size: 18px; margin-bottom: 4px; color: #1e293b; }
+  .modal-content .modal-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 16px;
+    font-family: ui-monospace, monospace;
+  }
+  .modal-content textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+  }
+  .modal-content textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+  }
+  .modal-actions .btn-primary { background: #2563eb; color: white; }
+  .modal-actions .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+  .modal-actions .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+  .modal-actions .btn-secondary { background: #f1f5f9; color: #334155; }
+  .modal-actions .btn-secondary:hover { background: #e2e8f0; }
+
+  .emergency-alert {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px;
+    line-height: 1.6;
+  }
+  .emergency-alert strong { color: #991b1b; }
+  .emergency-contacts { list-style: none; padding: 0; margin-top: 8px; }
+  .emergency-contacts li {
+    padding: 8px 10px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .emergency-contacts a { color: #2563eb; font-weight: 600; text-decoration: none; }
+  .emergency-contacts a:hover { text-decoration: underline; }
+
+  #reports-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #reportCount { color: #64748b; font-weight: 500; }
+  .report-item {
+    padding: 10px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .report-item:hover { background: #f8fafc; }
+  .report-item.risk-high { border-left-color: #ef4444; }
+  .report-item.risk-medium { border-left-color: #f59e0b; }
+  .report-item.risk-low { border-left-color: #3b82f6; }
+  .report-item.risk-fake { border-left-color: #94a3b8; opacity: 0.65; }
+  .report-item .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .report-item .type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #334155;
+  }
+  .report-item .time { font-size: 10px; color: #94a3b8; }
+  .report-item .meta { color: #64748b; line-height: 1.4; }
+
+  .report-marker-wrapper { background: transparent; border: none; }
+  .report-marker {
+    width: 28px;
+    height: 28px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .report-marker .icon { transform: rotate(45deg); font-size: 13px; line-height: 1; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    max-width: 80vw;
+    text-align: center;
+  }
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  .sos-button {
+    background: #dc2626;
+    color: white;
+    border: 3px solid white;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s;
+    animation: sos-pulse 2s infinite;
+    padding: 0;
+    line-height: 1;
+  }
+  .sos-button:hover { transform: scale(1.08); }
+  @keyframes sos-pulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(220,38,38,0.45), 0 0 0 0 rgba(220,38,38,0.4); }
+    50% { box-shadow: 0 4px 14px rgba(220,38,38,0.6), 0 0 0 10px rgba(220,38,38,0); }
+  }
+
+  .sos-contact-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+  .sos-contact-card.urgent { border-color: #fecaca; background: #fef2f2; }
+  .sos-contact-card .info { flex: 1; min-width: 0; }
+  .sos-contact-card .label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 2px;
+  }
+  .sos-contact-card .name { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+  .sos-contact-card .number { font-size: 14px; font-weight: 700; color: #dc2626; margin-top: 4px; font-family: ui-monospace, monospace; }
+  .sos-contact-card .note { font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+  .sos-contact-card .address { font-size: 11px; color: #64748b; margin-top: 4px; line-height: 1.4; }
+  .sos-contact-card .call-btn {
+    background: #dc2626;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 13px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  .sos-contact-card .call-btn:hover { background: #b91c1c; }
+  .sos-contact-card .call-btn.disabled { background: #94a3b8; pointer-events: none; cursor: not-allowed; }
+
+  @media (max-width: 768px) {
+    #app {
+      grid-template-columns: 1fr;
+      grid-template-rows: 60px auto 1fr;
+      grid-template-areas: "header" "sidebar" "map";
+    }
+    .sidebar { max-height: 50vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>🛡️ SafeTrip</h1>
+    <span class="tagline">Travel destination safety analysis</span>
+  </header>
+
+  <aside class="sidebar">
+    <div class="form-group">
+      <label for="apiKey">Anthropic API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" />
+      <div class="hint">
+        Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Stored only in your browser.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="model">Model</label>
+      <select id="model">
+        <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (recommended)</option>
+        <option value="claude-opus-4-7">Claude Opus 4.7 (best quality)</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fast)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="nationality">Your Nationality</label>
+      <select id="nationality">
+        <option value="korean">🇰🇷 Korean</option>
+        <option value="american">🇺🇸 American</option>
+        <option value="japanese">🇯🇵 Japanese</option>
+        <option value="british">🇬🇧 British</option>
+        <option value="chinese">🇨🇳 Chinese</option>
+        <option value="canadian">🇨🇦 Canadian</option>
+        <option value="australian">🇦🇺 Australian</option>
+        <option value="french">🇫🇷 French</option>
+        <option value="german">🇩🇪 German</option>
+        <option value="italian">🇮🇹 Italian</option>
+        <option value="spanish">🇪🇸 Spanish</option>
+        <option value="indian">🇮🇳 Indian</option>
+      </select>
+      <div class="hint">Used to show your country's embassy when you press SOS.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="destination">Destination</label>
+      <input type="text" id="destination" placeholder="e.g. Paris, Bangkok, Rio de Janeiro" />
+    </div>
+
+    <button id="analyze">Analyze Safety</button>
+    <button id="reportModeBtn" class="secondary" type="button">📍 Enable Report Mode</button>
+    <button id="liveTrackBtn" class="secondary" type="button">🛰️ Start Live Tracking</button>
+
+    <div class="divider"></div>
+
+    <div id="results">
+      <div class="status-card info">
+        Enter a city or region you plan to visit and click Analyze. Claude AI will review safety information for that area and mark risk zones on the map.
+      </div>
+    </div>
+
+    <div id="reports-section" style="display:none">
+      <div class="divider"></div>
+      <h3>📋 Reported Incidents <span id="reportCount"></span></h3>
+      <div id="reportsList"></div>
+    </div>
+  </aside>
+
+  <div id="map"></div>
+</div>
+
+<div id="reportModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>📝 Report an Incident</h2>
+    <div class="modal-sub">Coordinates: <span id="reportLat"></span>, <span id="reportLng"></span></div>
+    <form id="reportForm">
+      <div class="form-group">
+        <label for="incidentType">Incident Type</label>
+        <select id="incidentType" required>
+          <option value="">Select...</option>
+          <option value="pickpocket">Pickpocketing</option>
+          <option value="fraud">Fraud / Scam</option>
+          <option value="robbery">Robbery</option>
+          <option value="loss">Lost Item</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="incidentItems">Lost / Stolen Items</label>
+        <input type="text" id="incidentItems" placeholder="e.g. wallet, passport, smartphone" />
+      </div>
+      <div class="form-group">
+        <label for="incidentDescription">Description <span style="color:#ef4444">*</span></label>
+        <textarea id="incidentDescription" required placeholder="Describe what happened in detail"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="reportCancel">Cancel</button>
+        <button type="submit" class="btn-primary" id="reportSubmit">Submit Report</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="emergencyModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#991b1b">🚨 Classified as Emergency</h2>
+    <div class="modal-sub">Immediate reporting and assistance required</div>
+    <div id="emergencyContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="emergencyClose">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="sosModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#dc2626">🆘 Emergency SOS</h2>
+    <div class="modal-sub" id="sosSubtitle">Local emergency contacts</div>
+    <div id="sosContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="sosClose" style="background:#dc2626">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+<script>
+  const map = L.map("map").setView([20, 0], 2);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19,
+    subdomains: "abcd",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    crossOrigin: true,
+    referrerPolicy: "no-referrer",
+  }).addTo(map);
+
+  const legend = L.control({ position: "bottomright" });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create("div", "legend");
+    div.innerHTML = `
+      <strong>Risk Level</strong><br/>
+      <span class="dot" style="background:#22c55e"></span>Low<br/>
+      <span class="dot" style="background:#f59e0b"></span>Medium<br/>
+      <span class="dot" style="background:#ef4444"></span>High
+    `;
+    return div;
+  };
+  legend.addTo(map);
+
+  const riskLayer = L.layerGroup().addTo(map);
+  const riskMarkers = {};
+
+  const LEVEL_COLOR = { low: "#22c55e", medium: "#f59e0b", high: "#ef4444" };
+
+  const apiKeyInput = document.getElementById("apiKey");
+  const modelSelect = document.getElementById("model");
+  const destinationInput = document.getElementById("destination");
+  const nationalitySelect = document.getElementById("nationality");
+  const analyzeBtn = document.getElementById("analyze");
+  const resultsDiv = document.getElementById("results");
+
+  const NATIONALITY_INFO = {
+    korean:     { flag: "🇰🇷", country: "Republic of Korea", demonym: "Korean" },
+    american:   { flag: "🇺🇸", country: "United States",     demonym: "American" },
+    japanese:   { flag: "🇯🇵", country: "Japan",             demonym: "Japanese" },
+    british:    { flag: "🇬🇧", country: "United Kingdom",    demonym: "British" },
+    chinese:    { flag: "🇨🇳", country: "China",             demonym: "Chinese" },
+    canadian:   { flag: "🇨🇦", country: "Canada",            demonym: "Canadian" },
+    australian: { flag: "🇦🇺", country: "Australia",         demonym: "Australian" },
+    french:     { flag: "🇫🇷", country: "France",            demonym: "French" },
+    german:     { flag: "🇩🇪", country: "Germany",           demonym: "German" },
+    italian:    { flag: "🇮🇹", country: "Italy",             demonym: "Italian" },
+    spanish:    { flag: "🇪🇸", country: "Spain",             demonym: "Spanish" },
+    indian:     { flag: "🇮🇳", country: "India",             demonym: "Indian" },
+  };
+
+  const savedKey = localStorage.getItem("safetrip_api_key");
+  if (savedKey) apiKeyInput.value = savedKey;
+  apiKeyInput.addEventListener("change", () => {
+    localStorage.setItem("safetrip_api_key", apiKeyInput.value.trim());
+  });
+
+  const savedNationality = localStorage.getItem("safetrip_nationality");
+  if (savedNationality && NATIONALITY_INFO[savedNationality]) {
+    nationalitySelect.value = savedNationality;
+  }
+  nationalitySelect.addEventListener("change", () => {
+    localStorage.setItem("safetrip_nationality", nationalitySelect.value);
+    // Invalidate cached SOS contacts so the new embassy is fetched next open.
+    if (currentDestinationData) delete currentDestinationData.sos_contacts;
+  });
+
+  destinationInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") analyzeBtn.click();
+  });
+
+  analyzeBtn.addEventListener("click", runAnalysis);
+
+  async function runAnalysis() {
+    const apiKey = apiKeyInput.value.trim();
+    const destination = destinationInput.value.trim();
+    const model = modelSelect.value;
+
+    if (!apiKey) {
+      showError("Please enter your Anthropic API key.");
+      return;
+    }
+    if (!destination) {
+      showError("Please enter a destination.");
+      return;
+    }
+
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = "Analyzing...";
+    showLoading(`Analyzing safety information for "${destination}"...`);
+    riskLayer.clearLayers();
+
+    try {
+      const data = await callClaude(apiKey, model, destination);
+      currentDestinationData = data;
+      renderResults(data);
+      renderMap(data);
+    } catch (err) {
+      console.error(err);
+      showError(`Analysis failed: ${err.message}`);
+    } finally {
+      analyzeBtn.disabled = false;
+      analyzeBtn.textContent = "Analyze Safety";
+    }
+  }
+
+  async function callClaude(apiKey, model, destination) {
+    const systemPrompt = `You are a travel safety analysis expert. Analyze safety information for the destination provided by the user and respond ONLY with a structured JSON object that can be displayed on a map. Do not include any other text or markdown code fences — return pure JSON only. All human-readable string fields MUST be written in English.`;
+
+    const userPrompt = `Destination: "${destination}"
+
+Analyze safety information for this destination and return a response that exactly matches the JSON schema below. Coordinates must be real latitude/longitude values. Risk zones must reference actual neighborhoods/districts/streets in the destination, and you must return between 3 and 8 of them.
+
+{
+  "destination": "<normalized destination name, e.g. 'Paris, France'>",
+  "center": {"lat": <center latitude>, "lng": <center longitude>},
+  "zoom": <recommended zoom level, 11 to 13>,
+  "overall_safety": "<one of 'low' | 'medium' | 'high' — overall risk level>",
+  "summary": "<2 to 4 sentence English summary of the destination's safety situation>",
+  "risk_zones": [
+    {
+      "name": "<specific neighborhood / district / street name>",
+      "lat": <latitude>,
+      "lng": <longitude>,
+      "radius": <radius in meters, typically 300 to 2000>,
+      "level": "<one of 'low' | 'medium' | 'high'>",
+      "description": "<1 to 2 sentence English explanation of the risk factors for this zone>"
+    }
+  ],
+  "safety_tips": [
+    "<English safety tip 1>",
+    "<English safety tip 2>",
+    "<English safety tip 3>",
+    "<English safety tip 4>",
+    "<English safety tip 5>"
+  ],
+  "emergency": {
+    "police": "<local police phone number>",
+    "ambulance": "<local ambulance / medical emergency phone number>",
+    "tourist_helpline": "<tourist police or 24h tourist helpline phone number — 'N/A' if none exists>"
+  }
+}
+
+Do NOT output any text outside the JSON object.`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 2500,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      let errMsg = `HTTP ${response.status}`;
+      try {
+        const errJson = JSON.parse(errText);
+        errMsg = errJson.error?.message || errMsg;
+      } catch (_) {
+        errMsg = errText || errMsg;
+      }
+      throw new Error(errMsg);
+    }
+
+    const json = await response.json();
+    const text = json.content?.[0]?.text ?? "";
+    const parsed = extractJson(text);
+    if (!parsed) throw new Error("Failed to parse JSON from Claude response.");
+    return parsed;
+  }
+
+  function extractJson(text) {
+    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const candidate = fenced ? fenced[1] : text;
+    try {
+      return JSON.parse(candidate);
+    } catch (_) {
+      const start = candidate.indexOf("{");
+      const end = candidate.lastIndexOf("}");
+      if (start !== -1 && end !== -1 && end > start) {
+        try {
+          return JSON.parse(candidate.slice(start, end + 1));
+        } catch (_) {
+          return null;
+        }
+      }
+      return null;
+    }
+  }
+
+  function renderResults(data) {
+    const safetyLabels = { low: "Safe", medium: "Caution", high: "Danger" };
+    const level = data.overall_safety || "medium";
+
+    const zonesHtml = (data.risk_zones || [])
+      .map((z, i) => `
+        <div class="risk-item level-${z.level || "medium"}" data-zone-index="${i}">
+          <div class="name">
+            <span class="safety-badge ${z.level || "medium"}">${safetyLabels[z.level] || "Caution"}</span>
+            ${escapeHtml(z.name || "Unnamed")}
+          </div>
+          <div class="desc">${escapeHtml(z.description || "")}</div>
+        </div>
+      `).join("");
+
+    const tipsHtml = (data.safety_tips || [])
+      .map((t) => `<li>${escapeHtml(t)}</li>`).join("");
+
+    const em = data.emergency || {};
+
+    resultsDiv.innerHTML = `
+      <div class="result-section">
+        <h3>📍 ${escapeHtml(data.destination || "Destination")}</h3>
+        <p style="margin-bottom:10px">
+          <span class="safety-badge ${level}">${safetyLabels[level] || "Caution"}</span>
+          Overall risk level
+        </p>
+        <p>${escapeHtml(data.summary || "")}</p>
+      </div>
+
+      <div class="result-section">
+        <h3>⚠️ Main Risk Zones (${(data.risk_zones || []).length})</h3>
+        ${zonesHtml || '<p style="color:#64748b">No risk zones registered.</p>'}
+      </div>
+
+      <div class="result-section">
+        <h3>✅ Safety Tips</h3>
+        <ul>${tipsHtml}</ul>
+      </div>
+
+      <div class="result-section">
+        <h3>🚨 Emergency Contacts</h3>
+        <ul>
+          <li><strong>Police:</strong> ${escapeHtml(em.police || "N/A")}</li>
+          <li><strong>Ambulance:</strong> ${escapeHtml(em.ambulance || "N/A")}</li>
+          <li><strong>Tourist helpline:</strong> ${escapeHtml(em.tourist_helpline || "N/A")}</li>
+        </ul>
+      </div>
+    `;
+
+    resultsDiv.querySelectorAll(".risk-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const idx = Number(el.dataset.zoneIndex);
+        const zone = data.risk_zones[idx];
+        if (zone && riskMarkers[idx]) {
+          map.setView([zone.lat, zone.lng], 15, { animate: true });
+          riskMarkers[idx].openPopup();
+        }
+      });
+    });
+  }
+
+  function renderMap(data) {
+    Object.keys(riskMarkers).forEach((k) => delete riskMarkers[k]);
+    riskLayer.clearLayers();
+
+    const center = data.center || { lat: 0, lng: 0 };
+    const zoom = data.zoom || 12;
+    map.setView([center.lat, center.lng], zoom, { animate: true });
+
+    L.marker([center.lat, center.lng])
+      .addTo(riskLayer)
+      .bindPopup(`<strong>${escapeHtml(data.destination || "Destination")}</strong>`);
+
+    (data.risk_zones || []).forEach((zone, i) => {
+      const color = LEVEL_COLOR[zone.level] || LEVEL_COLOR.medium;
+      const circle = L.circle([zone.lat, zone.lng], {
+        radius: zone.radius || 500,
+        color,
+        fillColor: color,
+        fillOpacity: 0.25,
+        weight: 2,
+      })
+        .addTo(riskLayer)
+        .bindPopup(`
+          <strong>${escapeHtml(zone.name || "")}</strong><br/>
+          <em>Risk level: ${zone.level || "medium"}</em><br/>
+          ${escapeHtml(zone.description || "")}
+        `);
+      riskMarkers[i] = circle;
+    });
+
+    const zones = data.risk_zones || [];
+    if (zones.length > 0) {
+      const bounds = L.latLngBounds(zones.map((z) => [z.lat, z.lng]).concat([[center.lat, center.lng]]));
+      map.fitBounds(bounds.pad(0.2));
+    }
+  }
+
+  function showError(msg) {
+    resultsDiv.innerHTML = `<div class="status-card error">❌ ${escapeHtml(msg)}</div>`;
+  }
+  function showLoading(msg) {
+    resultsDiv.innerHTML = `<div class="status-card loading"><span class="spinner"></span>${escapeHtml(msg)}</div>`;
+  }
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  // --- Incident reporting ---
+  let currentDestinationData = null;
+  const reports = [];
+  let reportMode = false;
+  let pendingReportLatLng = null;
+  const reportLayer = L.layerGroup().addTo(map);
+
+  const TYPE_LABEL = { pickpocket: "Pickpocketing", fraud: "Fraud", robbery: "Robbery", loss: "Lost Item" };
+  const TYPE_ICON = { pickpocket: "🕵", fraud: "⚠", robbery: "🚨", loss: "🔎" };
+  const REPORT_COLOR = { high: "#ef4444", medium: "#f59e0b", low: "#3b82f6", fake: "#94a3b8" };
+  const LEVEL_LABEL = { high: "High 🚨", medium: "Medium ⚠️", low: "Low", fake: "Unverified" };
+
+  const reportModeBtn = document.getElementById("reportModeBtn");
+  const reportModal = document.getElementById("reportModal");
+  const reportForm = document.getElementById("reportForm");
+  const reportSubmit = document.getElementById("reportSubmit");
+  const reportCancel = document.getElementById("reportCancel");
+  const emergencyModal = document.getElementById("emergencyModal");
+  const emergencyClose = document.getElementById("emergencyClose");
+  const emergencyContent = document.getElementById("emergencyContent");
+  const toastEl = document.getElementById("toast");
+  const reportsListEl = document.getElementById("reportsList");
+  const reportCountEl = document.getElementById("reportCount");
+  const reportsSection = document.getElementById("reports-section");
+  const mapEl = document.getElementById("map");
+
+  try {
+    const saved = JSON.parse(localStorage.getItem("safetrip_reports") || "[]");
+    saved.forEach((r) => { reports.push(r); addReportMarker(r); });
+    renderReportsList();
+  } catch (_) {}
+
+  reportModeBtn.addEventListener("click", toggleReportMode);
+  reportCancel.addEventListener("click", () => reportModal.classList.remove("visible"));
+  reportForm.addEventListener("submit", submitReport);
+  emergencyClose.addEventListener("click", () => emergencyModal.classList.remove("visible"));
+  [reportModal, emergencyModal].forEach((m) => {
+    m.addEventListener("click", (e) => { if (e.target === m) m.classList.remove("visible"); });
+  });
+  map.on("click", (e) => {
+    if (!reportMode) return;
+    pendingReportLatLng = e.latlng;
+    openReportModal(e.latlng);
+  });
+
+  function toggleReportMode() {
+    reportMode = !reportMode;
+    reportModeBtn.classList.toggle("active", reportMode);
+    reportModeBtn.textContent = reportMode ? "📍 Disable Report Mode" : "📍 Enable Report Mode";
+    mapEl.style.cursor = reportMode ? "crosshair" : "";
+    if (reportMode) showToast("Click the location on the map where the incident occurred");
+  }
+
+  function openReportModal(latlng) {
+    document.getElementById("reportLat").textContent = latlng.lat.toFixed(5);
+    document.getElementById("reportLng").textContent = latlng.lng.toFixed(5);
+    reportForm.reset();
+    reportModal.classList.add("visible");
+  }
+
+  async function submitReport(e) {
+    e.preventDefault();
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) { showToast("Please enter your API key first"); return; }
+
+    const type = document.getElementById("incidentType").value;
+    const items = document.getElementById("incidentItems").value.trim();
+    const description = document.getElementById("incidentDescription").value.trim();
+
+    reportSubmit.disabled = true;
+    reportSubmit.textContent = "Analyzing...";
+
+    try {
+      const analysis = await analyzeReport(apiKey, modelSelect.value, {
+        lat: pendingReportLatLng.lat,
+        lng: pendingReportLatLng.lng,
+        type, items, description,
+        destination: currentDestinationData?.destination || null,
+      });
+
+      const report = {
+        id: "r_" + Date.now(),
+        lat: pendingReportLatLng.lat,
+        lng: pendingReportLatLng.lng,
+        type, items, description,
+        analysis,
+        destination: currentDestinationData?.destination || null,
+        timestamp: new Date().toISOString(),
+      };
+
+      reports.push(report);
+      saveReports();
+      addReportMarker(report);
+      renderReportsList();
+      reportModal.classList.remove("visible");
+
+      const level = analysis.risk_level || "medium";
+      if (level === "high" || analysis.should_alert_authorities) {
+        showEmergencyModal(report);
+      } else if (level === "fake" || analysis.is_suspicious) {
+        showToast("Auto-classified: registered as community notice only");
+      } else {
+        showToast(`Report submitted (risk level: ${LEVEL_LABEL[level] || level})`);
+      }
+    } catch (err) {
+      showToast("Analysis failed: " + err.message);
+    } finally {
+      reportSubmit.disabled = false;
+      reportSubmit.textContent = "Submit Report";
+    }
+  }
+
+  async function analyzeReport(apiKey, model, payload) {
+    const system = `You are a travel incident report analysis expert. Evaluate the credibility and risk level of the report and respond ONLY with JSON. All human-readable string fields MUST be in English.`;
+    const userPrompt = `Analyze the following incident report.
+
+Location: ${payload.destination || "Unknown area"} (${payload.lat.toFixed(5)}, ${payload.lng.toFixed(5)})
+Incident type: ${TYPE_LABEL[payload.type] || payload.type}
+Lost / stolen items: ${payload.items || "None"}
+Description: ${payload.description}
+
+Return JSON that exactly matches this schema:
+{
+  "risk_level": "<one of 'high' | 'medium' | 'low' | 'fake'>",
+  "category": "<one of 'Robbery' | 'Theft' | 'Fraud' | 'Lost' | 'Other'>",
+  "confidence": <number between 0 and 1>,
+  "is_suspicious": <true | false — whether the report looks fake / spam>,
+  "reasoning": "<1 to 2 English sentences explaining the risk judgment>",
+  "recommended_action": "<1 to 2 English sentences describing recommended action>",
+  "should_alert_authorities": <true | false — whether police / embassy should be contacted immediately>
+}
+
+Judgment criteria:
+- high: robbery, violence, physical threats, or anything requiring immediate police / embassy intervention
+- medium: real theft or fraud but not immediately life-threatening
+- low: a simple lost item or minor incident
+- fake: the report is too sparse, clearly a prank, repeated characters, or otherwise appears fabricated
+
+Do NOT output any text outside the JSON object.`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 800,
+        system,
+        messages: [{ role: "user", content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const t = await response.text();
+      let msg = `HTTP ${response.status}`;
+      try { msg = JSON.parse(t).error?.message || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+    const json = await response.json();
+    const text = json.content?.[0]?.text ?? "";
+    const parsed = extractJson(text);
+    if (!parsed) throw new Error("Failed to parse response");
+    return parsed;
+  }
+
+  function addReportMarker(report) {
+    const level = report.analysis?.risk_level || "medium";
+    const color = REPORT_COLOR[level] || REPORT_COLOR.medium;
+    const icon = TYPE_ICON[report.type] || "📍";
+    const html = `<div class="report-marker" style="background:${color}"><span class="icon">${icon}</span></div>`;
+    const divIcon = L.divIcon({
+      html,
+      className: "report-marker-wrapper",
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+      popupAnchor: [0, -28],
+    });
+    const marker = L.marker([report.lat, report.lng], { icon: divIcon })
+      .addTo(reportLayer)
+      .bindPopup(reportPopupHtml(report));
+    report._marker = marker;
+  }
+
+  function reportPopupHtml(r) {
+    const a = r.analysis || {};
+    const level = a.risk_level || "medium";
+    return `
+      <div style="min-width:220px">
+        <strong>${TYPE_ICON[r.type] || ""} ${escapeHtml(TYPE_LABEL[r.type] || r.type)}</strong>
+        <div style="font-size:11px;color:#64748b;margin:4px 0">${new Date(r.timestamp).toLocaleString("en-US")}</div>
+        <div style="margin:6px 0"><strong>Risk level:</strong> ${LEVEL_LABEL[level] || level}</div>
+        ${r.items ? `<div><strong>Items:</strong> ${escapeHtml(r.items)}</div>` : ""}
+        <div style="margin-top:6px;font-size:12px">${escapeHtml(r.description)}</div>
+        ${a.reasoning ? `<div style="margin-top:6px;font-size:11px;color:#475569"><em>AI analysis:</em> ${escapeHtml(a.reasoning)}</div>` : ""}
+        ${a.recommended_action ? `<div style="margin-top:4px;font-size:11px;color:#475569"><em>Recommended action:</em> ${escapeHtml(a.recommended_action)}</div>` : ""}
+      </div>
+    `;
+  }
+
+  function renderReportsList() {
+    if (reports.length === 0) {
+      reportsSection.style.display = "none";
+      return;
+    }
+    reportsSection.style.display = "";
+    reportCountEl.textContent = `(${reports.length})`;
+
+    const sorted = [...reports].reverse();
+    reportsListEl.innerHTML = sorted.map((r) => {
+      const level = r.analysis?.risk_level || "medium";
+      const descShort = (r.description || "").slice(0, 80);
+      const suffix = (r.description || "").length > 80 ? "..." : "";
+      return `
+        <div class="report-item risk-${level}" data-report-id="${r.id}">
+          <div class="top">
+            <span class="type-badge">${TYPE_ICON[r.type] || ""} ${escapeHtml(TYPE_LABEL[r.type] || r.type)}</span>
+            <span class="time">${new Date(r.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+          </div>
+          <div class="meta">${escapeHtml(descShort)}${suffix}</div>
+        </div>
+      `;
+    }).join("");
+
+    reportsListEl.querySelectorAll(".report-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const r = reports.find((x) => x.id === el.dataset.reportId);
+        if (r && r._marker) {
+          map.setView([r.lat, r.lng], 16, { animate: true });
+          r._marker.openPopup();
+        }
+      });
+    });
+  }
+
+  function showEmergencyModal(report) {
+    const em = currentDestinationData?.emergency || {};
+    const a = report.analysis || {};
+    const tel = (v) => (v && v !== "N/A" ? `<a href="tel:${escapeHtml(v.replace(/\s/g, ""))}">${escapeHtml(v)}</a>` : "N/A");
+    emergencyContent.innerHTML = `
+      <div class="emergency-alert">
+        <strong>AI analysis:</strong> ${escapeHtml(a.reasoning || "")}<br/>
+        <strong>Recommended action:</strong> ${escapeHtml(a.recommended_action || "Contact local police and your embassy immediately.")}
+      </div>
+      <h3 style="font-size:14px;margin:14px 0 6px">📞 Emergency Contacts</h3>
+      <ul class="emergency-contacts">
+        <li><span>Police</span>${tel(em.police)}</li>
+        <li><span>Ambulance</span>${tel(em.ambulance)}</li>
+        <li><span>Tourist helpline</span>${tel(em.tourist_helpline)}</li>
+      </ul>
+      <div style="font-size:12px;color:#64748b;margin-top:10px;line-height:1.5">
+        ※ If you are in physical danger, contact local police first, then reach out to your home country's embassy or consulate for further assistance.
+      </div>
+    `;
+    emergencyModal.classList.add("visible");
+  }
+
+  function saveReports() {
+    try {
+      const toSave = reports.map(({ _marker, ...rest }) => rest);
+      localStorage.setItem("safetrip_reports", JSON.stringify(toSave));
+    } catch (_) {}
+  }
+
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("visible");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toastEl.classList.remove("visible"), 3200);
+  }
+
+  // --- Emergency SOS ---
+  const sosModal = document.getElementById("sosModal");
+  const sosContent = document.getElementById("sosContent");
+  const sosSubtitle = document.getElementById("sosSubtitle");
+  const sosClose = document.getElementById("sosClose");
+
+  const SOSControl = L.Control.extend({
+    options: { position: "topright" },
+    onAdd: function () {
+      const btn = L.DomUtil.create("button", "sos-button");
+      btn.type = "button";
+      btn.innerHTML = "SOS";
+      btn.setAttribute("aria-label", "Emergency SOS");
+      btn.title = "Emergency SOS — show local emergency contacts";
+      L.DomEvent.disableClickPropagation(btn);
+      L.DomEvent.on(btn, "click", (e) => {
+        L.DomEvent.stop(e);
+        openSosModal();
+      });
+      return btn;
+    },
+  });
+  map.addControl(new SOSControl());
+
+  sosClose.addEventListener("click", () => sosModal.classList.remove("visible"));
+  sosModal.addEventListener("click", (e) => {
+    if (e.target === sosModal) sosModal.classList.remove("visible");
+  });
+
+  async function openSosModal() {
+    if (!currentDestinationData?.destination) {
+      showToast("Please analyze a destination first to load local emergency contacts.");
+      return;
+    }
+
+    const nationality = nationalitySelect.value;
+    const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
+
+    sosModal.classList.add("visible");
+    sosSubtitle.textContent = `Emergency contacts for ${currentDestinationData.destination} · ${info.flag} ${info.demonym} traveler`;
+
+    currentDestinationData.sos_contacts = currentDestinationData.sos_contacts || {};
+    if (currentDestinationData.sos_contacts[nationality]) {
+      renderSosContacts(currentDestinationData.sos_contacts[nationality], nationality);
+      return;
+    }
+
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      sosContent.innerHTML = `<div class="status-card error">❌ API key required to load emergency contacts.</div>`;
+      return;
+    }
+
+    sosContent.innerHTML = `<div class="status-card loading"><span class="spinner"></span>Loading emergency contacts...</div>`;
+
+    try {
+      const contacts = await fetchSosContacts(apiKey, modelSelect.value, currentDestinationData.destination, nationality);
+      currentDestinationData.sos_contacts[nationality] = contacts;
+      renderSosContacts(contacts, nationality);
+    } catch (err) {
+      sosContent.innerHTML = `<div class="status-card error">❌ Failed to load contacts: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  async function fetchSosContacts(apiKey, model, destination, nationality) {
+    const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
+    const homeCountry = info.country;
+    const demonym = info.demonym;
+
+    const system = `You are an emergency contacts lookup assistant for travelers. Return ONLY valid JSON with accurate emergency phone numbers. All human-readable text fields must be in English. Phone numbers should be in the format typically used locally (include country code with '+' for international numbers such as embassy lines).`;
+
+    const userPrompt = `Destination: "${destination}"
+Traveler's home country: "${homeCountry}" (${demonym} national)
+
+Return emergency contacts for this traveler at this destination in exactly this JSON schema:
+
+{
+  "country": "<destination country name in English>",
+  "local_police": {
+    "name": "Local Police",
+    "number": "<emergency phone number (e.g. 112, 911, 110)>",
+    "note": "<short English description>"
+  },
+  "tourist_police": {
+    "name": "Tourist Police / Helpline",
+    "number": "<phone number, or 'N/A' if none exists>",
+    "note": "<short English description>"
+  },
+  "ambulance": {
+    "name": "Ambulance / Medical Emergency",
+    "number": "<phone number>",
+    "note": "<short English description>"
+  },
+  "home_embassy": {
+    "name": "Embassy or consulate of ${homeCountry} in <destination country>",
+    "number": "<main embassy phone number with country code, e.g. +33-1-...>",
+    "emergency_number": "<24-hour consular emergency line if different from main, otherwise 'N/A'>",
+    "address": "<embassy street address>",
+    "note": "<short English note, e.g. 'Nearest ${demonym} consulate to the destination'>"
+  }
+}
+
+Use the country-appropriate emergency number (112 in most of Europe, 911 in US/Canada, 119 for fire/ambulance in Korea/Japan, etc.). For home_embassy, return the embassy or consulate of ${homeCountry} that is closest to the destination, including country code. Do NOT output any text outside the JSON object.`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1000,
+        system,
+        messages: [{ role: "user", content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const t = await response.text();
+      let msg = `HTTP ${response.status}`;
+      try { msg = JSON.parse(t).error?.message || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+    const json = await response.json();
+    const text = json.content?.[0]?.text ?? "";
+    const parsed = extractJson(text);
+    if (!parsed) throw new Error("Failed to parse response");
+    return parsed;
+  }
+
+  function renderSosContacts(c, nationality) {
+    const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
+    const telHref = (num) => {
+      if (!num || num === "N/A") return null;
+      return "tel:" + num.replace(/[^\d+]/g, "");
+    };
+
+    const card = (item, label, urgent = false) => {
+      if (!item) return "";
+      const href = telHref(item.number);
+      const callBtn = href
+        ? `<a class="call-btn" href="${escapeHtml(href)}">📞 Call</a>`
+        : `<span class="call-btn disabled">N/A</span>`;
+      return `
+        <div class="sos-contact-card${urgent ? " urgent" : ""}">
+          <div class="info">
+            <div class="label">${escapeHtml(label)}</div>
+            <div class="name">${escapeHtml(item.name || label)}</div>
+            ${item.number && item.number !== "N/A" ? `<div class="number">${escapeHtml(item.number)}</div>` : ""}
+            ${item.emergency_number && item.emergency_number !== "N/A" ? `<div class="note">🚨 24h emergency: <a href="${escapeHtml(telHref(item.emergency_number) || "#")}">${escapeHtml(item.emergency_number)}</a></div>` : ""}
+            ${item.address ? `<div class="address">📍 ${escapeHtml(item.address)}</div>` : ""}
+            ${item.note ? `<div class="note">${escapeHtml(item.note)}</div>` : ""}
+          </div>
+          ${callBtn}
+        </div>
+      `;
+    };
+
+    const embassyLabel = `${info.flag} ${info.demonym} Embassy`;
+    const koreaFooter = nationality === "korean"
+      ? ` Korean MOFA 24h call center: <a href="tel:+82232100404">+82-2-3210-0404</a>.`
+      : "";
+
+    sosContent.innerHTML = `
+      <div style="font-size:12px;color:#475569;margin-bottom:12px;padding:10px;background:#f1f5f9;border-radius:6px">
+        <strong>Destination country:</strong> ${escapeHtml(c.country || "Unknown")} &nbsp;·&nbsp;
+        <strong>Home country:</strong> ${info.flag} ${escapeHtml(info.country)}
+      </div>
+      ${card(c.local_police, "Local Police", true)}
+      ${card(c.tourist_police, "Tourist Police")}
+      ${card(c.ambulance, "Ambulance", true)}
+      ${card(c.home_embassy, embassyLabel, true)}
+      <div style="font-size:12px;color:#64748b;margin-top:12px;line-height:1.5;padding-top:10px;border-top:1px solid #e2e8f0">
+        ※ Call local emergency services first if you are in immediate danger. Contact your ${escapeHtml(info.demonym)} embassy afterwards for consular assistance.${koreaFooter}
+      </div>
+    `;
+  }
+
+  // --- Live location danger alert ---
+  const liveTrackBtn = document.getElementById("liveTrackBtn");
+  const LEVEL_LABEL_LIVE = { low: "Low", medium: "Medium", high: "High" };
+  let watchId = null;
+  let userMarker = null;
+  let userAccuracyCircle = null;
+  let firstFix = true;
+  const zonesEntered = new Set();
+
+  liveTrackBtn.addEventListener("click", toggleLiveTracking);
+
+  async function toggleLiveTracking() {
+    if (watchId !== null) {
+      stopLiveTracking();
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      showToast("Geolocation is not supported in this browser.");
+      return;
+    }
+    if ("Notification" in window && Notification.permission === "default") {
+      try { await Notification.requestPermission(); } catch (_) {}
+    }
+    firstFix = true;
+    zonesEntered.clear();
+    watchId = navigator.geolocation.watchPosition(
+      handleLocationUpdate,
+      handleLocationError,
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+    );
+    liveTrackBtn.textContent = "🛑 Stop Live Tracking";
+    liveTrackBtn.classList.add("active");
+    showToast("Live tracking started. You'll be alerted when entering a risk zone.");
+  }
+
+  function stopLiveTracking() {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
+    if (userAccuracyCircle) { map.removeLayer(userAccuracyCircle); userAccuracyCircle = null; }
+    zonesEntered.clear();
+    liveTrackBtn.textContent = "🛰️ Start Live Tracking";
+    liveTrackBtn.classList.remove("active");
+    showToast("Live tracking stopped.");
+  }
+
+  function handleLocationUpdate(pos) {
+    const { latitude, longitude, accuracy } = pos.coords;
+    if (!userMarker) {
+      userMarker = L.circleMarker([latitude, longitude], {
+        radius: 8,
+        color: "white",
+        fillColor: "#2563eb",
+        fillOpacity: 1,
+        weight: 3,
+      }).addTo(map).bindPopup("📍 You are here");
+      userAccuracyCircle = L.circle([latitude, longitude], {
+        radius: accuracy,
+        color: "#2563eb",
+        fillColor: "#2563eb",
+        fillOpacity: 0.08,
+        weight: 1,
+      }).addTo(map);
+    } else {
+      userMarker.setLatLng([latitude, longitude]);
+      userAccuracyCircle.setLatLng([latitude, longitude]);
+      userAccuracyCircle.setRadius(accuracy);
+    }
+    if (firstFix) {
+      map.setView([latitude, longitude], 15, { animate: true });
+      firstFix = false;
+    }
+    checkRiskZones(latitude, longitude);
+  }
+
+  function handleLocationError(err) {
+    const messages = { 1: "Permission denied.", 2: "Position unavailable.", 3: "Request timed out." };
+    showToast("Location error: " + (messages[err.code] || err.message));
+    stopLiveTracking();
+  }
+
+  function checkRiskZones(lat, lng) {
+    const zones = currentDestinationData?.risk_zones || [];
+    const currentlyInside = new Set();
+    zones.forEach((zone, i) => {
+      const distance = haversineMeters(lat, lng, zone.lat, zone.lng);
+      if (distance <= (zone.radius || 500)) {
+        currentlyInside.add(i);
+        if (!zonesEntered.has(i)) {
+          triggerDangerAlert(zone);
+        }
+      }
+    });
+    zonesEntered.clear();
+    currentlyInside.forEach((i) => zonesEntered.add(i));
+  }
+
+  function triggerDangerAlert(zone) {
+    const levelLabel = LEVEL_LABEL_LIVE[zone.level] || "Unknown";
+    const title = "⚠️ Warning: You are entering a high-risk area!";
+    const body = `${zone.name || "Unnamed zone"} — Risk level: ${levelLabel}`;
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      try {
+        new Notification(title, {
+          body,
+          tag: `safetrip-zone-${zone.name || zone.lat + "," + zone.lng}`,
+          requireInteraction: zone.level === "high",
+        });
+      } catch (_) {}
+    }
+    if ("vibrate" in navigator) {
+      const pattern = zone.level === "high"
+        ? [400, 120, 400, 120, 400, 120, 400]
+        : [300, 150, 300];
+      try { navigator.vibrate(pattern); } catch (_) {}
+    }
+    showToast(`⚠️ ${body}`);
+  }
+
+  function haversineMeters(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const toRad = (d) => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+</script>
+</body>
+</html>
