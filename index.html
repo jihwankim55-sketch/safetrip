@@ -482,32 +482,12 @@
     </div>
 
     <div class="form-group">
-      <label for="nationality">Your Nationality</label>
-      <select id="nationality">
-        <option value="korean">🇰🇷 Korean</option>
-        <option value="american">🇺🇸 American</option>
-        <option value="japanese">🇯🇵 Japanese</option>
-        <option value="british">🇬🇧 British</option>
-        <option value="chinese">🇨🇳 Chinese</option>
-        <option value="canadian">🇨🇦 Canadian</option>
-        <option value="australian">🇦🇺 Australian</option>
-        <option value="french">🇫🇷 French</option>
-        <option value="german">🇩🇪 German</option>
-        <option value="italian">🇮🇹 Italian</option>
-        <option value="spanish">🇪🇸 Spanish</option>
-        <option value="indian">🇮🇳 Indian</option>
-      </select>
-      <div class="hint">Used to show your country's embassy when you press SOS.</div>
-    </div>
-
-    <div class="form-group">
       <label for="destination">Destination</label>
       <input type="text" id="destination" placeholder="e.g. Paris, Bangkok, Rio de Janeiro" />
     </div>
 
     <button id="analyze">Analyze Safety</button>
     <button id="reportModeBtn" class="secondary" type="button">📍 Enable Report Mode</button>
-    <button id="liveTrackBtn" class="secondary" type="button">🛰️ Start Live Tracking</button>
 
     <div class="divider"></div>
 
@@ -618,39 +598,13 @@
   const apiKeyInput = document.getElementById("apiKey");
   const modelSelect = document.getElementById("model");
   const destinationInput = document.getElementById("destination");
-  const nationalitySelect = document.getElementById("nationality");
   const analyzeBtn = document.getElementById("analyze");
   const resultsDiv = document.getElementById("results");
-
-  const NATIONALITY_INFO = {
-    korean:     { flag: "🇰🇷", country: "Republic of Korea", demonym: "Korean" },
-    american:   { flag: "🇺🇸", country: "United States",     demonym: "American" },
-    japanese:   { flag: "🇯🇵", country: "Japan",             demonym: "Japanese" },
-    british:    { flag: "🇬🇧", country: "United Kingdom",    demonym: "British" },
-    chinese:    { flag: "🇨🇳", country: "China",             demonym: "Chinese" },
-    canadian:   { flag: "🇨🇦", country: "Canada",            demonym: "Canadian" },
-    australian: { flag: "🇦🇺", country: "Australia",         demonym: "Australian" },
-    french:     { flag: "🇫🇷", country: "France",            demonym: "French" },
-    german:     { flag: "🇩🇪", country: "Germany",           demonym: "German" },
-    italian:    { flag: "🇮🇹", country: "Italy",             demonym: "Italian" },
-    spanish:    { flag: "🇪🇸", country: "Spain",             demonym: "Spanish" },
-    indian:     { flag: "🇮🇳", country: "India",             demonym: "Indian" },
-  };
 
   const savedKey = localStorage.getItem("safetrip_api_key");
   if (savedKey) apiKeyInput.value = savedKey;
   apiKeyInput.addEventListener("change", () => {
     localStorage.setItem("safetrip_api_key", apiKeyInput.value.trim());
-  });
-
-  const savedNationality = localStorage.getItem("safetrip_nationality");
-  if (savedNationality && NATIONALITY_INFO[savedNationality]) {
-    nationalitySelect.value = savedNationality;
-  }
-  nationalitySelect.addEventListener("change", () => {
-    localStorage.setItem("safetrip_nationality", nationalitySelect.value);
-    // Invalidate cached SOS contacts so the new embassy is fetched next open.
-    if (currentDestinationData) delete currentDestinationData.sos_contacts;
   });
 
   destinationInput.addEventListener("keydown", (e) => {
@@ -1208,15 +1162,11 @@ Do NOT output any text outside the JSON object.`;
       return;
     }
 
-    const nationality = nationalitySelect.value;
-    const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
-
     sosModal.classList.add("visible");
-    sosSubtitle.textContent = `Emergency contacts for ${currentDestinationData.destination} · ${info.flag} ${info.demonym} traveler`;
+    sosSubtitle.textContent = `Emergency contacts for ${currentDestinationData.destination}`;
 
-    currentDestinationData.sos_contacts = currentDestinationData.sos_contacts || {};
-    if (currentDestinationData.sos_contacts[nationality]) {
-      renderSosContacts(currentDestinationData.sos_contacts[nationality], nationality);
+    if (currentDestinationData.sos_contacts) {
+      renderSosContacts(currentDestinationData.sos_contacts);
       return;
     }
 
@@ -1229,28 +1179,23 @@ Do NOT output any text outside the JSON object.`;
     sosContent.innerHTML = `<div class="status-card loading"><span class="spinner"></span>Loading emergency contacts...</div>`;
 
     try {
-      const contacts = await fetchSosContacts(apiKey, modelSelect.value, currentDestinationData.destination, nationality);
-      currentDestinationData.sos_contacts[nationality] = contacts;
-      renderSosContacts(contacts, nationality);
+      const contacts = await fetchSosContacts(apiKey, modelSelect.value, currentDestinationData.destination);
+      currentDestinationData.sos_contacts = contacts;
+      renderSosContacts(contacts);
     } catch (err) {
       sosContent.innerHTML = `<div class="status-card error">❌ Failed to load contacts: ${escapeHtml(err.message)}</div>`;
     }
   }
 
-  async function fetchSosContacts(apiKey, model, destination, nationality) {
-    const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
-    const homeCountry = info.country;
-    const demonym = info.demonym;
-
+  async function fetchSosContacts(apiKey, model, destination) {
     const system = `You are an emergency contacts lookup assistant for travelers. Return ONLY valid JSON with accurate emergency phone numbers. All human-readable text fields must be in English. Phone numbers should be in the format typically used locally (include country code with '+' for international numbers such as embassy lines).`;
 
     const userPrompt = `Destination: "${destination}"
-Traveler's home country: "${homeCountry}" (${demonym} national)
 
-Return emergency contacts for this traveler at this destination in exactly this JSON schema:
+Return emergency contacts for a traveler at this destination in exactly this JSON schema:
 
 {
-  "country": "<destination country name in English>",
+  "country": "<country name in English>",
   "local_police": {
     "name": "Local Police",
     "number": "<emergency phone number (e.g. 112, 911, 110)>",
@@ -1266,16 +1211,16 @@ Return emergency contacts for this traveler at this destination in exactly this 
     "number": "<phone number>",
     "note": "<short English description>"
   },
-  "home_embassy": {
-    "name": "Embassy or consulate of ${homeCountry} in <destination country>",
+  "korean_embassy": {
+    "name": "Embassy of the Republic of Korea in <country>",
     "number": "<main embassy phone number with country code, e.g. +33-1-...>",
     "emergency_number": "<24-hour consular emergency line if different from main, otherwise 'N/A'>",
     "address": "<embassy street address>",
-    "note": "<short English note, e.g. 'Nearest ${demonym} consulate to the destination'>"
+    "note": "<short English note, e.g. 'Nearest Korean consulate to the destination'>"
   }
 }
 
-Use the country-appropriate emergency number (112 in most of Europe, 911 in US/Canada, 119 for fire/ambulance in Korea/Japan, etc.). For home_embassy, return the embassy or consulate of ${homeCountry} that is closest to the destination, including country code. Do NOT output any text outside the JSON object.`;
+Use the country-appropriate emergency number (112 in most of Europe, 911 in US/Canada, 119 for fire/ambulance in Korea/Japan, etc.). For the Korean embassy, return the embassy or consulate closest to the destination, including country code. Do NOT output any text outside the JSON object.`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -1306,8 +1251,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     return parsed;
   }
 
-  function renderSosContacts(c, nationality) {
-    const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
+  function renderSosContacts(c) {
     const telHref = (num) => {
       if (!num || num === "N/A") return null;
       return "tel:" + num.replace(/[^\d+]/g, "");
@@ -1334,157 +1278,20 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       `;
     };
 
-    const embassyLabel = `${info.flag} ${info.demonym} Embassy`;
-    const koreaFooter = nationality === "korean"
-      ? ` Korean MOFA 24h call center: <a href="tel:+82232100404">+82-2-3210-0404</a>.`
-      : "";
-
     sosContent.innerHTML = `
       <div style="font-size:12px;color:#475569;margin-bottom:12px;padding:10px;background:#f1f5f9;border-radius:6px">
-        <strong>Destination country:</strong> ${escapeHtml(c.country || "Unknown")} &nbsp;·&nbsp;
-        <strong>Home country:</strong> ${info.flag} ${escapeHtml(info.country)}
+        <strong>Country:</strong> ${escapeHtml(c.country || "Unknown")} &nbsp;·&nbsp;
+        <strong>Destination:</strong> ${escapeHtml(currentDestinationData.destination || "")}
       </div>
       ${card(c.local_police, "Local Police", true)}
       ${card(c.tourist_police, "Tourist Police")}
       ${card(c.ambulance, "Ambulance", true)}
-      ${card(c.home_embassy, embassyLabel, true)}
+      ${card(c.korean_embassy, "Korean Embassy", true)}
       <div style="font-size:12px;color:#64748b;margin-top:12px;line-height:1.5;padding-top:10px;border-top:1px solid #e2e8f0">
-        ※ Call local emergency services first if you are in immediate danger. Contact your ${escapeHtml(info.demonym)} embassy afterwards for consular assistance.${koreaFooter}
+        ※ Call local emergency services first if you are in immediate danger. Contact the Korean embassy afterwards for consular assistance.
+        Korean MOFA 24h call center: <a href="tel:+82232100404">+82-2-3210-0404</a>.
       </div>
     `;
-  }
-
-  // --- Live location danger alert ---
-  const liveTrackBtn = document.getElementById("liveTrackBtn");
-  const LEVEL_LABEL_LIVE = { low: "Low", medium: "Medium", high: "High" };
-  let watchId = null;
-  let userMarker = null;
-  let userAccuracyCircle = null;
-  let firstFix = true;
-  const zonesEntered = new Set();
-
-  liveTrackBtn.addEventListener("click", toggleLiveTracking);
-
-  async function toggleLiveTracking() {
-    if (watchId !== null) {
-      stopLiveTracking();
-      return;
-    }
-    if (!("geolocation" in navigator)) {
-      showToast("Geolocation is not supported in this browser.");
-      return;
-    }
-    if ("Notification" in window && Notification.permission === "default") {
-      try { await Notification.requestPermission(); } catch (_) {}
-    }
-    firstFix = true;
-    zonesEntered.clear();
-    watchId = navigator.geolocation.watchPosition(
-      handleLocationUpdate,
-      handleLocationError,
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
-    );
-    liveTrackBtn.textContent = "🛑 Stop Live Tracking";
-    liveTrackBtn.classList.add("active");
-    showToast("Live tracking started. You'll be alerted when entering a risk zone.");
-  }
-
-  function stopLiveTracking() {
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-    }
-    if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
-    if (userAccuracyCircle) { map.removeLayer(userAccuracyCircle); userAccuracyCircle = null; }
-    zonesEntered.clear();
-    liveTrackBtn.textContent = "🛰️ Start Live Tracking";
-    liveTrackBtn.classList.remove("active");
-    showToast("Live tracking stopped.");
-  }
-
-  function handleLocationUpdate(pos) {
-    const { latitude, longitude, accuracy } = pos.coords;
-    if (!userMarker) {
-      userMarker = L.circleMarker([latitude, longitude], {
-        radius: 8,
-        color: "white",
-        fillColor: "#2563eb",
-        fillOpacity: 1,
-        weight: 3,
-      }).addTo(map).bindPopup("📍 You are here");
-      userAccuracyCircle = L.circle([latitude, longitude], {
-        radius: accuracy,
-        color: "#2563eb",
-        fillColor: "#2563eb",
-        fillOpacity: 0.08,
-        weight: 1,
-      }).addTo(map);
-    } else {
-      userMarker.setLatLng([latitude, longitude]);
-      userAccuracyCircle.setLatLng([latitude, longitude]);
-      userAccuracyCircle.setRadius(accuracy);
-    }
-    if (firstFix) {
-      map.setView([latitude, longitude], 15, { animate: true });
-      firstFix = false;
-    }
-    checkRiskZones(latitude, longitude);
-  }
-
-  function handleLocationError(err) {
-    const messages = { 1: "Permission denied.", 2: "Position unavailable.", 3: "Request timed out." };
-    showToast("Location error: " + (messages[err.code] || err.message));
-    stopLiveTracking();
-  }
-
-  function checkRiskZones(lat, lng) {
-    const zones = currentDestinationData?.risk_zones || [];
-    const currentlyInside = new Set();
-    zones.forEach((zone, i) => {
-      const distance = haversineMeters(lat, lng, zone.lat, zone.lng);
-      if (distance <= (zone.radius || 500)) {
-        currentlyInside.add(i);
-        if (!zonesEntered.has(i)) {
-          triggerDangerAlert(zone);
-        }
-      }
-    });
-    zonesEntered.clear();
-    currentlyInside.forEach((i) => zonesEntered.add(i));
-  }
-
-  function triggerDangerAlert(zone) {
-    const levelLabel = LEVEL_LABEL_LIVE[zone.level] || "Unknown";
-    const title = "⚠️ Warning: You are entering a high-risk area!";
-    const body = `${zone.name || "Unnamed zone"} — Risk level: ${levelLabel}`;
-
-    if ("Notification" in window && Notification.permission === "granted") {
-      try {
-        new Notification(title, {
-          body,
-          tag: `safetrip-zone-${zone.name || zone.lat + "," + zone.lng}`,
-          requireInteraction: zone.level === "high",
-        });
-      } catch (_) {}
-    }
-    if ("vibrate" in navigator) {
-      const pattern = zone.level === "high"
-        ? [400, 120, 400, 120, 400, 120, 400]
-        : [300, 150, 300];
-      try { navigator.vibrate(pattern); } catch (_) {}
-    }
-    showToast(`⚠️ ${body}`);
-  }
-
-  function haversineMeters(lat1, lng1, lat2, lng2) {
-    const R = 6371000;
-    const toRad = (d) => d * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLng = toRad(lng2 - lng1);
-    const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLng / 2) ** 2;
-    return 2 * R * Math.asin(Math.sqrt(a));
   }
 </script>
 </body>
