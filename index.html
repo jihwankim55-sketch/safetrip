@@ -38,6 +38,32 @@
   header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
   header .tagline { margin-left: 12px; font-size: 13px; opacity: 0.85; }
 
+  .lang-switcher {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .lang-switcher button {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    line-height: 1;
+  }
+  .lang-switcher button:hover { background: rgba(255,255,255,0.15); }
+  .lang-switcher button.active {
+    background: white;
+    color: #2563eb;
+    border-color: white;
+  }
+
   .sidebar {
     grid-area: sidebar;
     background: #f8fafc;
@@ -530,6 +556,7 @@
       text-overflow: ellipsis;
       min-width: 0;
     }
+    .lang-switcher button { padding: 4px 7px; font-size: 11px; }
     .sidebar {
       flex: 1 1 auto;
       max-height: 50vh;
@@ -565,36 +592,42 @@
 <div id="app">
   <header>
     <h1>🛡️ SafeTrip</h1>
-    <span class="tagline">Travel destination safety analysis</span>
+    <span class="tagline" data-i18n="tagline">Travel destination safety analysis</span>
+    <div class="lang-switcher" id="langSwitcher">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="ko">한국어</button>
+      <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="zh">中文</button>
+    </div>
   </header>
 
   <aside class="sidebar">
     <div class="form-group">
-      <label for="apiKey">Anthropic API Key</label>
+      <label for="apiKey" data-i18n="apiKeyLabel">Anthropic API Key</label>
       <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" />
-      <div class="hint">
+      <div class="hint" data-i18n-html="apiKeyHintHtml">
         Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Stored only in your browser.
       </div>
       <div class="api-help">
         <button type="button" class="api-help-toggle" id="apiHelpToggle" aria-expanded="false" aria-controls="apiHelpContent">
           <span class="chevron">▶</span>
-          <span>New here? How to get your API key</span>
+          <span data-i18n="apiHelpToggle">New here? How to get your API key</span>
         </button>
         <div class="api-help-content" id="apiHelpContent">
-          <p>No worries — it only takes a minute. Just follow these steps:</p>
+          <p data-i18n="apiHelpIntro">No worries — it only takes a minute. Just follow these steps:</p>
           <ol>
-            <li>Open <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> in a new tab.</li>
-            <li>Sign up with your Google account (one click — no password needed).</li>
-            <li>Once you're in, click <strong>"API keys"</strong> in the menu.</li>
-            <li>Click the <strong>"Create Key"</strong> button and give it any name.</li>
-            <li>Copy the key that appears, then paste it into the box above. Done!</li>
+            <li data-i18n-html="apiHelpStep1Html">Open <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> in a new tab.</li>
+            <li data-i18n="apiHelpStep2">Sign up with your Google account (one click — no password needed).</li>
+            <li data-i18n-html="apiHelpStep3Html">Once you're in, click <strong>"API keys"</strong> in the menu.</li>
+            <li data-i18n-html="apiHelpStep4Html">Click the <strong>"Create Key"</strong> button and give it any name.</li>
+            <li data-i18n="apiHelpStep5">Copy the key that appears, then paste it into the box above. Done!</li>
           </ol>
         </div>
       </div>
     </div>
 
     <div class="form-group">
-      <label for="model">Model</label>
+      <label for="model" data-i18n="modelLabel">Model</label>
       <select id="model">
         <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (recommended)</option>
         <option value="claude-opus-4-7">Claude Opus 4.7 (best quality)</option>
@@ -603,7 +636,7 @@
     </div>
 
     <div class="form-group">
-      <label for="nationality">Your Nationality</label>
+      <label for="nationality" data-i18n="nationalityLabel">Your Nationality</label>
       <select id="nationality">
         <option value="korean">🇰🇷 Korean</option>
         <option value="american">🇺🇸 American</option>
@@ -618,29 +651,29 @@
         <option value="spanish">🇪🇸 Spanish</option>
         <option value="indian">🇮🇳 Indian</option>
       </select>
-      <div class="hint">Used to show your country's embassy when you press SOS.</div>
+      <div class="hint" data-i18n="nationalityHint">Used to show your country's embassy when you press SOS.</div>
     </div>
 
     <div class="form-group">
-      <label for="destination">Destination</label>
-      <input type="text" id="destination" placeholder="e.g. Paris, Bangkok, Rio de Janeiro" />
+      <label for="destination" data-i18n="destinationLabel">Destination</label>
+      <input type="text" id="destination" data-i18n-placeholder="destinationPlaceholder" placeholder="e.g. Paris, Bangkok, Rio de Janeiro" />
     </div>
 
-    <button id="analyze">Analyze Safety</button>
-    <button id="reportModeBtn" class="secondary" type="button">📍 Enable Report Mode</button>
-    <button id="liveTrackBtn" class="secondary" type="button">🛰️ Start Live Tracking</button>
+    <button id="analyze" data-i18n="analyzeBtn">Analyze Safety</button>
+    <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
+    <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
 
     <div class="divider"></div>
 
     <div id="results">
-      <div class="status-card info">
+      <div class="status-card info" data-i18n="introCard">
         Enter a city or region you plan to visit and click Analyze. Claude AI will review safety information for that area and mark risk zones on the map.
       </div>
     </div>
 
     <div id="reports-section" style="display:none">
       <div class="divider"></div>
-      <h3>📋 Reported Incidents <span id="reportCount"></span></h3>
+      <h3><span data-i18n="reportsHeader">📋 Reported Incidents</span> <span id="reportCount"></span></h3>
       <div id="reportsList"></div>
     </div>
   </aside>
@@ -650,30 +683,30 @@
 
 <div id="reportModal" class="modal-overlay">
   <div class="modal-content">
-    <h2>📝 Report an Incident</h2>
-    <div class="modal-sub">Coordinates: <span id="reportLat"></span>, <span id="reportLng"></span></div>
+    <h2 data-i18n="reportModalTitle">📝 Report an Incident</h2>
+    <div class="modal-sub"><span data-i18n="coordinatesLabel">Coordinates:</span> <span id="reportLat"></span>, <span id="reportLng"></span></div>
     <form id="reportForm">
       <div class="form-group">
-        <label for="incidentType">Incident Type</label>
+        <label for="incidentType" data-i18n="incidentTypeLabel">Incident Type</label>
         <select id="incidentType" required>
-          <option value="">Select...</option>
-          <option value="pickpocket">Pickpocketing</option>
-          <option value="fraud">Fraud / Scam</option>
-          <option value="robbery">Robbery</option>
-          <option value="loss">Lost Item</option>
+          <option value="" data-i18n="incidentSelect">Select...</option>
+          <option value="pickpocket" data-i18n="incidentPickpocket">Pickpocketing</option>
+          <option value="fraud" data-i18n="incidentFraud">Fraud / Scam</option>
+          <option value="robbery" data-i18n="incidentRobbery">Robbery</option>
+          <option value="loss" data-i18n="incidentLoss">Lost Item</option>
         </select>
       </div>
       <div class="form-group">
-        <label for="incidentItems">Lost / Stolen Items</label>
-        <input type="text" id="incidentItems" placeholder="e.g. wallet, passport, smartphone" />
+        <label for="incidentItems" data-i18n="incidentItemsLabel">Lost / Stolen Items</label>
+        <input type="text" id="incidentItems" data-i18n-placeholder="incidentItemsPlaceholder" placeholder="e.g. wallet, passport, smartphone" />
       </div>
       <div class="form-group">
-        <label for="incidentDescription">Description <span style="color:#ef4444">*</span></label>
-        <textarea id="incidentDescription" required placeholder="Describe what happened in detail"></textarea>
+        <label for="incidentDescription"><span data-i18n="incidentDescriptionLabel">Description</span> <span style="color:#ef4444">*</span></label>
+        <textarea id="incidentDescription" required data-i18n-placeholder="incidentDescriptionPlaceholder" placeholder="Describe what happened in detail"></textarea>
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn-secondary" id="reportCancel">Cancel</button>
-        <button type="submit" class="btn-primary" id="reportSubmit">Submit Report</button>
+        <button type="button" class="btn-secondary" id="reportCancel" data-i18n="cancelBtn">Cancel</button>
+        <button type="submit" class="btn-primary" id="reportSubmit" data-i18n="submitReportBtn">Submit Report</button>
       </div>
     </form>
   </div>
@@ -681,27 +714,27 @@
 
 <div id="emergencyModal" class="modal-overlay">
   <div class="modal-content">
-    <h2 style="color:#991b1b">🚨 Classified as Emergency</h2>
-    <div class="modal-sub">Immediate reporting and assistance required</div>
+    <h2 style="color:#991b1b" data-i18n="emergencyModalTitle">🚨 Classified as Emergency</h2>
+    <div class="modal-sub" data-i18n="emergencyModalSub">Immediate reporting and assistance required</div>
     <div id="emergencyContent"></div>
     <div class="modal-actions">
-      <button type="button" class="btn-primary" id="emergencyClose">OK</button>
+      <button type="button" class="btn-primary" id="emergencyClose" data-i18n="okBtn">OK</button>
     </div>
   </div>
 </div>
 
 <div id="sosModal" class="modal-overlay">
   <div class="modal-content">
-    <h2 style="color:#dc2626">🆘 Emergency SOS</h2>
-    <div class="modal-sub" id="sosSubtitle">Local emergency contacts</div>
+    <h2 style="color:#dc2626" data-i18n="sosModalTitle">🆘 Emergency SOS</h2>
+    <div class="modal-sub" id="sosSubtitle" data-i18n="sosModalSub">Local emergency contacts</div>
     <div id="sosContent"></div>
     <div class="modal-actions">
-      <button type="button" class="btn-primary" id="sosClose" style="background:#dc2626">Close</button>
+      <button type="button" class="btn-primary" id="sosClose" style="background:#dc2626" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
 
-<div id="dangerBanner" class="danger-banner">⚠️ You are near a reported incident area. Stay alert!</div>
+<div id="dangerBanner" class="danger-banner" data-i18n="dangerBannerText">⚠️ You are near a reported incident area. Stay alert!</div>
 
 <div id="toast" class="toast"></div>
 
@@ -711,6 +744,367 @@
   crossorigin=""
 ></script>
 <script>
+  // --- i18n ---
+  const translations = {
+    en: {
+      tagline: "Travel destination safety analysis",
+      apiKeyLabel: "Anthropic API Key",
+      apiKeyHintHtml: 'Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Stored only in your browser.',
+      apiHelpToggle: "New here? How to get your API key",
+      apiHelpIntro: "No worries — it only takes a minute. Just follow these steps:",
+      apiHelpStep1Html: 'Open <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> in a new tab.',
+      apiHelpStep2: "Sign up with your Google account (one click — no password needed).",
+      apiHelpStep3Html: 'Once you’re in, click <strong>"API keys"</strong> in the menu.',
+      apiHelpStep4Html: 'Click the <strong>"Create Key"</strong> button and give it any name.',
+      apiHelpStep5: "Copy the key that appears, then paste it into the box above. Done!",
+      modelLabel: "Model",
+      nationalityLabel: "Your Nationality",
+      nationalityHint: "Used to show your country's embassy when you press SOS.",
+      destinationLabel: "Destination",
+      destinationPlaceholder: "e.g. Paris, Bangkok, Rio de Janeiro",
+      analyzeBtn: "Analyze Safety",
+      analyzingBtn: "Analyzing...",
+      enableReportMode: "📍 Enable Report Mode",
+      disableReportMode: "📍 Disable Report Mode",
+      startLiveTracking: "🛰️ Start Live Tracking",
+      stopLiveTracking: "🛑 Stop Live Tracking",
+      introCard: "Enter a city or region you plan to visit and click Analyze. Claude AI will review safety information for that area and mark risk zones on the map.",
+      reportsHeader: "📋 Reported Incidents",
+      reportModalTitle: "📝 Report an Incident",
+      coordinatesLabel: "Coordinates:",
+      incidentTypeLabel: "Incident Type",
+      incidentSelect: "Select...",
+      incidentPickpocket: "Pickpocketing",
+      incidentFraud: "Fraud / Scam",
+      incidentRobbery: "Robbery",
+      incidentLoss: "Lost Item",
+      incidentItemsLabel: "Lost / Stolen Items",
+      incidentItemsPlaceholder: "e.g. wallet, passport, smartphone",
+      incidentDescriptionLabel: "Description",
+      incidentDescriptionPlaceholder: "Describe what happened in detail",
+      cancelBtn: "Cancel",
+      submitReportBtn: "Submit Report",
+      emergencyModalTitle: "🚨 Classified as Emergency",
+      emergencyModalSub: "Immediate reporting and assistance required",
+      okBtn: "OK",
+      sosModalTitle: "🆘 Emergency SOS",
+      sosModalSub: "Local emergency contacts",
+      closeBtn: "Close",
+      dangerBannerText: "⚠️ You are near a reported incident area. Stay alert!",
+      legendTitle: "Risk Level",
+      legendLow: "Low",
+      legendMedium: "Medium",
+      legendHigh: "High",
+      sosButtonAria: "Emergency SOS",
+      sosButtonTitle: "Emergency SOS — show local emergency contacts",
+      voiceWarning: "Warning. You are entering a reported danger zone. Please stay alert and watch your belongings.",
+      voiceLang: "en-US",
+      toastReportClick: "Click the location on the map where the incident occurred",
+      toastTrackingStart: "📍 Live tracking active - You will be alerted when approaching reported danger zones",
+      toastTrackingStop: "Live tracking stopped.",
+      toastNoGeolocation: "Geolocation is not supported in this browser.",
+      toastApiKeyFirst: "Please enter your API key first",
+      toastNoDestForSos: "Please analyze a destination first to load local emergency contacts.",
+      errorNoApiKey: "Please enter your Anthropic API key.",
+      errorNoDestination: "Please enter a destination.",
+      riskAlertTitle: "⚠️ Warning: You are entering a high-risk area!",
+      riskLevelLabel: "Risk level",
+      unnamedZone: "Unnamed zone",
+      nearReport: "⚠️ Near reported incident",
+      analyzingFor: 'Analyzing safety information for "{dest}"...',
+      analysisFailedPrefix: "Analysis failed: ",
+      reportSubmitted: "Report submitted (risk level: {level})",
+      reportFakeNotice: "Auto-classified: registered as community notice only",
+      locationErrorPrefix: "Location error: ",
+      locationPermDenied: "Permission denied.",
+      locationUnavail: "Position unavailable.",
+      locationTimeout: "Request timed out.",
+      levelHigh: "High 🚨",
+      levelMedium: "Medium ⚠️",
+      levelLow: "Low",
+      levelFake: "Unverified",
+    },
+    ko: {
+      tagline: "여행지 안전 분석",
+      apiKeyLabel: "Anthropic API 키",
+      apiKeyHintHtml: '<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>에서 발급받으세요. 브라우저에만 저장됩니다.',
+      apiHelpToggle: "처음이신가요? API 키 발급 방법",
+      apiHelpIntro: "걱정 마세요 — 1분이면 됩니다. 다음 단계를 따라하세요:",
+      apiHelpStep1Html: '새 탭에서 <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>을 여세요.',
+      apiHelpStep2: "Google 계정으로 가입하세요 (원클릭 — 비밀번호 불필요).",
+      apiHelpStep3Html: '로그인 후 메뉴에서 <strong>"API keys"</strong>를 클릭하세요.',
+      apiHelpStep4Html: '<strong>"Create Key"</strong> 버튼을 클릭하고 이름을 지정하세요.',
+      apiHelpStep5: "표시된 키를 복사하여 위 입력란에 붙여넣으세요. 완료!",
+      modelLabel: "모델",
+      nationalityLabel: "국적",
+      nationalityHint: "SOS 시 해당 국가의 대사관 정보를 표시합니다.",
+      destinationLabel: "목적지",
+      destinationPlaceholder: "예: 파리, 방콕, 리우데자네이루",
+      analyzeBtn: "안전 분석",
+      analyzingBtn: "분석 중...",
+      enableReportMode: "📍 신고 모드 켜기",
+      disableReportMode: "📍 신고 모드 끄기",
+      startLiveTracking: "🛰️ 실시간 추적 시작",
+      stopLiveTracking: "🛑 실시간 추적 중지",
+      introCard: "방문할 도시나 지역을 입력하고 [안전 분석]을 클릭하세요. Claude AI가 해당 지역의 안전 정보를 검토하고 지도에 위험 지역을 표시합니다.",
+      reportsHeader: "📋 신고된 사건",
+      reportModalTitle: "📝 사건 신고",
+      coordinatesLabel: "좌표:",
+      incidentTypeLabel: "사건 유형",
+      incidentSelect: "선택...",
+      incidentPickpocket: "소매치기",
+      incidentFraud: "사기",
+      incidentRobbery: "강도",
+      incidentLoss: "분실물",
+      incidentItemsLabel: "분실/도난 물품",
+      incidentItemsPlaceholder: "예: 지갑, 여권, 스마트폰",
+      incidentDescriptionLabel: "상세 설명",
+      incidentDescriptionPlaceholder: "발생한 상황을 자세히 설명해 주세요",
+      cancelBtn: "취소",
+      submitReportBtn: "신고 제출",
+      emergencyModalTitle: "🚨 긴급 상황으로 분류됨",
+      emergencyModalSub: "즉각적인 신고와 도움이 필요합니다",
+      okBtn: "확인",
+      sosModalTitle: "🆘 긴급 SOS",
+      sosModalSub: "현지 긴급 연락처",
+      closeBtn: "닫기",
+      dangerBannerText: "⚠️ 신고된 사건 지역 근처에 있습니다. 주의하세요!",
+      legendTitle: "위험 수준",
+      legendLow: "낮음",
+      legendMedium: "보통",
+      legendHigh: "높음",
+      sosButtonAria: "긴급 SOS",
+      sosButtonTitle: "긴급 SOS — 현지 긴급 연락처 표시",
+      voiceWarning: "경고. 신고된 위험 지역에 진입하고 있습니다. 주의하시고 소지품을 잘 살피세요.",
+      voiceLang: "ko-KR",
+      toastReportClick: "사건이 발생한 지도 위치를 클릭하세요",
+      toastTrackingStart: "📍 실시간 추적 활성화 - 신고된 위험 지역 접근 시 알려드립니다",
+      toastTrackingStop: "실시간 추적이 중지되었습니다.",
+      toastNoGeolocation: "이 브라우저에서는 위치 서비스를 지원하지 않습니다.",
+      toastApiKeyFirst: "먼저 API 키를 입력하세요",
+      toastNoDestForSos: "현지 긴급 연락처를 불러오려면 먼저 목적지를 분석하세요.",
+      errorNoApiKey: "Anthropic API 키를 입력하세요.",
+      errorNoDestination: "목적지를 입력하세요.",
+      riskAlertTitle: "⚠️ 경고: 고위험 지역에 진입합니다!",
+      riskLevelLabel: "위험 수준",
+      unnamedZone: "이름 없는 지역",
+      nearReport: "⚠️ 신고된 사건 근처",
+      analyzingFor: '"{dest}"의 안전 정보를 분석 중...',
+      analysisFailedPrefix: "분석 실패: ",
+      reportSubmitted: "신고 제출됨 (위험 수준: {level})",
+      reportFakeNotice: "자동 분류: 커뮤니티 알림으로만 등록됨",
+      locationErrorPrefix: "위치 오류: ",
+      locationPermDenied: "권한이 거부되었습니다.",
+      locationUnavail: "위치를 찾을 수 없습니다.",
+      locationTimeout: "요청 시간이 초과되었습니다.",
+      levelHigh: "높음 🚨",
+      levelMedium: "보통 ⚠️",
+      levelLow: "낮음",
+      levelFake: "미확인",
+    },
+    ja: {
+      tagline: "旅行先の安全分析",
+      apiKeyLabel: "Anthropic API キー",
+      apiKeyHintHtml: '<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> で取得してください。ブラウザにのみ保存されます。',
+      apiHelpToggle: "初めてですか？API キーの取得方法",
+      apiHelpIntro: "ご安心ください — 1分で完了します。以下の手順に従ってください:",
+      apiHelpStep1Html: '新しいタブで <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> を開きます。',
+      apiHelpStep2: "Google アカウントで登録します（ワンクリック — パスワード不要）。",
+      apiHelpStep3Html: 'ログイン後、メニューから <strong>"API keys"</strong> をクリックします。',
+      apiHelpStep4Html: '<strong>"Create Key"</strong> ボタンをクリックして名前を付けます。',
+      apiHelpStep5: "表示されたキーをコピーして上の欄に貼り付けます。完了です！",
+      modelLabel: "モデル",
+      nationalityLabel: "国籍",
+      nationalityHint: "SOS 押下時に該当国の大使館を表示します。",
+      destinationLabel: "目的地",
+      destinationPlaceholder: "例: パリ、バンコク、リオデジャネイロ",
+      analyzeBtn: "安全分析",
+      analyzingBtn: "分析中...",
+      enableReportMode: "📍 報告モードを有効にする",
+      disableReportMode: "📍 報告モードを無効にする",
+      startLiveTracking: "🛰️ ライブトラッキング開始",
+      stopLiveTracking: "🛑 ライブトラッキング停止",
+      introCard: "訪問予定の都市や地域を入力して「安全分析」をクリックしてください。Claude AI がその地域の安全情報を確認し、地図上に危険ゾーンを表示します。",
+      reportsHeader: "📋 報告された事件",
+      reportModalTitle: "📝 事件を報告",
+      coordinatesLabel: "座標:",
+      incidentTypeLabel: "事件の種類",
+      incidentSelect: "選択...",
+      incidentPickpocket: "スリ",
+      incidentFraud: "詐欺",
+      incidentRobbery: "強盗",
+      incidentLoss: "紛失物",
+      incidentItemsLabel: "紛失・盗難品",
+      incidentItemsPlaceholder: "例: 財布、パスポート、スマートフォン",
+      incidentDescriptionLabel: "詳細",
+      incidentDescriptionPlaceholder: "発生した状況を詳しく説明してください",
+      cancelBtn: "キャンセル",
+      submitReportBtn: "報告を送信",
+      emergencyModalTitle: "🚨 緊急事態として分類",
+      emergencyModalSub: "即座の通報と支援が必要です",
+      okBtn: "OK",
+      sosModalTitle: "🆘 緊急 SOS",
+      sosModalSub: "現地の緊急連絡先",
+      closeBtn: "閉じる",
+      dangerBannerText: "⚠️ 報告された事件エリアの近くにいます。警戒してください！",
+      legendTitle: "危険レベル",
+      legendLow: "低",
+      legendMedium: "中",
+      legendHigh: "高",
+      sosButtonAria: "緊急 SOS",
+      sosButtonTitle: "緊急 SOS — 現地の緊急連絡先を表示",
+      voiceWarning: "警告。報告された危険ゾーンに入ろうとしています。警戒し、所持品にご注意ください。",
+      voiceLang: "ja-JP",
+      toastReportClick: "事件が発生した地図上の場所をクリックしてください",
+      toastTrackingStart: "📍 ライブトラッキング有効 - 報告された危険ゾーンに近づくと通知します",
+      toastTrackingStop: "ライブトラッキングを停止しました。",
+      toastNoGeolocation: "このブラウザはジオロケーションをサポートしていません。",
+      toastApiKeyFirst: "まず API キーを入力してください",
+      toastNoDestForSos: "現地の緊急連絡先を読み込むには、まず目的地を分析してください。",
+      errorNoApiKey: "Anthropic API キーを入力してください。",
+      errorNoDestination: "目的地を入力してください。",
+      riskAlertTitle: "⚠️ 警告: 高リスクエリアに入ろうとしています！",
+      riskLevelLabel: "危険レベル",
+      unnamedZone: "名称未設定エリア",
+      nearReport: "⚠️ 報告事件の近く",
+      analyzingFor: '"{dest}" の安全情報を分析中...',
+      analysisFailedPrefix: "分析失敗: ",
+      reportSubmitted: "報告を送信しました (危険レベル: {level})",
+      reportFakeNotice: "自動分類: コミュニティ通知としてのみ登録",
+      locationErrorPrefix: "位置エラー: ",
+      locationPermDenied: "権限が拒否されました。",
+      locationUnavail: "位置を取得できません。",
+      locationTimeout: "リクエストがタイムアウトしました。",
+      levelHigh: "高 🚨",
+      levelMedium: "中 ⚠️",
+      levelLow: "低",
+      levelFake: "未確認",
+    },
+    zh: {
+      tagline: "旅行目的地安全分析",
+      apiKeyLabel: "Anthropic API 密钥",
+      apiKeyHintHtml: '在 <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> 获取。仅存储在您的浏览器中。',
+      apiHelpToggle: "新手？如何获取 API 密钥",
+      apiHelpIntro: "别担心 — 只需一分钟。请按照以下步骤操作:",
+      apiHelpStep1Html: '在新标签页中打开 <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>。',
+      apiHelpStep2: "使用 Google 账号注册（一键完成 — 无需密码）。",
+      apiHelpStep3Html: '登录后，点击菜单中的 <strong>"API keys"</strong>。',
+      apiHelpStep4Html: '点击 <strong>"Create Key"</strong> 按钮并任意命名。',
+      apiHelpStep5: "复制显示的密钥并粘贴到上方输入框。完成！",
+      modelLabel: "模型",
+      nationalityLabel: "您的国籍",
+      nationalityHint: "用于在按下 SOS 时显示您所在国家的大使馆。",
+      destinationLabel: "目的地",
+      destinationPlaceholder: "例如：巴黎、曼谷、里约热内卢",
+      analyzeBtn: "安全分析",
+      analyzingBtn: "分析中...",
+      enableReportMode: "📍 启用举报模式",
+      disableReportMode: "📍 关闭举报模式",
+      startLiveTracking: "🛰️ 开始实时追踪",
+      stopLiveTracking: "🛑 停止实时追踪",
+      introCard: "输入您计划访问的城市或地区，然后点击「安全分析」。Claude AI 将查看该地区的安全信息并在地图上标记风险区域。",
+      reportsHeader: "📋 已报告事件",
+      reportModalTitle: "📝 报告事件",
+      coordinatesLabel: "坐标:",
+      incidentTypeLabel: "事件类型",
+      incidentSelect: "选择...",
+      incidentPickpocket: "扒窃",
+      incidentFraud: "欺诈",
+      incidentRobbery: "抢劫",
+      incidentLoss: "遗失物",
+      incidentItemsLabel: "遗失/被盗物品",
+      incidentItemsPlaceholder: "例如：钱包、护照、智能手机",
+      incidentDescriptionLabel: "描述",
+      incidentDescriptionPlaceholder: "详细描述发生的情况",
+      cancelBtn: "取消",
+      submitReportBtn: "提交报告",
+      emergencyModalTitle: "🚨 已分类为紧急情况",
+      emergencyModalSub: "需要立即举报和援助",
+      okBtn: "确定",
+      sosModalTitle: "🆘 紧急 SOS",
+      sosModalSub: "本地紧急联系方式",
+      closeBtn: "关闭",
+      dangerBannerText: "⚠️ 您靠近已报告的事件区域。请保持警惕！",
+      legendTitle: "风险等级",
+      legendLow: "低",
+      legendMedium: "中",
+      legendHigh: "高",
+      sosButtonAria: "紧急 SOS",
+      sosButtonTitle: "紧急 SOS — 显示本地紧急联系方式",
+      voiceWarning: "警告。您正在进入已报告的危险区域。请保持警惕并注意您的物品。",
+      voiceLang: "zh-CN",
+      toastReportClick: "请点击事件发生的地图位置",
+      toastTrackingStart: "📍 实时追踪已激活 - 接近已报告的危险区域时将提醒您",
+      toastTrackingStop: "实时追踪已停止。",
+      toastNoGeolocation: "此浏览器不支持地理定位。",
+      toastApiKeyFirst: "请先输入 API 密钥",
+      toastNoDestForSos: "请先分析目的地以加载本地紧急联系方式。",
+      errorNoApiKey: "请输入您的 Anthropic API 密钥。",
+      errorNoDestination: "请输入目的地。",
+      riskAlertTitle: "⚠️ 警告: 您正在进入高风险区域！",
+      riskLevelLabel: "风险等级",
+      unnamedZone: "未命名区域",
+      nearReport: "⚠️ 靠近已报告事件",
+      analyzingFor: '正在分析 "{dest}" 的安全信息...',
+      analysisFailedPrefix: "分析失败: ",
+      reportSubmitted: "报告已提交 (风险等级: {level})",
+      reportFakeNotice: "自动分类：仅作为社区通知登记",
+      locationErrorPrefix: "位置错误: ",
+      locationPermDenied: "权限被拒绝。",
+      locationUnavail: "位置不可用。",
+      locationTimeout: "请求超时。",
+      levelHigh: "高 🚨",
+      levelMedium: "中 ⚠️",
+      levelLow: "低",
+      levelFake: "未验证",
+    },
+  };
+
+  let currentLang = localStorage.getItem("safetrip_lang");
+  if (!currentLang || !translations[currentLang]) currentLang = "en";
+
+  function t(key, vars) {
+    const dict = translations[currentLang] || translations.en;
+    let str = dict[key] != null ? dict[key] : (translations.en[key] != null ? translations.en[key] : key);
+    if (vars && typeof str === "string") {
+      str = str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : `{${k}}`));
+    }
+    return str;
+  }
+
+  function applyTranslations() {
+    document.documentElement.lang = currentLang === "en" ? "en" : currentLang;
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+      el.innerHTML = t(el.getAttribute("data-i18n-html"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+    // Buttons whose text depends on runtime state — refresh from current state.
+    if (typeof refreshStatefulLabels === "function") refreshStatefulLabels();
+    if (typeof updateLegendHtml === "function") updateLegendHtml();
+    if (typeof updateSosButtonLabels === "function") updateSosButtonLabels();
+    if (typeof renderReportsList === "function") renderReportsList();
+    // Update active language button styling.
+    document.querySelectorAll("#langSwitcher button").forEach((b) => {
+      b.classList.toggle("active", b.dataset.lang === currentLang);
+    });
+  }
+
+  function setLanguage(lang) {
+    if (!translations[lang]) return;
+    currentLang = lang;
+    localStorage.setItem("safetrip_lang", lang);
+    applyTranslations();
+  }
+
+  document.querySelectorAll("#langSwitcher button").forEach((btn) => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+  });
+
   const map = L.map("map").setView([20, 0], 2);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
     maxZoom: 19,
@@ -720,16 +1114,21 @@
     referrerPolicy: "no-referrer",
   }).addTo(map);
 
+  let legendDiv = null;
+  function updateLegendHtml() {
+    if (!legendDiv) return;
+    legendDiv.innerHTML = `
+      <strong>${t("legendTitle")}</strong><br/>
+      <span class="dot" style="background:#22c55e"></span>${t("legendLow")}<br/>
+      <span class="dot" style="background:#f59e0b"></span>${t("legendMedium")}<br/>
+      <span class="dot" style="background:#ef4444"></span>${t("legendHigh")}
+    `;
+  }
   const legend = L.control({ position: "bottomright" });
   legend.onAdd = function () {
-    const div = L.DomUtil.create("div", "legend");
-    div.innerHTML = `
-      <strong>Risk Level</strong><br/>
-      <span class="dot" style="background:#22c55e"></span>Low<br/>
-      <span class="dot" style="background:#f59e0b"></span>Medium<br/>
-      <span class="dot" style="background:#ef4444"></span>High
-    `;
-    return div;
+    legendDiv = L.DomUtil.create("div", "legend");
+    updateLegendHtml();
+    return legendDiv;
   };
   legend.addTo(map);
 
@@ -814,17 +1213,18 @@
     const model = modelSelect.value;
 
     if (!apiKey) {
-      showError("Please enter your Anthropic API key.");
+      showError(t("errorNoApiKey"));
       return;
     }
     if (!destination) {
-      showError("Please enter a destination.");
+      showError(t("errorNoDestination"));
       return;
     }
 
     analyzeBtn.disabled = true;
-    analyzeBtn.textContent = "Analyzing...";
-    showLoading(`Analyzing safety information for "${destination}"...`);
+    analyzeBtn.textContent = t("analyzingBtn");
+    analyzeBtn.dataset.busy = "1";
+    showLoading(t("analyzingFor", { dest: destination }));
     riskLayer.clearLayers();
 
     try {
@@ -834,10 +1234,11 @@
       renderMap(data);
     } catch (err) {
       console.error(err);
-      showError(`Analysis failed: ${err.message}`);
+      showError(t("analysisFailedPrefix") + err.message);
     } finally {
       analyzeBtn.disabled = false;
-      analyzeBtn.textContent = "Analyze Safety";
+      delete analyzeBtn.dataset.busy;
+      analyzeBtn.textContent = t("analyzeBtn");
     }
   }
 
@@ -1096,9 +1497,9 @@ Do NOT output any text outside the JSON object.`;
   function toggleReportMode() {
     reportMode = !reportMode;
     reportModeBtn.classList.toggle("active", reportMode);
-    reportModeBtn.textContent = reportMode ? "📍 Disable Report Mode" : "📍 Enable Report Mode";
+    reportModeBtn.textContent = reportMode ? t("disableReportMode") : t("enableReportMode");
     mapEl.style.cursor = reportMode ? "crosshair" : "";
-    if (reportMode) showToast("Click the location on the map where the incident occurred");
+    if (reportMode) showToast(t("toastReportClick"));
   }
 
   function openReportModal(latlng) {
@@ -1111,14 +1512,15 @@ Do NOT output any text outside the JSON object.`;
   async function submitReport(e) {
     e.preventDefault();
     const apiKey = apiKeyInput.value.trim();
-    if (!apiKey) { showToast("Please enter your API key first"); return; }
+    if (!apiKey) { showToast(t("toastApiKeyFirst")); return; }
 
     const type = document.getElementById("incidentType").value;
     const items = document.getElementById("incidentItems").value.trim();
     const description = document.getElementById("incidentDescription").value.trim();
 
     reportSubmit.disabled = true;
-    reportSubmit.textContent = "Analyzing...";
+    reportSubmit.textContent = t("analyzingBtn");
+    reportSubmit.dataset.busy = "1";
 
     try {
       const analysis = await analyzeReport(apiKey, modelSelect.value, {
@@ -1148,16 +1550,27 @@ Do NOT output any text outside the JSON object.`;
       if (level === "high" || analysis.should_alert_authorities) {
         showEmergencyModal(report);
       } else if (level === "fake" || analysis.is_suspicious) {
-        showToast("Auto-classified: registered as community notice only");
+        showToast(t("reportFakeNotice"));
       } else {
-        showToast(`Report submitted (risk level: ${LEVEL_LABEL[level] || level})`);
+        showToast(t("reportSubmitted", { level: localizedLevelLabel(level) }));
       }
     } catch (err) {
-      showToast("Analysis failed: " + err.message);
+      showToast(t("analysisFailedPrefix") + err.message);
     } finally {
       reportSubmit.disabled = false;
-      reportSubmit.textContent = "Submit Report";
+      delete reportSubmit.dataset.busy;
+      reportSubmit.textContent = t("submitReportBtn");
     }
+  }
+
+  function localizedLevelLabel(level) {
+    const map = { high: "levelHigh", medium: "levelMedium", low: "levelLow", fake: "levelFake" };
+    return map[level] ? t(map[level]) : level;
+  }
+
+  function localizedTypeLabel(type) {
+    const map = { pickpocket: "incidentPickpocket", fraud: "incidentFraud", robbery: "incidentRobbery", loss: "incidentLoss" };
+    return map[type] ? t(map[type]) : (TYPE_LABEL[type] || type);
   }
 
   async function analyzeReport(apiKey, model, payload) {
@@ -1240,9 +1653,9 @@ Do NOT output any text outside the JSON object.`;
     const level = a.risk_level || "medium";
     return `
       <div style="min-width:220px">
-        <strong>${TYPE_ICON[r.type] || ""} ${escapeHtml(TYPE_LABEL[r.type] || r.type)}</strong>
+        <strong>${TYPE_ICON[r.type] || ""} ${escapeHtml(localizedTypeLabel(r.type))}</strong>
         <div style="font-size:11px;color:#64748b;margin:4px 0">${new Date(r.timestamp).toLocaleString("en-US")}</div>
-        <div style="margin:6px 0"><strong>Risk level:</strong> ${LEVEL_LABEL[level] || level}</div>
+        <div style="margin:6px 0"><strong>${t("riskLevelLabel")}:</strong> ${localizedLevelLabel(level)}</div>
         ${r.items ? `<div><strong>Items:</strong> ${escapeHtml(r.items)}</div>` : ""}
         <div style="margin-top:6px;font-size:12px">${escapeHtml(r.description)}</div>
         ${a.reasoning ? `<div style="margin-top:6px;font-size:11px;color:#475569"><em>AI analysis:</em> ${escapeHtml(a.reasoning)}</div>` : ""}
@@ -1267,7 +1680,7 @@ Do NOT output any text outside the JSON object.`;
       return `
         <div class="report-item risk-${level}" data-report-id="${r.id}">
           <div class="top">
-            <span class="type-badge">${TYPE_ICON[r.type] || ""} ${escapeHtml(TYPE_LABEL[r.type] || r.type)}</span>
+            <span class="type-badge">${TYPE_ICON[r.type] || ""} ${escapeHtml(localizedTypeLabel(r.type))}</span>
             <span class="time">${new Date(r.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
           </div>
           <div class="meta">${escapeHtml(descShort)}${suffix}</div>
@@ -1328,20 +1741,25 @@ Do NOT output any text outside the JSON object.`;
   const sosSubtitle = document.getElementById("sosSubtitle");
   const sosClose = document.getElementById("sosClose");
 
+  let sosMapBtnEl = null;
+  function updateSosButtonLabels() {
+    if (!sosMapBtnEl) return;
+    sosMapBtnEl.setAttribute("aria-label", t("sosButtonAria"));
+    sosMapBtnEl.title = t("sosButtonTitle");
+  }
   const SOSControl = L.Control.extend({
     options: { position: "topright" },
     onAdd: function () {
-      const btn = L.DomUtil.create("button", "sos-button");
-      btn.type = "button";
-      btn.innerHTML = "SOS";
-      btn.setAttribute("aria-label", "Emergency SOS");
-      btn.title = "Emergency SOS — show local emergency contacts";
-      L.DomEvent.disableClickPropagation(btn);
-      L.DomEvent.on(btn, "click", (e) => {
+      sosMapBtnEl = L.DomUtil.create("button", "sos-button");
+      sosMapBtnEl.type = "button";
+      sosMapBtnEl.innerHTML = "SOS";
+      updateSosButtonLabels();
+      L.DomEvent.disableClickPropagation(sosMapBtnEl);
+      L.DomEvent.on(sosMapBtnEl, "click", (e) => {
         L.DomEvent.stop(e);
         openSosModal();
       });
-      return btn;
+      return sosMapBtnEl;
     },
   });
   map.addControl(new SOSControl());
@@ -1353,7 +1771,7 @@ Do NOT output any text outside the JSON object.`;
 
   async function openSosModal() {
     if (!currentDestinationData?.destination) {
-      showToast("Please analyze a destination first to load local emergency contacts.");
+      showToast(t("toastNoDestForSos"));
       return;
     }
 
@@ -1514,13 +1932,32 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
 
   liveTrackBtn.addEventListener("click", toggleLiveTracking);
 
+  // Refresh button labels whose text depends on runtime state (toggled, busy, etc.).
+  function refreshStatefulLabels() {
+    if (analyzeBtn.dataset.busy) {
+      analyzeBtn.textContent = t("analyzingBtn");
+    } else {
+      analyzeBtn.textContent = t("analyzeBtn");
+    }
+    reportModeBtn.textContent = reportMode ? t("disableReportMode") : t("enableReportMode");
+    if (reportSubmit.dataset.busy) {
+      reportSubmit.textContent = t("analyzingBtn");
+    } else {
+      reportSubmit.textContent = t("submitReportBtn");
+    }
+    liveTrackBtn.textContent = (watchId !== null) ? t("stopLiveTracking") : t("startLiveTracking");
+  }
+
+  // Initial language application (after DOM is fully wired).
+  applyTranslations();
+
   async function toggleLiveTracking() {
     if (watchId !== null) {
       stopLiveTracking();
       return;
     }
     if (!("geolocation" in navigator)) {
-      showToast("Geolocation is not supported in this browser.");
+      showToast(t("toastNoGeolocation"));
       return;
     }
     if ("Notification" in window && Notification.permission === "default") {
@@ -1534,9 +1971,9 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       handleLocationError,
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
     );
-    liveTrackBtn.textContent = "🛑 Stop Live Tracking";
+    liveTrackBtn.textContent = t("stopLiveTracking");
     liveTrackBtn.classList.add("active");
-    showToast("📍 Live tracking active - You will be alerted when approaching reported danger zones");
+    showToast(t("toastTrackingStart"));
   }
 
   function stopLiveTracking() {
@@ -1549,9 +1986,9 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     zonesEntered.clear();
     reportZonesEntered.clear();
     hideDangerBanner();
-    liveTrackBtn.textContent = "🛰️ Start Live Tracking";
+    liveTrackBtn.textContent = t("startLiveTracking");
     liveTrackBtn.classList.remove("active");
-    showToast("Live tracking stopped.");
+    showToast(t("toastTrackingStop"));
   }
 
   function handleLocationUpdate(pos) {
@@ -1585,8 +2022,8 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   function handleLocationError(err) {
-    const messages = { 1: "Permission denied.", 2: "Position unavailable.", 3: "Request timed out." };
-    showToast("Location error: " + (messages[err.code] || err.message));
+    const messages = { 1: t("locationPermDenied"), 2: t("locationUnavail"), 3: t("locationTimeout") };
+    showToast(t("locationErrorPrefix") + (messages[err.code] || err.message));
     stopLiveTracking();
   }
 
@@ -1607,9 +2044,10 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   function triggerDangerAlert(zone) {
-    const levelLabel = LEVEL_LABEL_LIVE[zone.level] || "Unknown";
-    const title = "⚠️ Warning: You are entering a high-risk area!";
-    const body = `${zone.name || "Unnamed zone"} — Risk level: ${levelLabel}`;
+    const liveLabels = { low: t("legendLow"), medium: t("legendMedium"), high: t("legendHigh") };
+    const levelLabel = liveLabels[zone.level] || "Unknown";
+    const title = t("riskAlertTitle");
+    const body = `${zone.name || t("unnamedZone")} — ${t("riskLevelLabel")}: ${levelLabel}`;
 
     if ("Notification" in window && Notification.permission === "granted") {
       try {
@@ -1661,16 +2099,14 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     }
     if ("speechSynthesis" in window) {
       try {
-        const utter = new SpeechSynthesisUtterance(
-          "Warning. You are entering a reported danger zone. Please stay alert and watch your belongings."
-        );
-        utter.lang = "en-US";
+        const utter = new SpeechSynthesisUtterance(t("voiceWarning"));
+        utter.lang = t("voiceLang");
         utter.rate = 1.0;
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utter);
       } catch (_) {}
     }
-    showToast(`⚠️ Near reported incident: ${TYPE_LABEL[report.type] || report.type}`);
+    showToast(`${t("nearReport")}: ${localizedTypeLabel(report.type)}`);
   }
 
   function showDangerBanner() {
