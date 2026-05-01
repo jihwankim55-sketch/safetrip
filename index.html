@@ -1577,7 +1577,7 @@ Do NOT output any text outside the JSON object.`;
 
     const root = document.createElement("div");
     root.id = "pdfRenderRoot";
-    root.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;background:white;color:#1e293b;padding:48px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans CJK','Noto Sans KR','Noto Sans JP','Noto Sans SC',sans-serif;font-size:13px;line-height:1.55;box-sizing:border-box";
+    root.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;background:white;color:#1e293b;padding:48px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans CJK','Noto Sans KR','Noto Sans JP','Noto Sans SC',sans-serif;font-size:13px;line-height:1.55;box-sizing:border-box;word-break:break-word;overflow-wrap:break-word;white-space:normal";
     root.innerHTML = `
       <div style="text-align:center;border-bottom:3px solid #2563eb;padding-bottom:18px;margin-bottom:24px">
         <div style="font-size:30px;font-weight:800;color:#2563eb;letter-spacing:-0.5px">🛡️ SafeTrip</div>
@@ -1605,9 +1605,9 @@ Do NOT output any text outside the JSON object.`;
         ${zonesHtml}
       </div>
 
-      <div style="margin-bottom:22px">
+      <div style="margin-bottom:22px;page-break-inside:avoid;break-inside:avoid">
         <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px">${escapeHtml(t("pdfSummaryHeading"))}</div>
-        <div style="font-size:13px;color:#334155;line-height:1.7">${escapeHtml(data.summary || "")}</div>
+        <div style="font-size:13px;color:#334155;line-height:1.8;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;display:block;padding:6px 12px;background:#f8fafc;border-left:3px solid #2563eb;border-radius:4px">${escapeHtml(data.summary || "")}</div>
       </div>
 
       <div style="margin-top:36px;padding-top:14px;border-top:1px solid #e2e8f0;text-align:center;color:#94a3b8;font-size:10px;letter-spacing:0.3px">
@@ -1652,12 +1652,38 @@ Do NOT output any text outside the JSON object.`;
       if (imgHeight <= pageHeight) {
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       } else {
-        // Slice the canvas across multiple A4 pages.
+        // Slice the canvas across multiple A4 pages, avoiding cuts through text rows.
         const pageCanvasHeightPx = Math.floor((pageHeight * canvas.width) / pageWidth);
+        const srcCtx = canvas.getContext("2d");
+
+        function findSafeSliceEnd(proposedEnd, sliceStart) {
+          if (proposedEnd >= canvas.height) return canvas.height;
+          const minEnd = sliceStart + Math.floor(pageCanvasHeightPx * 0.6);
+          const lookback = Math.min(proposedEnd - minEnd, 160);
+          if (lookback <= 0) return proposedEnd;
+          const band = srcCtx.getImageData(0, proposedEnd - lookback, canvas.width, lookback).data;
+          const w = canvas.width;
+          for (let row = lookback - 1; row >= 0; row--) {
+            let nonWhite = 0;
+            const rowOffset = row * w * 4;
+            for (let x = 0; x < w; x++) {
+              const i = rowOffset + x * 4;
+              if (band[i] < 245 || band[i + 1] < 245 || band[i + 2] < 245) {
+                nonWhite++;
+                if (nonWhite > w * 0.01) break;
+              }
+            }
+            if (nonWhite <= w * 0.01) return proposedEnd - lookback + row;
+          }
+          return proposedEnd;
+        }
+
         let renderedPx = 0;
         let pageIndex = 0;
         while (renderedPx < canvas.height) {
-          const sliceHeight = Math.min(pageCanvasHeightPx, canvas.height - renderedPx);
+          const proposedEnd = Math.min(renderedPx + pageCanvasHeightPx, canvas.height);
+          const sliceEnd = findSafeSliceEnd(proposedEnd, renderedPx);
+          const sliceHeight = sliceEnd - renderedPx;
           const slice = document.createElement("canvas");
           slice.width = canvas.width;
           slice.height = sliceHeight;
@@ -1669,7 +1695,7 @@ Do NOT output any text outside the JSON object.`;
           const sliceMm = (sliceHeight * imgWidth) / canvas.width;
           if (pageIndex > 0) pdf.addPage();
           pdf.addImage(sliceData, "PNG", 0, 0, imgWidth, sliceMm);
-          renderedPx += sliceHeight;
+          renderedPx = sliceEnd;
           pageIndex += 1;
         }
       }
