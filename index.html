@@ -243,6 +243,22 @@
   button.secondary:hover { background: #eff6ff; }
   button.secondary.active { background: #2563eb; color: white; }
 
+  button.insurance {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #16a34a;
+    border: 1px solid #16a34a;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.insurance:hover { background: #f0fdf4; }
+
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -665,6 +681,7 @@
     <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
     <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
     <button id="pdfDownloadBtn" class="secondary" type="button" style="display:none" data-i18n="pdfDownloadBtn">📄 Download Safety Report (PDF)</button>
+    <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
 
     <div class="divider"></div>
 
@@ -843,6 +860,7 @@
       safetyLow: "Safe",
       safetyMedium: "Caution",
       safetyHigh: "Danger",
+      insuranceBtn: "🛡️ Get Travel Insurance",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -938,6 +956,7 @@
       safetyLow: "안전",
       safetyMedium: "주의",
       safetyHigh: "위험",
+      insuranceBtn: "🛡️ 여행자 보험 가입",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -1033,6 +1052,7 @@
       safetyLow: "安全",
       safetyMedium: "注意",
       safetyHigh: "危険",
+      insuranceBtn: "🛡️ 旅行保険に加入",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -1128,6 +1148,7 @@
       safetyLow: "安全",
       safetyMedium: "注意",
       safetyHigh: "危险",
+      insuranceBtn: "🛡️ 购买旅行保险",
     },
   };
 
@@ -1526,10 +1547,16 @@ Do NOT output any text outside the JSON object.`;
 
   // --- PDF download ---
   const pdfDownloadBtn = document.getElementById("pdfDownloadBtn");
+  const insuranceBtn = document.getElementById("insuranceBtn");
 
   function setPdfButtonVisible(visible) {
     pdfDownloadBtn.style.display = visible ? "" : "none";
+    insuranceBtn.style.display = visible ? "" : "none";
   }
+
+  insuranceBtn.addEventListener("click", () => {
+    window.open("https://safetywing.com/nomad-insurance?referenceID=safetrip", "_blank", "noopener,noreferrer");
+  });
 
   pdfDownloadBtn.addEventListener("click", downloadSafetyPdf);
 
