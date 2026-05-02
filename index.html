@@ -259,6 +259,59 @@
   }
   button.insurance:hover { background: #f0fdf4; }
 
+  button.phrases {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #ea580c;
+    border: 1px solid #ea580c;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.phrases:hover { background: #fff7ed; }
+
+  .phrase-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #ea580c;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .phrase-card .local {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  .phrase-card .roman {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .phrase-card .english {
+    font-size: 12px;
+    color: #475569;
+  }
+  .phrase-lang-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #fff7ed;
+    color: #c2410c;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -682,6 +735,7 @@
     <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
     <button id="pdfDownloadBtn" class="secondary" type="button" style="display:none" data-i18n="pdfDownloadBtn">📄 Download Safety Report (PDF)</button>
     <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
+    <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
 
     <div class="divider"></div>
 
@@ -750,6 +804,17 @@
     <div id="sosContent"></div>
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="sosClose" style="background:#dc2626" data-i18n="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="phrasesModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#ea580c" data-i18n="phrasesModalTitle">🆘 Emergency Phrases</h2>
+    <div class="modal-sub" data-i18n="phrasesModalSub">Memorize or screenshot these for offline use</div>
+    <div id="phrasesContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="phrasesClose" style="background:#ea580c" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -861,6 +926,11 @@
       safetyMedium: "Caution",
       safetyHigh: "Danger",
       insuranceBtn: "🛡️ Get Travel Insurance",
+      phrasesBtn: "🆘 Emergency Phrases",
+      phrasesModalTitle: "🆘 Emergency Phrases",
+      phrasesModalSub: "Memorize or screenshot these for offline use",
+      phrasesLangLabel: "Local language",
+      phrasesFallbackNote: "Local translations not available for this destination — showing English.",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -957,6 +1027,11 @@
       safetyMedium: "주의",
       safetyHigh: "위험",
       insuranceBtn: "🛡️ 여행자 보험 가입",
+      phrasesBtn: "🆘 긴급 문구",
+      phrasesModalTitle: "🆘 긴급 문구",
+      phrasesModalSub: "오프라인 사용을 위해 외우거나 스크린샷을 저장하세요",
+      phrasesLangLabel: "현지 언어",
+      phrasesFallbackNote: "이 목적지의 현지어 번역을 제공할 수 없어 영어로 표시합니다.",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -1053,6 +1128,11 @@
       safetyMedium: "注意",
       safetyHigh: "危険",
       insuranceBtn: "🛡️ 旅行保険に加入",
+      phrasesBtn: "🆘 緊急フレーズ",
+      phrasesModalTitle: "🆘 緊急フレーズ",
+      phrasesModalSub: "オフライン用に覚えるかスクリーンショットを保存してください",
+      phrasesLangLabel: "現地の言語",
+      phrasesFallbackNote: "この目的地の現地語訳がないため英語で表示します。",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -1149,6 +1229,11 @@
       safetyMedium: "注意",
       safetyHigh: "危险",
       insuranceBtn: "🛡️ 购买旅行保险",
+      phrasesBtn: "🆘 紧急用语",
+      phrasesModalTitle: "🆘 紧急用语",
+      phrasesModalSub: "请记住或截图保存以便离线使用",
+      phrasesLangLabel: "当地语言",
+      phrasesFallbackNote: "此目的地暂无当地语言翻译，已显示英语。",
     },
   };
 
@@ -1552,10 +1637,161 @@ Do NOT output any text outside the JSON object.`;
   function setPdfButtonVisible(visible) {
     pdfDownloadBtn.style.display = visible ? "" : "none";
     insuranceBtn.style.display = visible ? "" : "none";
+    const phrasesEl = document.getElementById("phrasesBtn");
+    if (phrasesEl) phrasesEl.style.display = visible ? "" : "none";
   }
 
   insuranceBtn.addEventListener("click", () => {
     window.open("https://safetywing.com/nomad-insurance?referenceID=safetrip", "_blank", "noopener,noreferrer");
+  });
+
+  // --- Emergency Phrases ---
+  const phrasesBtn = document.getElementById("phrasesBtn");
+  const phrasesModal = document.getElementById("phrasesModal");
+  const phrasesContent = document.getElementById("phrasesContent");
+  const phrasesClose = document.getElementById("phrasesClose");
+
+  const PHRASE_KEYS = ["help", "police", "hospital", "robbed", "embassy"];
+  const ENGLISH_PHRASES = {
+    help: "Help me!",
+    police: "Call the police",
+    hospital: "I need a hospital",
+    robbed: "I've been robbed",
+    embassy: "Where is the embassy?",
+  };
+
+  const EMERGENCY_PHRASES = {
+    ja: { name: "Japanese · 日本語", phrases: {
+      help:     { local: "助けて！",                   roman: "Tasukete!" },
+      police:   { local: "警察を呼んでください",       roman: "Keisatsu o yonde kudasai" },
+      hospital: { local: "病院に行きたいです",         roman: "Byōin ni ikitai desu" },
+      robbed:   { local: "強盗にあいました",           roman: "Gōtō ni aimashita" },
+      embassy:  { local: "大使館はどこですか？",       roman: "Taishikan wa doko desu ka?" },
+    }},
+    zh: { name: "Chinese · 中文 (普通话)", phrases: {
+      help:     { local: "救命！",                     roman: "Jiùmìng!" },
+      police:   { local: "请叫警察",                   roman: "Qǐng jiào jǐngchá" },
+      hospital: { local: "我需要去医院",               roman: "Wǒ xūyào qù yīyuàn" },
+      robbed:   { local: "我被抢劫了",                 roman: "Wǒ bèi qiǎngjié le" },
+      embassy:  { local: "大使馆在哪里？",             roman: "Dàshǐguǎn zài nǎlǐ?" },
+    }},
+    ko: { name: "Korean · 한국어", phrases: {
+      help:     { local: "도와주세요!",                roman: "Dowajuseyo!" },
+      police:   { local: "경찰을 불러주세요",          roman: "Gyeongchareul bulleojuseyo" },
+      hospital: { local: "병원에 가야 해요",           roman: "Byeongwone gaya haeyo" },
+      robbed:   { local: "강도를 당했어요",            roman: "Gangdoreul danghaesseoyo" },
+      embassy:  { local: "대사관이 어디인가요?",       roman: "Daesagwan-i eodi-ingayo?" },
+    }},
+    th: { name: "Thai · ภาษาไทย", phrases: {
+      help:     { local: "ช่วยด้วย!",                  roman: "Chûay dûay!" },
+      police:   { local: "กรุณาเรียกตำรวจ",           roman: "Karunaa rîak tamrùat" },
+      hospital: { local: "ฉันต้องไปโรงพยาบาล",       roman: "Chăn dtông bpai roong-pá-yaa-baan" },
+      robbed:   { local: "ฉันถูกปล้น",                 roman: "Chăn tùk bplôn" },
+      embassy:  { local: "สถานทูตอยู่ที่ไหน?",       roman: "Sà-tăan-tûut yòo têe năi?" },
+    }},
+    vi: { name: "Vietnamese · Tiếng Việt", phrases: {
+      help:     { local: "Cứu tôi với!",               roman: "" },
+      police:   { local: "Gọi cảnh sát giúp tôi",      roman: "" },
+      hospital: { local: "Tôi cần đến bệnh viện",      roman: "" },
+      robbed:   { local: "Tôi bị cướp",                roman: "" },
+      embassy:  { local: "Đại sứ quán ở đâu?",         roman: "" },
+    }},
+    es: { name: "Spanish · Español", phrases: {
+      help:     { local: "¡Ayúdame!",                  roman: "" },
+      police:   { local: "Llame a la policía",         roman: "" },
+      hospital: { local: "Necesito un hospital",       roman: "" },
+      robbed:   { local: "Me han robado",              roman: "" },
+      embassy:  { local: "¿Dónde está la embajada?",   roman: "" },
+    }},
+    fr: { name: "French · Français", phrases: {
+      help:     { local: "Au secours !",               roman: "" },
+      police:   { local: "Appelez la police",          roman: "" },
+      hospital: { local: "J'ai besoin d'un hôpital",   roman: "" },
+      robbed:   { local: "On m'a volé",                roman: "" },
+      embassy:  { local: "Où est l'ambassade ?",       roman: "" },
+    }},
+    ar: { name: "Arabic · العربية", phrases: {
+      help:     { local: "النجدة!",                    roman: "An-najda!" },
+      police:   { local: "اتصل بالشرطة",               roman: "Ittasil bil-shurta" },
+      hospital: { local: "أحتاج إلى مستشفى",          roman: "Aḥtāj ilā mustashfā" },
+      robbed:   { local: "لقد سُرقت",                  roman: "Laqad suriqtu" },
+      embassy:  { local: "أين السفارة؟",               roman: "Ayna as-safāra?" },
+    }},
+    pt: { name: "Portuguese · Português", phrases: {
+      help:     { local: "Socorro!",                   roman: "" },
+      police:   { local: "Chame a polícia",            roman: "" },
+      hospital: { local: "Preciso de um hospital",     roman: "" },
+      robbed:   { local: "Fui roubado",                roman: "" },
+      embassy:  { local: "Onde fica a embaixada?",     roman: "" },
+    }},
+    id: { name: "Indonesian · Bahasa Indonesia", phrases: {
+      help:     { local: "Tolong!",                    roman: "" },
+      police:   { local: "Panggil polisi",             roman: "" },
+      hospital: { local: "Saya butuh rumah sakit",     roman: "" },
+      robbed:   { local: "Saya dirampok",              roman: "" },
+      embassy:  { local: "Di mana kedutaan besar?",    roman: "" },
+    }},
+  };
+
+  const COUNTRY_LANG_RULES = [
+    { lang: "ja", keys: ["japan", "tokyo", "osaka", "kyoto", "yokohama", "nagoya", "sapporo", "fukuoka", "kobe", "hiroshima", "okinawa", "nara"] },
+    { lang: "zh", keys: ["china", "beijing", "shanghai", "guangzhou", "shenzhen", "chengdu", "xi'an", "xian", "hangzhou", "taiwan", "taipei", "hong kong", "macau", "macao", "singapore"] },
+    { lang: "ko", keys: ["korea", "seoul", "busan", "incheon", "daegu", "jeju", "gwangju"] },
+    { lang: "th", keys: ["thailand", "bangkok", "phuket", "chiang mai", "pattaya", "krabi", "koh samui"] },
+    { lang: "vi", keys: ["vietnam", "viet nam", "hanoi", "ho chi minh", "saigon", "da nang", "hoi an", "nha trang"] },
+    { lang: "ar", keys: ["saudi", "riyadh", "jeddah", "uae", "dubai", "abu dhabi", "egypt", "cairo", "alexandria", "qatar", "doha", "kuwait", "jordan", "amman", "morocco", "marrakech", "casablanca", "oman", "muscat", "bahrain", "lebanon", "beirut", "tunisia", "tunis", "algeria"] },
+    { lang: "id", keys: ["indonesia", "jakarta", "bali", "surabaya", "yogyakarta", "bandung", "ubud"] },
+    { lang: "pt", keys: ["portugal", "lisbon", "porto", "brazil", "brasil", "rio de janeiro", "rio", "sao paulo", "são paulo", "salvador", "brasilia", "fortaleza"] },
+    { lang: "fr", keys: ["france", "paris", "lyon", "marseille", "nice", "bordeaux", "toulouse", "strasbourg", "monaco", "luxembourg"] },
+    { lang: "es", keys: ["spain", "españa", "madrid", "barcelona", "seville", "valencia", "mexico", "méxico", "cancun", "cancún", "mexico city", "argentina", "buenos aires", "chile", "santiago", "colombia", "bogota", "bogotá", "medellin", "medellín", "peru", "perú", "lima", "cusco", "ecuador", "quito", "uruguay", "montevideo", "venezuela", "caracas", "cuba", "havana", "dominican", "guatemala", "costa rica", "san jose", "panama", "honduras", "nicaragua", "el salvador", "bolivia", "paraguay"] },
+  ];
+
+  function detectLocalLang(destination) {
+    if (!destination) return null;
+    const s = destination.toLowerCase();
+    for (const rule of COUNTRY_LANG_RULES) {
+      if (rule.keys.some((k) => s.includes(k))) return rule.lang;
+    }
+    return null;
+  }
+
+  function renderEmergencyPhrases() {
+    const dest = currentDestinationData?.destination || "";
+    const lang = detectLocalLang(dest);
+    const data = lang ? EMERGENCY_PHRASES[lang] : null;
+
+    let html = "";
+    if (data) {
+      html += `<div class="phrase-lang-tag">${escapeHtml(t("phrasesLangLabel"))}: ${escapeHtml(data.name)}</div>`;
+      html += PHRASE_KEYS.map((k) => {
+        const p = data.phrases[k] || {};
+        const romanLine = p.roman ? `<div class="roman">${escapeHtml(p.roman)}</div>` : "";
+        return `
+          <div class="phrase-card">
+            <div class="local">${escapeHtml(p.local || ENGLISH_PHRASES[k])}</div>
+            ${romanLine}
+            <div class="english">🇬🇧 ${escapeHtml(ENGLISH_PHRASES[k])}</div>
+          </div>
+        `;
+      }).join("");
+    } else {
+      html += `<div class="status-card info" style="margin-bottom:12px">${escapeHtml(t("phrasesFallbackNote"))}</div>`;
+      html += PHRASE_KEYS.map((k) => `
+        <div class="phrase-card">
+          <div class="local">${escapeHtml(ENGLISH_PHRASES[k])}</div>
+        </div>
+      `).join("");
+    }
+    phrasesContent.innerHTML = html;
+  }
+
+  phrasesBtn.addEventListener("click", () => {
+    renderEmergencyPhrases();
+    phrasesModal.classList.add("visible");
+  });
+  phrasesClose.addEventListener("click", () => phrasesModal.classList.remove("visible"));
+  phrasesModal.addEventListener("click", (e) => {
+    if (e.target === phrasesModal) phrasesModal.classList.remove("visible");
   });
 
   pdfDownloadBtn.addEventListener("click", downloadSafetyPdf);
