@@ -275,6 +275,31 @@
   }
   button.phrases:hover { background: #fff7ed; }
 
+  .btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .btn-grid > button {
+    margin-top: 0;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.3;
+  }
+  .btn-grid > #phrasesBtn {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 480px) {
+    .btn-grid { grid-template-columns: 1fr; }
+    .btn-grid > #phrasesBtn { grid-column: auto; }
+  }
+
   .phrase-card {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -731,11 +756,13 @@
     </div>
 
     <button id="analyze" data-i18n="analyzeBtn">Analyze Safety</button>
-    <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
-    <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
-    <button id="pdfDownloadBtn" class="secondary" type="button" style="display:none" data-i18n="pdfDownloadBtn">📄 Download Safety Report (PDF)</button>
-    <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
-    <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
+    <div class="btn-grid">
+      <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
+      <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
+      <button id="pdfDownloadBtn" class="secondary" type="button" style="display:none" data-i18n="pdfDownloadBtn">📄 Download Safety Report (PDF)</button>
+      <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
+      <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
+    </div>
 
     <div class="divider"></div>
 
