@@ -2,9 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="referrer" content="no-referrer" />
-<title>SafeTrip — Travel Safety Analysis</title>
+<meta name="theme-color" content="#2563eb" />
+<meta name="description" content="Analyze travel destination safety with AI. Get risk maps, emergency phrases, and safety reports." />
+<meta name="keywords" content="travel safety, AI, risk map, travel insurance, emergency phrases, embassy, SOS" />
+<title>SafeTrip - AI Travel Safety Analysis</title>
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="SafeTrip - AI Travel Safety Analysis" />
+<meta property="og:description" content="Analyze travel destination safety with AI. Get risk maps, emergency phrases, and safety reports." />
+<meta property="og:site_name" content="SafeTrip" />
+<meta property="og:locale" content="en_US" />
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="SafeTrip - AI Travel Safety Analysis" />
+<meta name="twitter:description" content="Analyze travel destination safety with AI. Get risk maps, emergency phrases, and safety reports." />
+
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232563eb'/><text x='50%25' y='62%25' font-size='62' text-anchor='middle' dominant-baseline='middle'>🛡️</text></svg>" />
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -677,10 +693,54 @@
   }
 
   @media (max-width: 480px) {
+    header { padding: 0 12px; }
+    header h1 { font-size: 17px; }
     header .tagline { display: none; }
-    .sidebar { padding: 14px; }
-    button#analyze { padding: 14px; }  /* larger tap target */
-    button.secondary { padding: 12px; font-size: 14px; }
+    .lang-switcher { gap: 3px; }
+    .lang-switcher button { padding: 3px 6px; font-size: 10px; }
+
+    .sidebar {
+      padding: 14px;
+      max-height: none;
+    }
+    #map {
+      height: 60vh;
+      min-height: 320px;
+    }
+
+    .form-group { margin-bottom: 10px; }
+    .form-group label { font-size: 11px; }
+    .form-group input,
+    .form-group select {
+      padding: 11px 12px;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    button#analyze { padding: 14px; font-size: 15px; }  /* larger tap target */
+    button.secondary,
+    button.insurance,
+    button.phrases { padding: 12px; font-size: 13px; }
+    .btn-grid { gap: 6px; }
+
+    .modal-content {
+      padding: 18px;
+      border-radius: 10px;
+      max-height: 85vh;
+    }
+    .modal-actions { gap: 6px; }
+    .modal-actions button { padding: 12px; font-size: 14px; }
+
+    .sos-button {
+      width: 56px;
+      height: 56px;
+      font-size: 19px;
+      border-width: 3px;
+    }
+    .leaflet-top.leaflet-right { top: 8px; right: 8px; }
+
+    .toast { font-size: 12px; padding: 10px 16px; max-width: 92vw; }
+    .danger-banner { font-size: 13px; padding: 12px 16px; }
   }
 </style>
 </head>
