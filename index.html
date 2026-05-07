@@ -59,10 +59,32 @@
   header .tagline { margin-left: 12px; font-size: 13px; opacity: 0.85; }
 
   .lang-switcher {
-    margin-left: auto;
     display: flex;
     gap: 4px;
     align-items: center;
+    margin-left: 8px;
+  }
+  .theme-toggle {
+    margin-left: auto;
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    width: 34px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: 1;
+    transition: background 0.15s, border-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .theme-toggle:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.7);
   }
   .lang-switcher button {
     background: transparent;
@@ -666,6 +688,145 @@
   .api-help-content li:last-child { margin-bottom: 0; }
   .api-help-content a { color: #2563eb; font-weight: 600; }
 
+  /* --- Dark mode --- */
+  body.dark { background: #1a1a2e; color: #e0e0e0; }
+  body.dark .sidebar {
+    background: #16213e;
+    border-right-color: #1f2a4a;
+    border-bottom-color: #1f2a4a;
+  }
+  body.dark .form-group label { color: #cbd5e1; }
+  body.dark .form-group input,
+  body.dark .form-group select {
+    background: #0f1626;
+    color: #e0e0e0;
+    border-color: #334155;
+  }
+  body.dark .form-group input:focus,
+  body.dark .form-group select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.2);
+  }
+  body.dark .hint { color: #94a3b8; }
+  body.dark .api-help-toggle { color: #93c5fd; }
+  body.dark .api-help-toggle:hover { color: #bfdbfe; }
+  body.dark .api-help-content {
+    background: #0f1626;
+    color: #cbd5e1;
+    border-left-color: #3b82f6;
+  }
+  body.dark .api-help-content a { color: #93c5fd; }
+  body.dark .divider { background: #1f2a4a; }
+  body.dark #results { color: #e0e0e0; }
+  body.dark .result-section {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .result-section h3 { color: #e0e0e0; }
+  body.dark .result-section p { color: #cbd5e1; }
+  body.dark .result-section ul li { border-bottom-color: #1f2a4a; color: #cbd5e1; }
+  body.dark .risk-item { background: #0f1626; }
+  body.dark .risk-item:hover { background: #131c33; }
+  body.dark .risk-item .name { color: #e0e0e0; }
+  body.dark .risk-item .desc { color: #94a3b8; }
+  body.dark .modal-overlay { background: rgba(0,0,0,0.7); }
+  body.dark .modal-content {
+    background: #16213e;
+    color: #e0e0e0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  body.dark .modal-content h2 { color: #e0e0e0; }
+  body.dark .modal-content .modal-sub { color: #94a3b8; }
+  body.dark .modal-content textarea,
+  body.dark .modal-content input,
+  body.dark .modal-content select {
+    background: #0f1626;
+    color: #e0e0e0;
+    border-color: #334155;
+  }
+  body.dark .modal-actions .btn-secondary {
+    background: #1f2a4a;
+    color: #e0e0e0;
+  }
+  body.dark .modal-actions .btn-secondary:hover { background: #283455; }
+  body.dark .report-item {
+    background: #0f1626;
+    border-color: #1f2a4a;
+  }
+  body.dark .report-item:hover { background: #131c33; }
+  body.dark .report-item .meta { color: #94a3b8; }
+  body.dark .report-item .type-badge { background: #1f2a4a; color: #cbd5e1; }
+  body.dark .report-item .time { color: #64748b; }
+  body.dark #reportCount { color: #94a3b8; }
+  body.dark #reports-section h3 { color: #e0e0e0; }
+  body.dark .toast { background: #0b1220; }
+  body.dark .legend {
+    background: #16213e;
+    color: #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  body.dark .sos-contact-card {
+    background: #0f1626;
+    border-color: #1f2a4a;
+  }
+  body.dark .sos-contact-card.urgent { background: #2a0f12; border-color: #5b1f25; }
+  body.dark .sos-contact-card .label { color: #94a3b8; }
+  body.dark .sos-contact-card .name { color: #e0e0e0; }
+  body.dark .sos-contact-card .note,
+  body.dark .sos-contact-card .address { color: #94a3b8; }
+  body.dark button.secondary {
+    background: #16213e;
+    color: #93c5fd;
+    border-color: #3b82f6;
+  }
+  body.dark button.secondary:hover { background: #1f2a4a; }
+  body.dark button.secondary.active { background: #3b82f6; color: white; }
+  body.dark button.insurance {
+    background: #16213e;
+    color: #4ade80;
+    border-color: #22c55e;
+  }
+  body.dark button.insurance:hover { background: #1f2a4a; }
+  body.dark button.phrases {
+    background: #16213e;
+    color: #fdba74;
+    border-color: #f97316;
+  }
+  body.dark button.phrases:hover { background: #1f2a4a; }
+  body.dark button#analyze:disabled { background: #475569; }
+  body.dark .phrase-card {
+    background: #0f1626;
+    border-color: #1f2a4a;
+  }
+  body.dark .phrase-card .local { color: #e0e0e0; }
+  body.dark .phrase-card .english,
+  body.dark .phrase-card .roman { color: #94a3b8; }
+  body.dark .phrase-lang-tag { background: #2a1a0f; color: #fdba74; }
+  body.dark .emergency-alert {
+    background: #2a0f12;
+    border-color: #5b1f25;
+    color: #fecaca;
+  }
+  body.dark .emergency-alert strong { color: #fca5a5; }
+  body.dark .emergency-contacts li {
+    background: #0f1626;
+    border-color: #1f2a4a;
+    color: #e0e0e0;
+  }
+  body.dark .emergency-contacts a { color: #93c5fd; }
+  body.dark .status-card.info { background: #1e3a5f; color: #bfdbfe; }
+  body.dark .status-card.error { background: #3a0f15; color: #fca5a5; }
+  body.dark .status-card.loading {
+    background: #3a2a0f;
+    color: #fcd34d;
+  }
+  body.dark .status-card.loading .spinner {
+    border-color: rgba(252,211,77,0.18);
+    border-top-color: #fcd34d;
+  }
+  body.dark .api-help-content strong,
+  body.dark .modal-content strong { color: #e0e0e0; }
+
   .site-footer {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
     color: white;
@@ -825,6 +986,7 @@
   <header>
     <h1>🛡️ SafeTrip</h1>
     <span class="tagline" data-i18n="tagline">Travel destination safety analysis</span>
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
     <div class="lang-switcher" id="langSwitcher">
       <button type="button" data-lang="en">EN</button>
       <button type="button" data-lang="ko">한국어</button>
@@ -1462,6 +1624,28 @@
   document.querySelectorAll("#langSwitcher button").forEach((btn) => {
     btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
   });
+
+  // --- Dark mode toggle ---
+  const themeToggleBtn = document.getElementById("themeToggle");
+  let currentTheme = localStorage.getItem("safetrip_theme") === "dark" ? "dark" : "light";
+
+  function applyTheme(theme) {
+    document.body.classList.toggle("dark", theme === "dark");
+    if (themeToggleBtn) {
+      themeToggleBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+      themeToggleBtn.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+      themeToggleBtn.title = themeToggleBtn.getAttribute("aria-label");
+    }
+  }
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", () => {
+      currentTheme = currentTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("safetrip_theme", currentTheme);
+      applyTheme(currentTheme);
+    });
+  }
+  applyTheme(currentTheme);
 
   const map = L.map("map").setView([20, 0], 2);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
