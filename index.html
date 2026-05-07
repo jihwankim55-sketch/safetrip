@@ -688,6 +688,71 @@
   .api-help-content li:last-child { margin-bottom: 0; }
   .api-help-content a { color: #2563eb; font-weight: 600; }
 
+  /* --- Pre-trip checklist --- */
+  #checklist-section { margin-top: 4px; }
+  .checklist-toggle {
+    background: none;
+    border: none;
+    padding: 6px 0;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    width: 100%;
+    text-align: left;
+  }
+  .checklist-toggle:hover { color: #2563eb; }
+  .checklist-toggle .chevron {
+    transition: transform 0.2s ease;
+    font-size: 11px;
+    color: #64748b;
+  }
+  .checklist-toggle[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+  .checklist-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 9px;
+    border-radius: 10px;
+  }
+  .checklist-content {
+    display: none;
+    margin-top: 8px;
+    padding: 4px 0;
+  }
+  .checklist-content.open { display: block; }
+  .checklist-content label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.45;
+    border-bottom: 1px solid #f1f5f9;
+    transition: color 0.15s;
+  }
+  .checklist-content label:last-child { border-bottom: none; }
+  .checklist-content input[type="checkbox"] {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    accent-color: #2563eb;
+    cursor: pointer;
+  }
+  .checklist-content input[type="checkbox"]:checked + span {
+    color: #94a3b8;
+    text-decoration: line-through;
+  }
+
   /* --- Dark mode --- */
   body.dark { background: #1a1a2e; color: #e0e0e0; }
   body.dark .sidebar {
@@ -826,6 +891,16 @@
   }
   body.dark .api-help-content strong,
   body.dark .modal-content strong { color: #e0e0e0; }
+  body.dark .checklist-toggle { color: #e0e0e0; }
+  body.dark .checklist-toggle:hover { color: #93c5fd; }
+  body.dark .checklist-toggle .chevron { color: #94a3b8; }
+  body.dark .checklist-count { background: #1f2a4a; color: #cbd5e1; }
+  body.dark .checklist-content label {
+    color: #cbd5e1;
+    border-bottom-color: #1f2a4a;
+  }
+  body.dark .checklist-content input[type="checkbox"] { accent-color: #3b82f6; }
+  body.dark .checklist-content input[type="checkbox"]:checked + span { color: #64748b; }
 
   .site-footer {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
@@ -1075,6 +1150,24 @@
       <h3><span data-i18n="reportsHeader">📋 Reported Incidents</span> <span id="reportCount"></span></h3>
       <div id="reportsList"></div>
     </div>
+
+    <div id="checklist-section">
+      <div class="divider"></div>
+      <button type="button" class="checklist-toggle" id="checklistToggle" aria-expanded="false" aria-controls="checklistContent">
+        <span class="chevron">▶</span>
+        <span data-i18n="checklistTitle">✅ Pre-Trip Checklist</span>
+        <span class="checklist-count" id="checklistCount">0/7</span>
+      </button>
+      <div class="checklist-content" id="checklistContent">
+        <label><input type="checkbox" data-cl-id="passport" /><span data-i18n="checklistItemPassport">Passport/ID copies saved digitally</span></label>
+        <label><input type="checkbox" data-cl-id="insurance" /><span data-i18n="checklistItemInsurance">Travel insurance purchased</span></label>
+        <label><input type="checkbox" data-cl-id="embassy" /><span data-i18n="checklistItemEmbassy">Embassy contact info saved</span></label>
+        <label><input type="checkbox" data-cl-id="emergency" /><span data-i18n="checklistItemEmergency">Emergency contacts notified</span></label>
+        <label><input type="checkbox" data-cl-id="numbers" /><span data-i18n="checklistItemNumbers">Local emergency numbers noted</span></label>
+        <label><input type="checkbox" data-cl-id="meds" /><span data-i18n="checklistItemMeds">Medication/prescriptions packed</span></label>
+        <label><input type="checkbox" data-cl-id="hotel" /><span data-i18n="checklistItemHotel">Hotel/accommodation confirmed</span></label>
+      </div>
+    </div>
   </aside>
 
   <div id="map"></div>
@@ -1274,6 +1367,14 @@
       phrasesModalSub: "Memorize or screenshot these for offline use",
       phrasesLangLabel: "Local language",
       phrasesFallbackNote: "Local translations not available for this destination — showing English.",
+      checklistTitle: "✅ Pre-Trip Checklist",
+      checklistItemPassport: "Passport/ID copies saved digitally",
+      checklistItemInsurance: "Travel insurance purchased",
+      checklistItemEmbassy: "Embassy contact info saved",
+      checklistItemEmergency: "Emergency contacts notified",
+      checklistItemNumbers: "Local emergency numbers noted",
+      checklistItemMeds: "Medication/prescriptions packed",
+      checklistItemHotel: "Hotel/accommodation confirmed",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -1375,6 +1476,14 @@
       phrasesModalSub: "오프라인 사용을 위해 외우거나 스크린샷을 저장하세요",
       phrasesLangLabel: "현지 언어",
       phrasesFallbackNote: "이 목적지의 현지어 번역을 제공할 수 없어 영어로 표시합니다.",
+      checklistTitle: "✅ 여행 전 체크리스트",
+      checklistItemPassport: "여권/신분증 사본 디지털 저장",
+      checklistItemInsurance: "여행자 보험 가입",
+      checklistItemEmbassy: "대사관 연락처 저장",
+      checklistItemEmergency: "비상 연락처에 통보",
+      checklistItemNumbers: "현지 긴급 번호 메모",
+      checklistItemMeds: "약/처방전 준비",
+      checklistItemHotel: "숙박 예약 확인",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -1476,6 +1585,14 @@
       phrasesModalSub: "オフライン用に覚えるかスクリーンショットを保存してください",
       phrasesLangLabel: "現地の言語",
       phrasesFallbackNote: "この目的地の現地語訳がないため英語で表示します。",
+      checklistTitle: "✅ 旅行前チェックリスト",
+      checklistItemPassport: "パスポート・IDのデジタルコピーを保存",
+      checklistItemInsurance: "旅行保険に加入済み",
+      checklistItemEmbassy: "大使館の連絡先を保存",
+      checklistItemEmergency: "緊急連絡先に通知済み",
+      checklistItemNumbers: "現地の緊急電話番号を控えた",
+      checklistItemMeds: "薬・処方箋を準備",
+      checklistItemHotel: "ホテル・宿泊先の予約確認",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -1577,6 +1694,14 @@
       phrasesModalSub: "请记住或截图保存以便离线使用",
       phrasesLangLabel: "当地语言",
       phrasesFallbackNote: "此目的地暂无当地语言翻译，已显示英语。",
+      checklistTitle: "✅ 行前清单",
+      checklistItemPassport: "护照/身份证电子备份已保存",
+      checklistItemInsurance: "已购买旅行保险",
+      checklistItemEmbassy: "已保存大使馆联系方式",
+      checklistItemEmergency: "已通知紧急联系人",
+      checklistItemNumbers: "已记录当地紧急电话",
+      checklistItemMeds: "已准备药物/处方",
+      checklistItemHotel: "已确认酒店/住宿",
     },
   };
 
@@ -2846,6 +2971,48 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       pdfDownloadBtn.textContent = t("pdfDownloadBtn");
     }
   }
+
+  // --- Pre-trip checklist ---
+  (function initChecklist() {
+    const toggleBtn = document.getElementById("checklistToggle");
+    const content = document.getElementById("checklistContent");
+    const countEl = document.getElementById("checklistCount");
+    if (!toggleBtn || !content || !countEl) return;
+    const STORAGE_KEY = "safetrip_checklist";
+
+    toggleBtn.addEventListener("click", () => {
+      const expanded = toggleBtn.getAttribute("aria-expanded") === "true";
+      toggleBtn.setAttribute("aria-expanded", String(!expanded));
+      content.classList.toggle("open", !expanded);
+    });
+
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+      catch (_) { return {}; }
+    }
+    function saveState(s) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (_) {}
+    }
+    function updateCount() {
+      const inputs = content.querySelectorAll('input[type="checkbox"]');
+      const total = inputs.length;
+      const done = Array.from(inputs).filter((i) => i.checked).length;
+      countEl.textContent = `${done}/${total}`;
+    }
+
+    const state = loadState();
+    content.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      const id = input.dataset.clId;
+      if (id && state[id]) input.checked = true;
+      input.addEventListener("change", () => {
+        const s = loadState();
+        s[input.dataset.clId] = input.checked;
+        saveState(s);
+        updateCount();
+      });
+    });
+    updateCount();
+  })();
 
   // Initial language application (after DOM is fully wired).
   applyTranslations();
