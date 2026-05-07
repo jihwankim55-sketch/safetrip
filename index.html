@@ -353,6 +353,77 @@
   }
   button.share:hover { background: #ecfeff; }
 
+  button.compare-toggle {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #475569;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  button.compare-toggle:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #1e293b;
+  }
+  button.compare-toggle.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    border-style: solid;
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .compare-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-top: 4px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .compare-card.level-low { border-top-color: #22c55e; }
+  .compare-card.level-medium { border-top-color: #f59e0b; }
+  .compare-card.level-high { border-top-color: #ef4444; }
+  .compare-card .compare-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    word-break: break-word;
+    min-height: 34px;
+  }
+  .compare-card .compare-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 0.4px;
+  }
+  .compare-card .compare-badge.low { background: #dcfce7; color: #166534; }
+  .compare-card .compare-badge.medium { background: #fef3c7; color: #92400e; }
+  .compare-card .compare-badge.high { background: #fee2e2; color: #991b1b; }
+  .compare-card .compare-stats {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.6;
+  }
+
   .btn-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -925,6 +996,27 @@
   }
   body.dark .checklist-content input[type="checkbox"] { accent-color: #3b82f6; }
   body.dark .checklist-content input[type="checkbox"]:checked + span { color: #64748b; }
+  body.dark button.compare-toggle {
+    background: transparent;
+    color: #94a3b8;
+    border-color: #334155;
+  }
+  body.dark button.compare-toggle:hover {
+    background: #1f2a4a;
+    border-color: #64748b;
+    color: #e0e0e0;
+  }
+  body.dark button.compare-toggle.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+  body.dark .compare-card {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .compare-card .compare-name { color: #e0e0e0; }
+  body.dark .compare-card .compare-stats { color: #e0e0e0; }
 
   .site-footer {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
@@ -1077,6 +1169,9 @@
       gap: 10px;
       text-align: center;
     }
+
+    .compare-grid { grid-template-columns: 1fr; }
+    .compare-card .compare-name { min-height: 0; }
   }
 </style>
 </head>
@@ -1153,6 +1248,11 @@
     </div>
 
     <button id="analyze" data-i18n="analyzeBtn">Analyze Safety</button>
+    <button id="compareToggleBtn" class="compare-toggle" type="button" data-i18n="compareToggle">⚖️ Compare Destinations</button>
+    <div class="form-group" id="destinationBGroup" style="display:none; margin-top:8px">
+      <label for="destinationB" data-i18n="compareWithLabel">Compare with</label>
+      <input type="text" id="destinationB" data-i18n-placeholder="compareWithPlaceholder" placeholder="e.g. Tokyo, Japan" />
+    </div>
     <div class="btn-grid">
       <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
       <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
@@ -1403,6 +1503,12 @@
       shareBtn: "📤 Share Results",
       shareCopied: "✓ Copied!",
       shareCopyFailed: "Copy failed",
+      compareToggle: "⚖️ Compare Destinations",
+      compareWithLabel: "Compare with",
+      compareWithPlaceholder: "e.g. Tokyo, Japan",
+      compareTitle: "📊 Comparison",
+      compareRiskCount: "{n} risk areas",
+      compareErrorBoth: "Please enter both destinations.",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -1515,6 +1621,12 @@
       shareBtn: "📤 결과 공유",
       shareCopied: "✓ 복사됨!",
       shareCopyFailed: "복사 실패",
+      compareToggle: "⚖️ 목적지 비교",
+      compareWithLabel: "비교 대상",
+      compareWithPlaceholder: "예: 도쿄, 일본",
+      compareTitle: "📊 비교 결과",
+      compareRiskCount: "위험 지역 {n}곳",
+      compareErrorBoth: "두 목적지를 모두 입력하세요.",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -1627,6 +1739,12 @@
       shareBtn: "📤 結果を共有",
       shareCopied: "✓ コピーしました！",
       shareCopyFailed: "コピーに失敗しました",
+      compareToggle: "⚖️ 目的地を比較",
+      compareWithLabel: "比較対象",
+      compareWithPlaceholder: "例: 東京, 日本",
+      compareTitle: "📊 比較結果",
+      compareRiskCount: "危険ゾーン {n} 件",
+      compareErrorBoth: "両方の目的地を入力してください。",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -1739,6 +1857,12 @@
       shareBtn: "📤 分享结果",
       shareCopied: "✓ 已复制！",
       shareCopyFailed: "复制失败",
+      compareToggle: "⚖️ 比较目的地",
+      compareWithLabel: "比较对象",
+      compareWithPlaceholder: "例如: 东京, 日本",
+      compareTitle: "📊 比较结果",
+      compareRiskCount: "{n} 个风险区域",
+      compareErrorBoth: "请输入两个目的地。",
     },
   };
 
@@ -1909,7 +2033,112 @@
     if (e.key === "Enter") analyzeBtn.click();
   });
 
-  analyzeBtn.addEventListener("click", runAnalysis);
+  // --- Compare destinations mode ---
+  let compareMode = false;
+  const compareToggleBtn = document.getElementById("compareToggleBtn");
+  const destinationBGroup = document.getElementById("destinationBGroup");
+  const destinationBInput = document.getElementById("destinationB");
+
+  compareToggleBtn.addEventListener("click", () => {
+    compareMode = !compareMode;
+    compareToggleBtn.classList.toggle("active", compareMode);
+    destinationBGroup.style.display = compareMode ? "" : "none";
+  });
+  destinationBInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") analyzeBtn.click();
+  });
+
+  analyzeBtn.addEventListener("click", () => {
+    if (compareMode) runCompareAnalysis();
+    else runAnalysis();
+  });
+
+  async function runCompareAnalysis() {
+    const apiKey = apiKeyInput.value.trim();
+    const destA = destinationInput.value.trim();
+    const destB = destinationBInput.value.trim();
+    const model = modelSelect.value;
+
+    if (!apiKey) { showError(t("errorNoApiKey")); return; }
+    if (!destA || !destB) { showError(t("compareErrorBoth")); return; }
+
+    analyzeBtn.disabled = true;
+    analyzeBtn.dataset.busy = "1";
+    analyzeBtn.textContent = t("analyzingBtn");
+    showLoading(t("analyzingFor"));
+    riskLayer.clearLayers();
+    Object.keys(riskMarkers).forEach((k) => delete riskMarkers[k]);
+    currentDestinationData = null;
+    setPdfButtonVisible(false);
+
+    try {
+      const [dataA, dataB] = await Promise.all([
+        callClaude(apiKey, model, destA),
+        callClaude(apiKey, model, destB),
+      ]);
+      renderCompareResults(dataA, dataB);
+      renderCompareMap(dataA, dataB);
+    } catch (err) {
+      console.error(err);
+      showError(t("analysisFailedPrefix") + err.message);
+    } finally {
+      analyzeBtn.disabled = false;
+      delete analyzeBtn.dataset.busy;
+      analyzeBtn.textContent = t("analyzeBtn");
+    }
+  }
+
+  function renderCompareResults(dataA, dataB) {
+    const labels = { low: t("safetyLow"), medium: t("safetyMedium"), high: t("safetyHigh") };
+    function card(d) {
+      const level = d.overall_safety || "medium";
+      const zoneCount = (d.risk_zones || []).length;
+      return `
+        <div class="compare-card level-${level}">
+          <div class="compare-name">${escapeHtml(d.destination || "—")}</div>
+          <span class="compare-badge ${level}">${escapeHtml(labels[level] || labels.medium)}</span>
+          <div class="compare-stats">${escapeHtml(t("compareRiskCount", { n: zoneCount }))}</div>
+        </div>
+      `;
+    }
+    resultsDiv.innerHTML = `
+      <div class="result-section">
+        <h3>${escapeHtml(t("compareTitle"))}</h3>
+        <div class="compare-grid">
+          ${card(dataA)}
+          ${card(dataB)}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCompareMap(dataA, dataB) {
+    riskLayer.clearLayers();
+    const points = [];
+    [dataA, dataB].forEach((d) => {
+      const c = d && d.center;
+      if (c && typeof c.lat === "number" && typeof c.lng === "number") {
+        L.marker([c.lat, c.lng])
+          .addTo(riskLayer)
+          .bindPopup(`<strong>${escapeHtml(d.destination || "")}</strong>`);
+        points.push([c.lat, c.lng]);
+        (d.risk_zones || []).forEach((zone) => {
+          const color = LEVEL_COLOR[zone.level] || LEVEL_COLOR.medium;
+          L.circle([zone.lat, zone.lng], {
+            radius: zone.radius || 500,
+            color, fillColor: color, fillOpacity: 0.22, weight: 2,
+          })
+            .addTo(riskLayer)
+            .bindPopup(`<strong>${escapeHtml(zone.name || "")}</strong><br/><em>${escapeHtml(zone.level || "medium")}</em><br/>${escapeHtml(zone.description || "")}`);
+        });
+      }
+    });
+    if (points.length >= 2) {
+      map.fitBounds(L.latLngBounds(points).pad(0.4));
+    } else if (points.length === 1) {
+      map.setView(points[0], 5);
+    }
+  }
 
   async function runAnalysis() {
     const apiKey = apiKeyInput.value.trim();
