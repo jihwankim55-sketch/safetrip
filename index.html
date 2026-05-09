@@ -353,6 +353,151 @@
   }
   button.share:hover { background: #ecfeff; }
 
+  button.emergency-card {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #4f46e5;
+    border: 1px solid #4f46e5;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.emergency-card:hover { background: #eef2ff; }
+
+  /* Emergency Card modal + preview */
+  .ec-modal-content { max-width: 600px; }
+  .ec-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .ec-inputs .form-group { margin-bottom: 0; }
+  .ec-inputs .form-group:first-child { grid-column: 1 / -1; }
+  .ec-inputs label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .ec-inputs input {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    color: #1e293b;
+    font-family: inherit;
+  }
+  .ec-inputs input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+  }
+
+  .ec-card-preview {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans CJK", "Noto Sans KR", "Noto Sans JP", "Noto Sans SC", sans-serif;
+    box-shadow: 0 4px 14px rgba(15,23,42,0.08);
+  }
+  .ec-card-preview .ec-card-header {
+    text-align: center;
+    border-bottom: 3px solid #4f46e5;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+  .ec-card-preview .ec-card-brand {
+    font-size: 18px;
+    font-weight: 800;
+    color: #4f46e5;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+  .ec-card-preview .ec-card-dest {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+  }
+  .ec-card-preview .ec-card-flag { font-size: 22px; margin-right: 6px; vertical-align: -2px; }
+  .ec-card-preview .ec-section { margin-bottom: 14px; }
+  .ec-card-preview .ec-section:last-child { margin-bottom: 0; }
+  .ec-card-preview .ec-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+    border-left: 3px solid #4f46e5;
+    padding-left: 8px;
+  }
+  .ec-card-preview .ec-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    gap: 10px;
+  }
+  .ec-card-preview .ec-row:last-child { border-bottom: none; }
+  .ec-card-preview .ec-row .ec-label { color: #475569; flex-shrink: 0; }
+  .ec-card-preview .ec-row .ec-value {
+    color: #1e293b;
+    font-weight: 700;
+    text-align: right;
+    word-break: break-word;
+  }
+  .ec-card-preview .ec-row .ec-value.tel { font-family: ui-monospace, monospace; color: #dc2626; }
+  .ec-card-preview .ec-phrase-card {
+    background: #f8fafc;
+    border-left: 3px solid #4f46e5;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .ec-card-preview .ec-phrase-card:last-child { margin-bottom: 0; }
+  .ec-card-preview .ec-phrase-local { font-weight: 700; color: #1e293b; line-height: 1.4; }
+  .ec-card-preview .ec-phrase-en { color: #64748b; font-size: 11px; margin-top: 2px; }
+  .ec-card-preview .ec-personal {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .ec-card-preview .ec-personal .ec-row { border-bottom-color: #fde0e0; }
+  .ec-card-preview .ec-card-footer {
+    text-align: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 10px;
+    color: #94a3b8;
+    letter-spacing: 0.3px;
+  }
+  .ec-card-preview .ec-loading { color: #94a3b8; font-style: italic; font-size: 12px; }
+
+  @media (max-width: 480px) {
+    .ec-inputs { grid-template-columns: 1fr; }
+    .ec-card-preview { padding: 16px; }
+  }
+
   button.compare-toggle {
     width: 100%;
     padding: 10px;
@@ -456,13 +601,15 @@
     line-height: 1.3;
   }
   .btn-grid > #phrasesBtn,
-  .btn-grid > #shareBtn {
+  .btn-grid > #shareBtn,
+  .btn-grid > #ecCardBtn {
     grid-column: 1 / -1;
   }
   @media (max-width: 480px) {
     .btn-grid { grid-template-columns: 1fr; }
     .btn-grid > #phrasesBtn,
-    .btn-grid > #shareBtn { grid-column: auto; }
+    .btn-grid > #shareBtn,
+    .btn-grid > #ecCardBtn { grid-column: auto; }
   }
 
   .phrase-card {
@@ -967,6 +1114,22 @@
     border-color: #06b6d4;
   }
   body.dark button.share:hover { background: #1f2a4a; }
+  body.dark button.emergency-card {
+    background: #16213e;
+    color: #a5b4fc;
+    border-color: #6366f1;
+  }
+  body.dark button.emergency-card:hover { background: #1f2a4a; }
+  body.dark .ec-inputs label { color: #cbd5e1; }
+  body.dark .ec-inputs input {
+    background: #0f1626;
+    color: #e0e0e0;
+    border-color: #334155;
+  }
+  body.dark .ec-inputs input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(129,140,248,0.2);
+  }
   body.dark button#analyze:disabled { background: #475569; }
   body.dark .phrase-card {
     background: #0f1626;
@@ -1276,6 +1439,7 @@
       <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
       <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
       <button id="shareBtn" class="share" type="button" style="display:none" data-i18n="shareBtn">📤 Share Results</button>
+      <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
     </div>
 
     <div class="divider"></div>
@@ -1363,6 +1527,35 @@
     <div id="sosContent"></div>
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="sosClose" style="background:#dc2626" data-i18n="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="ecCardModal" class="modal-overlay">
+  <div class="modal-content ec-modal-content">
+    <h2 style="color:#4f46e5" data-i18n="ecCardTitle">🆔 Emergency Contact Card</h2>
+    <div class="modal-sub" data-i18n="ecCardSub">Fill in your info, then save the card as an image to keep offline.</div>
+
+    <div class="ec-inputs">
+      <div class="form-group">
+        <label for="ecName" data-i18n="ecCardNameLabel">Full Name</label>
+        <input type="text" id="ecName" data-i18n-placeholder="ecCardNamePh" placeholder="John Doe" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label for="ecBloodType" data-i18n="ecCardBloodLabel">Blood Type</label>
+        <input type="text" id="ecBloodType" data-i18n-placeholder="ecCardBloodPh" placeholder="e.g. A+, O-" />
+      </div>
+      <div class="form-group">
+        <label for="ecConditions" data-i18n="ecCardCondLabel">Allergies / Conditions</label>
+        <input type="text" id="ecConditions" data-i18n-placeholder="ecCardCondPh" placeholder="e.g. peanut allergy, asthma" />
+      </div>
+    </div>
+
+    <div id="ecCardPreview" class="ec-card-preview"></div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="ecCardSave" style="background:#4f46e5" data-i18n="ecCardSaveBtn">📸 Save as Image</button>
+      <button type="button" class="btn-secondary" id="ecCardClose" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -1526,6 +1719,38 @@
       compareRiskCount: "{n} risk areas",
       compareErrorBoth: "Please enter both destinations.",
       localLawsTitle: "⚖️ Local Laws & Customs",
+      ecCardBtn: "🆔 Generate Emergency Card",
+      ecCardTitle: "🆔 Emergency Contact Card",
+      ecCardSub: "Fill in your info, then save the card as an image to keep offline.",
+      ecCardNameLabel: "Full Name",
+      ecCardBloodLabel: "Blood Type",
+      ecCardCondLabel: "Allergies / Conditions",
+      ecCardNamePh: "John Doe",
+      ecCardBloodPh: "e.g. A+, O-",
+      ecCardCondPh: "e.g. peanut allergy, asthma",
+      ecCardSaveBtn: "📸 Save as Image",
+      ecCardSecDest: "Destination",
+      ecCardSecEmergency: "Emergency Numbers",
+      ecCardSecEmbassy: "Your Embassy",
+      ecCardSecPhrases: "Local Phrases",
+      ecCardSecPersonal: "Personal Information",
+      ecCardLabelPolice: "Police",
+      ecCardLabelAmbulance: "Ambulance",
+      ecCardLabelFire: "Fire",
+      ecCardLabelTourist: "Tourist Helpline",
+      ecCardLabelEmbassyPhone: "Phone",
+      ecCardLabelEmbassyEmergency: "24h Emergency",
+      ecCardLabelEmbassyAddress: "Address",
+      ecCardLabelName: "Name",
+      ecCardLabelBlood: "Blood Type",
+      ecCardLabelConditions: "Allergies / Conditions",
+      ecCardLoadingEmbassy: "Loading embassy info...",
+      ecCardEmbassyError: "Could not load embassy info.",
+      ecCardImageSaved: "✓ Image saved!",
+      ecCardSavingBtn: "Generating image...",
+      ecCardFooter: "🛡️ SafeTrip — Generated for emergency reference. Carry while traveling.",
+      ecCardNotProvided: "—",
+      ecCardFilenameLabel: "SafeTrip_EmergencyCard",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -1645,6 +1870,38 @@
       compareRiskCount: "위험 지역 {n}곳",
       compareErrorBoth: "두 목적지를 모두 입력하세요.",
       localLawsTitle: "⚖️ 현지 법률 & 관습",
+      ecCardBtn: "🆔 긴급 카드 생성",
+      ecCardTitle: "🆔 긴급 연락 카드",
+      ecCardSub: "정보를 입력한 뒤 이미지로 저장해 오프라인에서 휴대하세요.",
+      ecCardNameLabel: "이름",
+      ecCardBloodLabel: "혈액형",
+      ecCardCondLabel: "알레르기 / 질환",
+      ecCardNamePh: "홍길동",
+      ecCardBloodPh: "예: A+, O-",
+      ecCardCondPh: "예: 땅콩 알레르기, 천식",
+      ecCardSaveBtn: "📸 이미지로 저장",
+      ecCardSecDest: "목적지",
+      ecCardSecEmergency: "긴급 번호",
+      ecCardSecEmbassy: "대사관",
+      ecCardSecPhrases: "현지어 긴급 문구",
+      ecCardSecPersonal: "개인 정보",
+      ecCardLabelPolice: "경찰",
+      ecCardLabelAmbulance: "구급",
+      ecCardLabelFire: "소방",
+      ecCardLabelTourist: "관광 핫라인",
+      ecCardLabelEmbassyPhone: "전화",
+      ecCardLabelEmbassyEmergency: "24시간 긴급",
+      ecCardLabelEmbassyAddress: "주소",
+      ecCardLabelName: "이름",
+      ecCardLabelBlood: "혈액형",
+      ecCardLabelConditions: "알레르기 / 질환",
+      ecCardLoadingEmbassy: "대사관 정보 불러오는 중...",
+      ecCardEmbassyError: "대사관 정보를 불러오지 못했습니다.",
+      ecCardImageSaved: "✓ 이미지가 저장되었습니다!",
+      ecCardSavingBtn: "이미지 생성 중...",
+      ecCardFooter: "🛡️ SafeTrip — 비상 시 참고용 카드. 여행 중 휴대하세요.",
+      ecCardNotProvided: "—",
+      ecCardFilenameLabel: "SafeTrip_긴급카드",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -1764,6 +2021,38 @@
       compareRiskCount: "危険ゾーン {n} 件",
       compareErrorBoth: "両方の目的地を入力してください。",
       localLawsTitle: "⚖️ 現地の法律と習慣",
+      ecCardBtn: "🆔 緊急カードを作成",
+      ecCardTitle: "🆔 緊急連絡カード",
+      ecCardSub: "情報を入力後、画像として保存してオフラインで携帯してください。",
+      ecCardNameLabel: "氏名",
+      ecCardBloodLabel: "血液型",
+      ecCardCondLabel: "アレルギー / 持病",
+      ecCardNamePh: "山田 太郎",
+      ecCardBloodPh: "例: A+, O-",
+      ecCardCondPh: "例: ピーナッツアレルギー, 喘息",
+      ecCardSaveBtn: "📸 画像として保存",
+      ecCardSecDest: "目的地",
+      ecCardSecEmergency: "緊急電話番号",
+      ecCardSecEmbassy: "大使館",
+      ecCardSecPhrases: "現地の緊急フレーズ",
+      ecCardSecPersonal: "個人情報",
+      ecCardLabelPolice: "警察",
+      ecCardLabelAmbulance: "救急",
+      ecCardLabelFire: "消防",
+      ecCardLabelTourist: "観光ホットライン",
+      ecCardLabelEmbassyPhone: "電話",
+      ecCardLabelEmbassyEmergency: "24時間緊急",
+      ecCardLabelEmbassyAddress: "住所",
+      ecCardLabelName: "氏名",
+      ecCardLabelBlood: "血液型",
+      ecCardLabelConditions: "アレルギー / 持病",
+      ecCardLoadingEmbassy: "大使館情報を読み込み中...",
+      ecCardEmbassyError: "大使館情報を読み込めませんでした。",
+      ecCardImageSaved: "✓ 画像を保存しました！",
+      ecCardSavingBtn: "画像を生成中...",
+      ecCardFooter: "🛡️ SafeTrip — 緊急時参照用カード。旅行中に携帯してください。",
+      ecCardNotProvided: "—",
+      ecCardFilenameLabel: "SafeTrip_緊急カード",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -1883,6 +2172,38 @@
       compareRiskCount: "{n} 个风险区域",
       compareErrorBoth: "请输入两个目的地。",
       localLawsTitle: "⚖️ 当地法律与习俗",
+      ecCardBtn: "🆔 生成紧急联系卡",
+      ecCardTitle: "🆔 紧急联系卡",
+      ecCardSub: "填写信息后保存为图片，离线携带使用。",
+      ecCardNameLabel: "姓名",
+      ecCardBloodLabel: "血型",
+      ecCardCondLabel: "过敏 / 疾病",
+      ecCardNamePh: "张三",
+      ecCardBloodPh: "例如：A+, O-",
+      ecCardCondPh: "例如：花生过敏，哮喘",
+      ecCardSaveBtn: "📸 保存为图片",
+      ecCardSecDest: "目的地",
+      ecCardSecEmergency: "紧急电话",
+      ecCardSecEmbassy: "大使馆",
+      ecCardSecPhrases: "当地紧急用语",
+      ecCardSecPersonal: "个人信息",
+      ecCardLabelPolice: "警察",
+      ecCardLabelAmbulance: "急救",
+      ecCardLabelFire: "消防",
+      ecCardLabelTourist: "旅游热线",
+      ecCardLabelEmbassyPhone: "电话",
+      ecCardLabelEmbassyEmergency: "24小时紧急",
+      ecCardLabelEmbassyAddress: "地址",
+      ecCardLabelName: "姓名",
+      ecCardLabelBlood: "血型",
+      ecCardLabelConditions: "过敏 / 疾病",
+      ecCardLoadingEmbassy: "正在加载大使馆信息...",
+      ecCardEmbassyError: "无法加载大使馆信息。",
+      ecCardImageSaved: "✓ 图片已保存！",
+      ecCardSavingBtn: "正在生成图片...",
+      ecCardFooter: "🛡️ SafeTrip — 紧急参考卡。请随身携带。",
+      ecCardNotProvided: "—",
+      ecCardFilenameLabel: "SafeTrip_紧急联系卡",
     },
   };
 
@@ -2235,6 +2556,7 @@ Analyze safety information for this destination and return a response that exact
   "emergency": {
     "police": "<local police phone number>",
     "ambulance": "<local ambulance / medical emergency phone number>",
+    "fire": "<local fire department phone number, or 'N/A' if it shares the ambulance/police line>",
     "tourist_helpline": "<tourist police or 24h tourist helpline phone number — 'N/A' if none exists>"
   }
 }
@@ -2344,6 +2666,7 @@ Do NOT output any text outside the JSON object.`;
         <ul>
           <li><strong>Police:</strong> ${escapeHtml(em.police || "N/A")}</li>
           <li><strong>Ambulance:</strong> ${escapeHtml(em.ambulance || "N/A")}</li>
+          ${em.fire && em.fire !== "N/A" ? `<li><strong>Fire:</strong> ${escapeHtml(em.fire)}</li>` : ""}
           <li><strong>Tourist helpline:</strong> ${escapeHtml(em.tourist_helpline || "N/A")}</li>
         </ul>
       </div>
@@ -2433,6 +2756,8 @@ Do NOT output any text outside the JSON object.`;
     if (phrasesEl) phrasesEl.style.display = visible ? "" : "none";
     const shareEl = document.getElementById("shareBtn");
     if (shareEl) shareEl.style.display = visible ? "" : "none";
+    const ecCardEl = document.getElementById("ecCardBtn");
+    if (ecCardEl) ecCardEl.style.display = visible ? "" : "none";
   }
 
   insuranceBtn.addEventListener("click", () => {
@@ -2489,6 +2814,284 @@ Do NOT output any text outside the JSON object.`;
       showToast(t("shareCopied"));
     } catch (err) {
       showToast(t("shareCopyFailed"));
+    }
+  });
+
+  // --- Emergency Contact Card ---
+  const ecCardBtn = document.getElementById("ecCardBtn");
+  const ecCardModal = document.getElementById("ecCardModal");
+  const ecCardClose = document.getElementById("ecCardClose");
+  const ecCardSave = document.getElementById("ecCardSave");
+  const ecCardPreview = document.getElementById("ecCardPreview");
+  const ecNameInput = document.getElementById("ecName");
+  const ecBloodInput = document.getElementById("ecBloodType");
+  const ecCondInput = document.getElementById("ecConditions");
+
+  const EC_USER_KEY = "safetrip_user_info";
+
+  const DEST_FLAG_RULES = [
+    { rx: /(thailand|bangkok|phuket|chiang mai|pattaya|krabi|koh samui)/i, flag: "🇹🇭" },
+    { rx: /(japan|tokyo|osaka|kyoto|yokohama|nagoya|sapporo|fukuoka|hiroshima|okinawa|nara)/i, flag: "🇯🇵" },
+    { rx: /(korea|seoul|busan|incheon|daegu|jeju|gwangju)/i, flag: "🇰🇷" },
+    { rx: /(taiwan|taipei|kaohsiung|taichung)/i, flag: "🇹🇼" },
+    { rx: /(hong kong)/i, flag: "🇭🇰" },
+    { rx: /(macau|macao)/i, flag: "🇲🇴" },
+    { rx: /(singapore)/i, flag: "🇸🇬" },
+    { rx: /(china|beijing|shanghai|guangzhou|shenzhen|chengdu|xi'?an|hangzhou|chongqing)/i, flag: "🇨🇳" },
+    { rx: /(vietnam|hanoi|ho chi minh|saigon|da nang|hoi an|nha trang)/i, flag: "🇻🇳" },
+    { rx: /(indonesia|jakarta|bali|surabaya|yogyakarta|bandung|ubud)/i, flag: "🇮🇩" },
+    { rx: /(malaysia|kuala lumpur|penang|langkawi)/i, flag: "🇲🇾" },
+    { rx: /(philippines|manila|cebu|boracay)/i, flag: "🇵🇭" },
+    { rx: /(india|mumbai|delhi|new delhi|bangalore|kolkata|chennai|jaipur|goa)/i, flag: "🇮🇳" },
+    { rx: /(nepal|kathmandu)/i, flag: "🇳🇵" },
+    { rx: /(sri lanka|colombo)/i, flag: "🇱🇰" },
+    { rx: /(france|paris|lyon|marseille|nice|bordeaux|toulouse|strasbourg)/i, flag: "🇫🇷" },
+    { rx: /(monaco)/i, flag: "🇲🇨" },
+    { rx: /(germany|berlin|munich|hamburg|frankfurt|cologne)/i, flag: "🇩🇪" },
+    { rx: /(italy|rome|milan|venice|florence|naples)/i, flag: "🇮🇹" },
+    { rx: /(spain|españa|madrid|barcelona|seville|valencia|granada)/i, flag: "🇪🇸" },
+    { rx: /(united kingdom|england|london|scotland|edinburgh|manchester|liverpool|wales|cardiff)/i, flag: "🇬🇧" },
+    { rx: /(ireland|dublin)/i, flag: "🇮🇪" },
+    { rx: /(portugal|lisbon|porto)/i, flag: "🇵🇹" },
+    { rx: /(netherlands|amsterdam|holland|rotterdam)/i, flag: "🇳🇱" },
+    { rx: /(belgium|brussels|brugge|bruges|antwerp)/i, flag: "🇧🇪" },
+    { rx: /(switzerland|zurich|geneva|bern)/i, flag: "🇨🇭" },
+    { rx: /(austria|vienna|salzburg)/i, flag: "🇦🇹" },
+    { rx: /(greece|athens|santorini|mykonos)/i, flag: "🇬🇷" },
+    { rx: /(czech|prague)/i, flag: "🇨🇿" },
+    { rx: /(poland|warsaw|krakow)/i, flag: "🇵🇱" },
+    { rx: /(hungary|budapest)/i, flag: "🇭🇺" },
+    { rx: /(sweden|stockholm)/i, flag: "🇸🇪" },
+    { rx: /(norway|oslo|bergen)/i, flag: "🇳🇴" },
+    { rx: /(denmark|copenhagen)/i, flag: "🇩🇰" },
+    { rx: /(finland|helsinki)/i, flag: "🇫🇮" },
+    { rx: /(iceland|reykjavik)/i, flag: "🇮🇸" },
+    { rx: /(russia|moscow|st\.? petersburg)/i, flag: "🇷🇺" },
+    { rx: /(turkey|istanbul|ankara|cappadocia|antalya)/i, flag: "🇹🇷" },
+    { rx: /(united states|^usa\b|new york|los angeles|san francisco|chicago|miami|las vegas|boston|seattle|hawaii|honolulu)/i, flag: "🇺🇸" },
+    { rx: /(canada|toronto|vancouver|montreal|ottawa)/i, flag: "🇨🇦" },
+    { rx: /(mexico|méxico|cancun|cancún|mexico city|guadalajara|tulum|playa del carmen)/i, flag: "🇲🇽" },
+    { rx: /(brazil|brasil|rio de janeiro|sao paulo|são paulo|salvador|brasilia|fortaleza)/i, flag: "🇧🇷" },
+    { rx: /(argentina|buenos aires)/i, flag: "🇦🇷" },
+    { rx: /(chile|santiago)/i, flag: "🇨🇱" },
+    { rx: /(peru|perú|lima|cusco|cuzco|machu picchu)/i, flag: "🇵🇪" },
+    { rx: /(colombia|bogota|bogotá|medellin|medellín|cartagena)/i, flag: "🇨🇴" },
+    { rx: /(ecuador|quito)/i, flag: "🇪🇨" },
+    { rx: /(uruguay|montevideo)/i, flag: "🇺🇾" },
+    { rx: /(cuba|havana|habana)/i, flag: "🇨🇺" },
+    { rx: /(saudi|riyadh|jeddah|mecca)/i, flag: "🇸🇦" },
+    { rx: /(uae|dubai|abu dhabi)/i, flag: "🇦🇪" },
+    { rx: /(qatar|doha)/i, flag: "🇶🇦" },
+    { rx: /(kuwait)/i, flag: "🇰🇼" },
+    { rx: /(jordan|amman|petra)/i, flag: "🇯🇴" },
+    { rx: /(israel|jerusalem|tel aviv)/i, flag: "🇮🇱" },
+    { rx: /(lebanon|beirut)/i, flag: "🇱🇧" },
+    { rx: /(egypt|cairo|alexandria|luxor|sharm el)/i, flag: "🇪🇬" },
+    { rx: /(morocco|marrakech|casablanca|rabat|fes|fez|tangier)/i, flag: "🇲🇦" },
+    { rx: /(tunisia|tunis)/i, flag: "🇹🇳" },
+    { rx: /(south africa|cape town|johannesburg|durban)/i, flag: "🇿🇦" },
+    { rx: /(kenya|nairobi)/i, flag: "🇰🇪" },
+    { rx: /(australia|sydney|melbourne|brisbane|perth|gold coast)/i, flag: "🇦🇺" },
+    { rx: /(new zealand|auckland|wellington|queenstown)/i, flag: "🇳🇿" },
+    { rx: /(fiji)/i, flag: "🇫🇯" },
+  ];
+
+  function detectDestFlag(destination) {
+    if (!destination) return "🌍";
+    for (const r of DEST_FLAG_RULES) {
+      if (r.rx.test(destination)) return r.flag;
+    }
+    return "🌍";
+  }
+
+  function loadUserInfo() {
+    try { return JSON.parse(localStorage.getItem(EC_USER_KEY) || "{}"); }
+    catch (_) { return {}; }
+  }
+  function saveUserInfo(info) {
+    try { localStorage.setItem(EC_USER_KEY, JSON.stringify(info)); } catch (_) {}
+  }
+
+  function ecPhraseSet(lang) {
+    const dict = lang ? EMERGENCY_PHRASES[lang] : null;
+    const keys = ["help", "hospital", "police"];
+    return keys.map((k) => {
+      const localPhrase = dict && dict.phrases[k] ? dict.phrases[k].local : null;
+      return {
+        key: k,
+        local: localPhrase || ENGLISH_PHRASES[k],
+        english: ENGLISH_PHRASES[k],
+      };
+    });
+  }
+
+  function renderEmergencyCard(embassyState) {
+    const data = currentDestinationData;
+    if (!data) return;
+    const flag = detectDestFlag(data.destination || "");
+    const em = data.emergency || {};
+    const lang = detectLocalLang(data.destination || "");
+    const phrases = ecPhraseSet(lang);
+    const userInfo = loadUserInfo();
+    const nationality = nationalitySelect.value;
+    const natInfo = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
+    const cachedEmbassy = data.sos_contacts && data.sos_contacts[nationality]
+      ? data.sos_contacts[nationality].home_embassy
+      : null;
+
+    const NA = t("ecCardNotProvided");
+    function row(label, value, cls) {
+      const v = (value === undefined || value === null || value === "" || value === "N/A") ? NA : value;
+      return `<div class="ec-row"><span class="ec-label">${escapeHtml(label)}</span><span class="ec-value${cls ? " " + cls : ""}">${escapeHtml(v)}</span></div>`;
+    }
+
+    let embassyBlock = "";
+    if (embassyState === "loading") {
+      embassyBlock = `<div class="ec-loading">${escapeHtml(t("ecCardLoadingEmbassy"))}</div>`;
+    } else if (embassyState === "error") {
+      embassyBlock = `<div class="ec-loading">${escapeHtml(t("ecCardEmbassyError"))}</div>`;
+    } else if (cachedEmbassy) {
+      const e = cachedEmbassy;
+      embassyBlock = `
+        <div class="ec-row"><span class="ec-label">${escapeHtml(natInfo.flag)} ${escapeHtml(natInfo.demonym)}</span><span class="ec-value">${escapeHtml(e.name || "—")}</span></div>
+        ${row(t("ecCardLabelEmbassyPhone"), e.number, "tel")}
+        ${e.emergency_number && e.emergency_number !== "N/A" ? row(t("ecCardLabelEmbassyEmergency"), e.emergency_number, "tel") : ""}
+        ${e.address ? row(t("ecCardLabelEmbassyAddress"), e.address) : ""}
+      `;
+    } else {
+      embassyBlock = `<div class="ec-loading">${escapeHtml(t("ecCardLoadingEmbassy"))}</div>`;
+    }
+
+    const phrasesHtml = phrases.map((p) => `
+      <div class="ec-phrase-card">
+        <div class="ec-phrase-local">${escapeHtml(p.local)}</div>
+        <div class="ec-phrase-en">🇬🇧 ${escapeHtml(p.english)}</div>
+      </div>
+    `).join("");
+
+    ecCardPreview.innerHTML = `
+      <div class="ec-card-header">
+        <div class="ec-card-brand">🛡️ SafeTrip — ${escapeHtml(t("ecCardTitle").replace(/^🆔\s*/, ""))}</div>
+        <div class="ec-card-dest"><span class="ec-card-flag">${flag}</span>${escapeHtml(data.destination || "—")}</div>
+      </div>
+
+      <div class="ec-section">
+        <div class="ec-section-title">${escapeHtml(t("ecCardSecEmergency"))}</div>
+        ${row(t("ecCardLabelPolice"), em.police, "tel")}
+        ${row(t("ecCardLabelAmbulance"), em.ambulance, "tel")}
+        ${em.fire && em.fire !== "N/A" ? row(t("ecCardLabelFire"), em.fire, "tel") : ""}
+        ${em.tourist_helpline && em.tourist_helpline !== "N/A" ? row(t("ecCardLabelTourist"), em.tourist_helpline, "tel") : ""}
+      </div>
+
+      <div class="ec-section">
+        <div class="ec-section-title">${escapeHtml(t("ecCardSecEmbassy"))}</div>
+        ${embassyBlock}
+      </div>
+
+      <div class="ec-section">
+        <div class="ec-section-title">${escapeHtml(t("ecCardSecPhrases"))}</div>
+        ${phrasesHtml}
+      </div>
+
+      <div class="ec-section">
+        <div class="ec-section-title">${escapeHtml(t("ecCardSecPersonal"))}</div>
+        <div class="ec-personal">
+          ${row(t("ecCardLabelName"), userInfo.name)}
+          ${row(t("ecCardLabelBlood"), userInfo.bloodType)}
+          ${row(t("ecCardLabelConditions"), userInfo.conditions)}
+        </div>
+      </div>
+
+      <div class="ec-card-footer">${escapeHtml(t("ecCardFooter"))}</div>
+    `;
+  }
+
+  function refreshEcInputs() {
+    const info = loadUserInfo();
+    ecNameInput.value = info.name || "";
+    ecBloodInput.value = info.bloodType || "";
+    ecCondInput.value = info.conditions || "";
+  }
+
+  [ecNameInput, ecBloodInput, ecCondInput].forEach((inp) => {
+    inp.addEventListener("input", () => {
+      saveUserInfo({
+        name: ecNameInput.value.trim(),
+        bloodType: ecBloodInput.value.trim(),
+        conditions: ecCondInput.value.trim(),
+      });
+      renderEmergencyCard("idle");
+    });
+  });
+
+  async function openEmergencyCardModal() {
+    if (!currentDestinationData) return;
+    refreshEcInputs();
+    ecCardModal.classList.add("visible");
+
+    const nationality = nationalitySelect.value;
+    const cached = currentDestinationData.sos_contacts && currentDestinationData.sos_contacts[nationality];
+    if (cached) {
+      renderEmergencyCard("idle");
+      return;
+    }
+
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      renderEmergencyCard("error");
+      return;
+    }
+
+    renderEmergencyCard("loading");
+    try {
+      const contacts = await fetchSosContacts(apiKey, modelSelect.value, currentDestinationData.destination, nationality);
+      currentDestinationData.sos_contacts = currentDestinationData.sos_contacts || {};
+      currentDestinationData.sos_contacts[nationality] = contacts;
+      renderEmergencyCard("idle");
+    } catch (_) {
+      renderEmergencyCard("error");
+    }
+  }
+
+  ecCardBtn.addEventListener("click", openEmergencyCardModal);
+  ecCardClose.addEventListener("click", () => ecCardModal.classList.remove("visible"));
+  ecCardModal.addEventListener("click", (e) => {
+    if (e.target === ecCardModal) ecCardModal.classList.remove("visible");
+  });
+
+  ecCardSave.addEventListener("click", async () => {
+    if (!window.html2canvas) {
+      showToast("Image library not loaded.");
+      return;
+    }
+    const originalLabel = ecCardSave.textContent;
+    ecCardSave.disabled = true;
+    ecCardSave.dataset.busy = "1";
+    ecCardSave.textContent = t("ecCardSavingBtn");
+    try {
+      const canvas = await window.html2canvas(ecCardPreview, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+      });
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const cityPart = sanitizeFilenamePart(currentDestinationData?.destination || "card");
+      const filename = `${t("ecCardFilenameLabel")}_${cityPart}_${dateStr}.png`;
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = canvas.toDataURL("image/png");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(t("ecCardImageSaved"));
+    } catch (err) {
+      console.error(err);
+      showToast(t("analysisFailedPrefix") + (err.message || "image error"));
+    } finally {
+      ecCardSave.disabled = false;
+      delete ecCardSave.dataset.busy;
+      ecCardSave.textContent = t("ecCardSaveBtn");
     }
   });
 
