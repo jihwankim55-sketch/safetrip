@@ -424,6 +424,20 @@
     line-height: 1.6;
   }
 
+  .laws-list { list-style: none; padding: 0; }
+  .laws-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    line-height: 1.55;
+  }
+  .laws-list li:last-child { border-bottom: none; }
+  .laws-list li::before { content: none !important; }
+  .laws-list .law-icon { flex-shrink: 0; font-size: 14px; line-height: 1.4; }
+  .laws-list .law-text { font-size: 13px; color: #334155; word-break: break-word; }
+
   .btn-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1017,6 +1031,8 @@
   }
   body.dark .compare-card .compare-name { color: #e0e0e0; }
   body.dark .compare-card .compare-stats { color: #e0e0e0; }
+  body.dark .laws-list li { border-bottom-color: #1f2a4a; }
+  body.dark .laws-list .law-text { color: #cbd5e1; }
 
   .site-footer {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
@@ -1509,6 +1525,7 @@
       compareTitle: "📊 Comparison",
       compareRiskCount: "{n} risk areas",
       compareErrorBoth: "Please enter both destinations.",
+      localLawsTitle: "⚖️ Local Laws & Customs",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -1627,6 +1644,7 @@
       compareTitle: "📊 비교 결과",
       compareRiskCount: "위험 지역 {n}곳",
       compareErrorBoth: "두 목적지를 모두 입력하세요.",
+      localLawsTitle: "⚖️ 현지 법률 & 관습",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -1745,6 +1763,7 @@
       compareTitle: "📊 比較結果",
       compareRiskCount: "危険ゾーン {n} 件",
       compareErrorBoth: "両方の目的地を入力してください。",
+      localLawsTitle: "⚖️ 現地の法律と習慣",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -1863,6 +1882,7 @@
       compareTitle: "📊 比较结果",
       compareRiskCount: "{n} 个风险区域",
       compareErrorBoth: "请输入两个目的地。",
+      localLawsTitle: "⚖️ 当地法律与习俗",
     },
   };
 
@@ -2180,7 +2200,7 @@
 
     const userPrompt = `Destination: "${destination}"
 
-Analyze safety information for this destination and return a response that exactly matches the JSON schema below. Coordinates must be real latitude/longitude values. Risk zones must reference actual neighborhoods/districts/streets in the destination, and you must return between 3 and 8 of them.
+Analyze safety information for this destination and return a response that exactly matches the JSON schema below. Coordinates must be real latitude/longitude values. Risk zones must reference actual neighborhoods/districts/streets in the destination, and you must return between 3 and 8 of them. Also list 5 important local laws, customs, or cultural taboos that travelers must know. Include potential penalties.
 
 {
   "destination": "<normalized destination name, e.g. 'Paris, France'>",
@@ -2205,6 +2225,13 @@ Analyze safety information for this destination and return a response that exact
     "<English safety tip 4>",
     "<English safety tip 5>"
   ],
+  "local_laws": [
+    "<English description of an important local law / custom / cultural taboo, including potential penalties (e.g. fines, jail time, social consequences)>",
+    "<item 2>",
+    "<item 3>",
+    "<item 4>",
+    "<item 5>"
+  ],
   "emergency": {
     "police": "<local police phone number>",
     "ambulance": "<local ambulance / medical emergency phone number>",
@@ -2224,7 +2251,7 @@ Do NOT output any text outside the JSON object.`;
       },
       body: JSON.stringify({
         model,
-        max_tokens: 2500,
+        max_tokens: 3200,
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
@@ -2286,6 +2313,10 @@ Do NOT output any text outside the JSON object.`;
     const tipsHtml = (data.safety_tips || [])
       .map((t) => `<li>${escapeHtml(t)}</li>`).join("");
 
+    const lawsHtml = (data.local_laws || [])
+      .map((law) => `<li><span class="law-icon">⚠️</span><span class="law-text">${escapeHtml(law)}</span></li>`)
+      .join("");
+
     const em = data.emergency || {};
 
     resultsDiv.innerHTML = `
@@ -2315,6 +2346,11 @@ Do NOT output any text outside the JSON object.`;
           <li><strong>Ambulance:</strong> ${escapeHtml(em.ambulance || "N/A")}</li>
           <li><strong>Tourist helpline:</strong> ${escapeHtml(em.tourist_helpline || "N/A")}</li>
         </ul>
+      </div>
+
+      <div class="result-section">
+        <h3>${escapeHtml(t("localLawsTitle"))}</h3>
+        ${lawsHtml ? `<ul class="laws-list">${lawsHtml}</ul>` : '<p style="color:#64748b">—</p>'}
       </div>
     `;
 
