@@ -378,6 +378,84 @@
   }
   button.emergency-card:hover { background: #eef2ff; }
 
+  button.offline-emergency {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #475569;
+    border: 1px dashed #94a3b8;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  button.offline-emergency:hover {
+    background: #f1f5f9;
+    border-color: #475569;
+    color: #1e293b;
+  }
+  button.offline-emergency.urgent {
+    border-style: solid;
+    border-color: #475569;
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  .offline-banner {
+    display: none;
+    background: #475569;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .offline-banner.visible { display: block; }
+
+  .offline-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #1e293b;
+  }
+  .offline-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .offline-section ul { list-style: none; padding: 0; }
+  .offline-section ul li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    line-height: 1.5;
+  }
+  .offline-section ul li:last-child { border-bottom: none; }
+  .offline-phrase {
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    background: #f8fafc;
+    border-left: 3px solid #ea580c;
+    border-radius: 4px;
+  }
+  .offline-phrase .local { font-weight: 700; color: #1e293b; line-height: 1.4; }
+  .offline-phrase .roman { font-size: 11px; color: #64748b; font-style: italic; margin-top: 2px; }
+  .offline-phrase .english { font-size: 11px; color: #64748b; margin-top: 2px; }
+
   /* Emergency Card modal + preview */
   .ec-modal-content { max-width: 600px; }
   .ec-inputs {
@@ -1139,6 +1217,33 @@
     border-color: #818cf8;
     box-shadow: 0 0 0 3px rgba(129,140,248,0.2);
   }
+  body.dark button.offline-emergency {
+    background: transparent;
+    color: #94a3b8;
+    border-color: #475569;
+  }
+  body.dark button.offline-emergency:hover {
+    background: #1f2a4a;
+    color: #e0e0e0;
+    border-color: #64748b;
+  }
+  body.dark button.offline-emergency.urgent {
+    background: #1f2a4a;
+    color: #e0e0e0;
+    border-color: #94a3b8;
+  }
+  body.dark .offline-banner { background: #0f1626; color: #e0e0e0; }
+  body.dark .offline-section {
+    background: #16213e;
+    border-color: #1f2a4a;
+    color: #e0e0e0;
+  }
+  body.dark .offline-section h3 { color: #e0e0e0; }
+  body.dark .offline-section ul li { border-bottom-color: #1f2a4a; color: #cbd5e1; }
+  body.dark .offline-phrase { background: #0f1626; }
+  body.dark .offline-phrase .local { color: #e0e0e0; }
+  body.dark .offline-phrase .roman,
+  body.dark .offline-phrase .english { color: #94a3b8; }
   body.dark .landing-section h2 { color: #e0e0e0; }
   body.dark .landing-section .section-lead { color: #94a3b8; }
   body.dark .landing-features { background: #0f1626; }
@@ -1556,6 +1661,8 @@
 <body>
 <script>try{if(localStorage.getItem("safetrip_theme")==="dark")document.body.classList.add("dark");}catch(_){}</script>
 
+<div id="offlineBanner" class="offline-banner">📴 <span data-i18n="offlineBannerText">You are offline. Emergency info available below.</span></div>
+
 <section id="landing">
   <div class="landing-hero">
     <div class="landing-hero-inner">
@@ -1714,6 +1821,8 @@
       <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
     </div>
 
+    <button id="offlineEmergencyBtn" class="offline-emergency" type="button" style="display:none" data-i18n="offlineBtn">📴 Offline Emergency Info</button>
+
     <div class="divider"></div>
 
     <div id="results">
@@ -1828,6 +1937,17 @@
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="ecCardSave" style="background:#4f46e5" data-i18n="ecCardSaveBtn">📸 Save as Image</button>
       <button type="button" class="btn-secondary" id="ecCardClose" data-i18n="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="offlineModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#475569" data-i18n="offlineModalTitle">📴 Offline Emergency Info</h2>
+    <div class="modal-sub"><span data-i18n="offlineModalSub">Saved from your last analysis</span> · <span id="offlineSavedAtVal"></span></div>
+    <div id="offlineContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="offlineClose" style="background:#475569" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -2045,6 +2165,18 @@
       howStep2Desc: "Claude reviews risks, customs, and emergency info.",
       howStep3: "Get your report",
       howStep3Desc: "See risk zones on the map and download a PDF.",
+      offlineBannerText: "You are offline. Emergency info available below.",
+      offlineBtn: "📴 Offline Emergency Info",
+      offlineModalTitle: "📴 Offline Emergency Info",
+      offlineModalSub: "Saved from your last analysis",
+      offlineSavedAtLabel: "Last updated",
+      offlineNoData: "No saved emergency info yet. Run a safety analysis first.",
+      offlineSecDest: "Destination",
+      offlineSecEmergency: "Emergency Numbers",
+      offlineSecEmbassy: "Embassy",
+      offlineSecPhrases: "Local Emergency Phrases",
+      offlineNoPhrases: "No local phrases saved for this destination.",
+      offlineNoEmbassy: "Open SOS or Emergency Card while online to save embassy info.",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -2218,6 +2350,18 @@
       howStep2Desc: "Claude가 위험·관습·긴급 정보를 검토합니다.",
       howStep3: "리포트 확인",
       howStep3Desc: "지도에서 위험 지역을 확인하고 PDF로 받으세요.",
+      offlineBannerText: "오프라인입니다. 아래에서 저장된 긴급정보를 확인하세요.",
+      offlineBtn: "📴 오프라인 긴급정보",
+      offlineModalTitle: "📴 오프라인 긴급정보",
+      offlineModalSub: "마지막 분석에서 저장됨",
+      offlineSavedAtLabel: "마지막 업데이트",
+      offlineNoData: "저장된 긴급정보가 없습니다. 먼저 안전 분석을 실행하세요.",
+      offlineSecDest: "목적지",
+      offlineSecEmergency: "긴급 번호",
+      offlineSecEmbassy: "대사관",
+      offlineSecPhrases: "현지어 긴급 문구",
+      offlineNoPhrases: "이 목적지에 저장된 현지어 문구가 없습니다.",
+      offlineNoEmbassy: "온라인 상태에서 SOS 또는 긴급 카드를 한번 열어 대사관 정보를 저장하세요.",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -2391,6 +2535,18 @@
       howStep2Desc: "Claude がリスク・習慣・緊急情報をレビュー。",
       howStep3: "レポートを取得",
       howStep3Desc: "地図で危険ゾーンを確認し PDF をダウンロード。",
+      offlineBannerText: "オフラインです。下に保存された緊急情報があります。",
+      offlineBtn: "📴 オフライン緊急情報",
+      offlineModalTitle: "📴 オフライン緊急情報",
+      offlineModalSub: "前回の分析から保存されました",
+      offlineSavedAtLabel: "最終更新",
+      offlineNoData: "保存された緊急情報はありません。先に安全分析を実行してください。",
+      offlineSecDest: "目的地",
+      offlineSecEmergency: "緊急電話番号",
+      offlineSecEmbassy: "大使館",
+      offlineSecPhrases: "現地の緊急フレーズ",
+      offlineNoPhrases: "この目的地には保存された現地フレーズがありません。",
+      offlineNoEmbassy: "オンライン時に SOS または緊急カードを開いて大使館情報を保存してください。",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -2564,6 +2720,18 @@
       howStep2Desc: "Claude 审查风险、习俗和紧急信息。",
       howStep3: "获取报告",
       howStep3Desc: "在地图上查看风险区域并下载 PDF。",
+      offlineBannerText: "您已离线。可查看下方保存的紧急信息。",
+      offlineBtn: "📴 离线紧急信息",
+      offlineModalTitle: "📴 离线紧急信息",
+      offlineModalSub: "保存自您的最近一次分析",
+      offlineSavedAtLabel: "最后更新",
+      offlineNoData: "尚无保存的紧急信息。请先运行安全分析。",
+      offlineSecDest: "目的地",
+      offlineSecEmergency: "紧急电话",
+      offlineSecEmbassy: "大使馆",
+      offlineSecPhrases: "当地紧急用语",
+      offlineNoPhrases: "此目的地暂无保存的当地用语。",
+      offlineNoEmbassy: "请在联网时打开 SOS 或紧急联系卡以保存大使馆信息。",
     },
   };
 
@@ -4526,6 +4694,181 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
               Math.sin(dLng / 2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(a));
   }
+
+  // --- Offline emergency info caching ---
+  const OFFLINE_KEY = "safetrip_offline_emergency";
+  const offlineBanner = document.getElementById("offlineBanner");
+  const offlineEmergencyBtn = document.getElementById("offlineEmergencyBtn");
+  const offlineModal = document.getElementById("offlineModal");
+  const offlineModalClose = document.getElementById("offlineClose");
+  const offlineContent = document.getElementById("offlineContent");
+  const offlineSavedAtVal = document.getElementById("offlineSavedAtVal");
+
+  function loadOfflineEmergency() {
+    try { return JSON.parse(localStorage.getItem(OFFLINE_KEY) || "null"); }
+    catch (_) { return null; }
+  }
+  function persistOfflineEmergency(obj) {
+    try { localStorage.setItem(OFFLINE_KEY, JSON.stringify(obj)); } catch (_) {}
+  }
+
+  function saveOfflineEmergency() {
+    const d = currentDestinationData;
+    if (!d || !d.destination) return;
+    const flag = (typeof detectDestFlag === "function") ? detectDestFlag(d.destination) : "🌍";
+    const lang = (typeof detectLocalLang === "function") ? detectLocalLang(d.destination) : null;
+    const phraseDict = lang && typeof EMERGENCY_PHRASES !== "undefined" ? EMERGENCY_PHRASES[lang] : null;
+
+    let phrases = null;
+    if (phraseDict) {
+      phrases = {
+        lang,
+        name: phraseDict.name,
+        items: PHRASE_KEYS.map((k) => ({
+          key: k,
+          local: phraseDict.phrases[k] ? phraseDict.phrases[k].local : ENGLISH_PHRASES[k],
+          roman: phraseDict.phrases[k] ? (phraseDict.phrases[k].roman || "") : "",
+          english: ENGLISH_PHRASES[k],
+        })),
+      };
+    }
+
+    // Preserve previously-saved SOS contacts unless this analysis overrides them.
+    const prior = loadOfflineEmergency();
+    const priorContacts = (prior && prior.destination === d.destination && prior.sosContacts) ? prior.sosContacts : {};
+    const sosContacts = Object.assign({}, priorContacts, d.sos_contacts || {});
+
+    persistOfflineEmergency({
+      destination: d.destination,
+      flag,
+      savedAt: new Date().toISOString(),
+      emergency: d.emergency || {},
+      phrases,
+      sosContacts,
+    });
+    updateOfflineButtonVisibility();
+  }
+
+  function updateOfflineButtonVisibility() {
+    const has = !!loadOfflineEmergency();
+    offlineEmergencyBtn.style.display = has ? "" : "none";
+    const offline = !navigator.onLine;
+    offlineEmergencyBtn.classList.toggle("urgent", has && offline);
+  }
+
+  function updateOnlineStatus() {
+    const offline = !navigator.onLine;
+    offlineBanner.classList.toggle("visible", offline);
+    updateOfflineButtonVisibility();
+  }
+
+  function renderOfflineModal() {
+    const data = loadOfflineEmergency();
+    if (!data) {
+      offlineSavedAtVal.textContent = "";
+      offlineContent.innerHTML = `<div class="status-card info">${escapeHtml(t("offlineNoData"))}</div>`;
+      return;
+    }
+
+    const savedDate = (() => {
+      try { return new Date(data.savedAt).toLocaleString(); }
+      catch (_) { return data.savedAt || ""; }
+    })();
+    offlineSavedAtVal.textContent = `${t("offlineSavedAtLabel")}: ${savedDate}`;
+
+    let html = `
+      <div class="offline-section">
+        <h3>${escapeHtml(data.flag || "🌍")} ${escapeHtml(data.destination || "—")}</h3>
+      </div>
+    `;
+
+    const em = data.emergency || {};
+    html += `
+      <div class="offline-section">
+        <h3>🚨 ${escapeHtml(t("offlineSecEmergency"))}</h3>
+        <ul>
+          ${em.police ? `<li><strong>${escapeHtml(t("ecCardLabelPolice"))}:</strong> ${escapeHtml(em.police)}</li>` : ""}
+          ${em.ambulance ? `<li><strong>${escapeHtml(t("ecCardLabelAmbulance"))}:</strong> ${escapeHtml(em.ambulance)}</li>` : ""}
+          ${em.fire && em.fire !== "N/A" ? `<li><strong>${escapeHtml(t("ecCardLabelFire"))}:</strong> ${escapeHtml(em.fire)}</li>` : ""}
+          ${em.tourist_helpline && em.tourist_helpline !== "N/A" ? `<li><strong>${escapeHtml(t("ecCardLabelTourist"))}:</strong> ${escapeHtml(em.tourist_helpline)}</li>` : ""}
+        </ul>
+      </div>
+    `;
+
+    const sosEntries = data.sosContacts ? Object.entries(data.sosContacts) : [];
+    if (sosEntries.length > 0) {
+      sosEntries.forEach(([nat, contacts]) => {
+        if (!contacts) return;
+        const e = contacts.home_embassy;
+        if (!e) return;
+        const info = (typeof NATIONALITY_INFO !== "undefined" && NATIONALITY_INFO[nat]) || { flag: "🏛️", demonym: "" };
+        html += `
+          <div class="offline-section">
+            <h3>${escapeHtml(info.flag)} ${escapeHtml(t("offlineSecEmbassy"))}${info.demonym ? ` · ${escapeHtml(info.demonym)}` : ""}</h3>
+            <p style="font-weight:600;margin-bottom:6px">${escapeHtml(e.name || "—")}</p>
+            ${e.number && e.number !== "N/A" ? `<p>📞 <a href="tel:${escapeHtml(e.number.replace(/[^\d+]/g, ""))}">${escapeHtml(e.number)}</a></p>` : ""}
+            ${e.emergency_number && e.emergency_number !== "N/A" ? `<p>🚨 <a href="tel:${escapeHtml(e.emergency_number.replace(/[^\d+]/g, ""))}">${escapeHtml(e.emergency_number)}</a></p>` : ""}
+            ${e.address ? `<p style="font-size:12px;color:#64748b;margin-top:4px">📍 ${escapeHtml(e.address)}</p>` : ""}
+          </div>
+        `;
+      });
+    } else {
+      html += `<div class="offline-section"><h3>🏛️ ${escapeHtml(t("offlineSecEmbassy"))}</h3><p style="color:#64748b;font-size:12px">${escapeHtml(t("offlineNoEmbassy"))}</p></div>`;
+    }
+
+    if (data.phrases && data.phrases.items && data.phrases.items.length) {
+      const phrasesHtml = data.phrases.items.map((p) => `
+        <div class="offline-phrase">
+          <div class="local">${escapeHtml(p.local)}</div>
+          ${p.roman ? `<div class="roman">${escapeHtml(p.roman)}</div>` : ""}
+          <div class="english">🇬🇧 ${escapeHtml(p.english)}</div>
+        </div>
+      `).join("");
+      html += `
+        <div class="offline-section">
+          <h3>🆘 ${escapeHtml(t("offlineSecPhrases"))} <span style="font-size:11px;color:#64748b;font-weight:500">· ${escapeHtml(data.phrases.name || "")}</span></h3>
+          ${phrasesHtml}
+        </div>
+      `;
+    } else {
+      html += `<div class="offline-section"><h3>🆘 ${escapeHtml(t("offlineSecPhrases"))}</h3><p style="color:#64748b;font-size:12px">${escapeHtml(t("offlineNoPhrases"))}</p></div>`;
+    }
+
+    offlineContent.innerHTML = html;
+  }
+
+  offlineEmergencyBtn.addEventListener("click", () => {
+    renderOfflineModal();
+    offlineModal.classList.add("visible");
+  });
+  offlineModalClose.addEventListener("click", () => offlineModal.classList.remove("visible"));
+  offlineModal.addEventListener("click", (e) => {
+    if (e.target === offlineModal) offlineModal.classList.remove("visible");
+  });
+
+  // Wrap renderResults & fetchSosContacts so saving happens automatically without
+  // touching their original bodies. Done at the end of script so the originals exist.
+  if (typeof renderResults === "function") {
+    const _origRenderResults = renderResults;
+    renderResults = function (data) {
+      _origRenderResults(data);
+      try { saveOfflineEmergency(); } catch (_) {}
+    };
+  }
+  if (typeof fetchSosContacts === "function") {
+    const _origFetchSosContacts = fetchSosContacts;
+    fetchSosContacts = async function (...args) {
+      const result = await _origFetchSosContacts(...args);
+      // Schedule after caller's synchronous code (which assigns result into sos_contacts).
+      setTimeout(() => { try { saveOfflineEmergency(); } catch (_) {} }, 0);
+      return result;
+    };
+  }
+
+  window.addEventListener("online", updateOnlineStatus);
+  window.addEventListener("offline", updateOnlineStatus);
+  updateOnlineStatus();
+  updateOfflineButtonVisibility();
 
   // --- PWA service worker registration ---
   if ("serviceWorker" in navigator) {

@@ -1,7 +1,16 @@
 // SafeTrip service worker — offline-first app shell.
 // Bump CACHE_VERSION whenever app shell files change so old caches get purged.
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `safetrip-shell-${CACHE_VERSION}`;
+
+// Offline emergency info caching strategy:
+//   The per-destination emergency payload (numbers, embassy contacts, local
+//   phrases) is persisted by the app to localStorage under the key
+//   `safetrip_offline_emergency` whenever a safety analysis completes or SOS
+//   contacts are fetched. localStorage is synchronously available without
+//   network access, so the SW's responsibility is just to keep the app shell
+//   (this file's APP_SHELL list) cached — the shell HTML + bundled JS will
+//   read localStorage and render the offline modal even with no connectivity.
 
 // Files cached on install. Relative paths so the worker works under any base path.
 const APP_SHELL = [
