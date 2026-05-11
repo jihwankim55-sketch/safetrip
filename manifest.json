@@ -1,0 +1,28 @@
+{
+  "name": "SafeTrip",
+  "short_name": "SafeTrip",
+  "description": "AI-powered travel safety analysis — risk maps, emergency phrases, and offline safety reports.",
+  "start_url": "/safetrip/",
+  "scope": "/safetrip/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "en",
+  "dir": "ltr",
+  "theme_color": "#2563eb",
+  "background_color": "#1e293b",
+  "categories": ["travel", "navigation", "utilities"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

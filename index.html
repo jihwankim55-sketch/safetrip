@@ -19,8 +19,17 @@
 <meta name="twitter:title" content="SafeTrip - AI Travel Safety Analysis" />
 <meta name="twitter:description" content="Analyze travel destination safety with AI. Get risk maps, emergency phrases, and safety reports." />
 
-<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232563eb'/><text x='50%25' y='62%25' font-size='62' text-anchor='middle' dominant-baseline='middle'>🛡️</text></svg>" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="SafeTrip" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="application-name" content="SafeTrip" />
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -4516,6 +4525,18 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
               Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
               Math.sin(dLng / 2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  // --- PWA service worker registration ---
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      // Skip registration on file:// (e.g. opening index.html directly) — SW requires http(s).
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .catch((err) => console.warn("SW registration failed:", err));
+      }
+    });
   }
 </script>
 </body>
