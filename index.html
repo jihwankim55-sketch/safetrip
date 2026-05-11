@@ -1130,6 +1130,22 @@
     border-color: #818cf8;
     box-shadow: 0 0 0 3px rgba(129,140,248,0.2);
   }
+  body.dark .landing-section h2 { color: #e0e0e0; }
+  body.dark .landing-section .section-lead { color: #94a3b8; }
+  body.dark .landing-features { background: #0f1626; }
+  body.dark .landing-how { background: #16213e; }
+  body.dark .feature-card {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .feature-card:hover {
+    border-color: #60a5fa;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+  }
+  body.dark .feature-card h3 { color: #e0e0e0; }
+  body.dark .feature-card p { color: #cbd5e1; }
+  body.dark .step h3 { color: #e0e0e0; }
+  body.dark .step p { color: #cbd5e1; }
   body.dark button#analyze:disabled { background: #475569; }
   body.dark .phrase-card {
     background: #0f1626;
@@ -1196,6 +1212,180 @@
   body.dark .compare-card .compare-stats { color: #e0e0e0; }
   body.dark .laws-list li { border-bottom-color: #1f2a4a; }
   body.dark .laws-list .law-text { color: #cbd5e1; }
+
+  /* --- Landing page --- */
+  #landing { width: 100%; }
+  .landing-hero {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    color: white;
+    text-align: center;
+    padding: 96px 24px 110px;
+    position: relative;
+    overflow: hidden;
+  }
+  .landing-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0, transparent 35%),
+                      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 0, transparent 40%);
+    pointer-events: none;
+  }
+  .landing-hero-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .landing-hero h1 {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .landing-hero .hero-shield { font-size: 56px; }
+  .landing-hero .subtitle {
+    font-size: 20px;
+    opacity: 0.95;
+    margin-bottom: 38px;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+  .landing-hero .try-now {
+    background: white;
+    color: #2563eb;
+    border: none;
+    padding: 15px 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    letter-spacing: 0.2px;
+  }
+  .landing-hero .try-now:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.3);
+  }
+
+  .landing-section {
+    padding: 72px 24px;
+  }
+  .landing-section-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .landing-section h2 {
+    font-size: 32px;
+    font-weight: 800;
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .landing-section .section-lead {
+    text-align: center;
+    color: #64748b;
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+
+  .landing-features { background: #f8fafc; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .feature-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 26px 22px;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  }
+  .feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(15,23,42,0.08);
+    border-color: #2563eb;
+  }
+  .feature-icon {
+    font-size: 38px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  .feature-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+  .feature-card p {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  .landing-how { background: white; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .step {
+    text-align: center;
+    padding: 0 8px;
+  }
+  .step-number {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    color: white;
+    font-size: 22px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 16px rgba(37,99,235,0.3);
+  }
+  .step h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  .step p {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .landing-hero { padding: 72px 20px 84px; }
+    .landing-hero h1 { font-size: 48px; }
+    .landing-hero .hero-shield { font-size: 44px; }
+    .landing-hero .subtitle { font-size: 17px; }
+    .landing-section { padding: 56px 20px; }
+    .landing-section h2 { font-size: 26px; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: 1fr; gap: 22px; }
+  }
+  @media (max-width: 480px) {
+    .landing-hero { padding: 60px 16px 72px; }
+    .landing-hero h1 { font-size: 40px; }
+    .landing-hero .hero-shield { font-size: 36px; }
+    .landing-hero .subtitle { font-size: 15px; margin-bottom: 28px; }
+    .landing-hero .try-now { padding: 13px 28px; font-size: 15px; }
+    .landing-section { padding: 44px 16px; }
+    .landing-section h2 { font-size: 23px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-card { padding: 22px 18px; }
+  }
 
   .site-footer {
     background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
@@ -1355,6 +1545,79 @@
 </style>
 </head>
 <body>
+<script>try{if(localStorage.getItem("safetrip_theme")==="dark")document.body.classList.add("dark");}catch(_){}</script>
+
+<section id="landing">
+  <div class="landing-hero">
+    <div class="landing-hero-inner">
+      <h1><span class="hero-shield">🛡️</span><span>SafeTrip</span></h1>
+      <p class="subtitle" data-i18n="landingSubtitle">AI-powered travel safety analysis</p>
+      <button type="button" class="try-now" id="tryNowBtn" data-i18n="landingTryNowBtn">Try it now →</button>
+    </div>
+  </div>
+
+  <section class="landing-section landing-features">
+    <div class="landing-section-inner">
+      <h2 data-i18n="landingFeaturesHeading">Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3 data-i18n="featureAnalysisTitle">AI Safety Analysis</h3>
+          <p data-i18n="featureAnalysisDesc">Instant safety reports for any destination, powered by Claude AI.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚖️</div>
+          <h3 data-i18n="featureCompareTitle">Compare Destinations</h3>
+          <p data-i18n="featureCompareDesc">Side-by-side risk comparison to choose safer travel options.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛰️</div>
+          <h3 data-i18n="featureTrackingTitle">Live Tracking</h3>
+          <p data-i18n="featureTrackingDesc">Real-time alerts when entering reported danger zones.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🆘</div>
+          <h3 data-i18n="featureSosTitle">Emergency SOS</h3>
+          <p data-i18n="featureSosDesc">One-tap access to local emergency contacts and your embassy.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📄</div>
+          <h3 data-i18n="featurePdfTitle">PDF Report</h3>
+          <p data-i18n="featurePdfDesc">Download your safety briefing for offline reference.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3 data-i18n="featureLangTitle">Multi-language</h3>
+          <p data-i18n="featureLangDesc">Available in English, Korean, Japanese, and Chinese.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section landing-how">
+    <div class="landing-section-inner">
+      <h2 data-i18n="landingHowItWorks">How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3 data-i18n="howStep1">Enter destination</h3>
+          <p data-i18n="howStep1Desc">Type any city or region you plan to visit.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3 data-i18n="howStep2">AI analyzes safety</h3>
+          <p data-i18n="howStep2Desc">Claude reviews risks, customs, and emergency info.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3 data-i18n="howStep3">Get your report</h3>
+          <p data-i18n="howStep3Desc">See risk zones on the map and download a PDF.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
 <div id="app">
   <header>
     <h1>🛡️ SafeTrip</h1>
@@ -1751,6 +2014,28 @@
       ecCardFooter: "🛡️ SafeTrip — Generated for emergency reference. Carry while traveling.",
       ecCardNotProvided: "—",
       ecCardFilenameLabel: "SafeTrip_EmergencyCard",
+      landingSubtitle: "AI-powered travel safety analysis",
+      landingTryNowBtn: "Try it now →",
+      landingFeaturesHeading: "Features",
+      landingHowItWorks: "How it works",
+      featureAnalysisTitle: "AI Safety Analysis",
+      featureAnalysisDesc: "Instant safety reports for any destination, powered by Claude AI.",
+      featureCompareTitle: "Compare Destinations",
+      featureCompareDesc: "Side-by-side risk comparison to choose safer travel options.",
+      featureTrackingTitle: "Live Tracking",
+      featureTrackingDesc: "Real-time alerts when entering reported danger zones.",
+      featureSosTitle: "Emergency SOS",
+      featureSosDesc: "One-tap access to local emergency contacts and your embassy.",
+      featurePdfTitle: "PDF Report",
+      featurePdfDesc: "Download your safety briefing for offline reference.",
+      featureLangTitle: "Multi-language",
+      featureLangDesc: "Available in English, Korean, Japanese, and Chinese.",
+      howStep1: "Enter destination",
+      howStep1Desc: "Type any city or region you plan to visit.",
+      howStep2: "AI analyzes safety",
+      howStep2Desc: "Claude reviews risks, customs, and emergency info.",
+      howStep3: "Get your report",
+      howStep3Desc: "See risk zones on the map and download a PDF.",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -1902,6 +2187,28 @@
       ecCardFooter: "🛡️ SafeTrip — 비상 시 참고용 카드. 여행 중 휴대하세요.",
       ecCardNotProvided: "—",
       ecCardFilenameLabel: "SafeTrip_긴급카드",
+      landingSubtitle: "AI 기반 여행지 안전 분석",
+      landingTryNowBtn: "지금 시작하기 →",
+      landingFeaturesHeading: "주요 기능",
+      landingHowItWorks: "사용 방법",
+      featureAnalysisTitle: "AI 안전 분석",
+      featureAnalysisDesc: "Claude AI가 어떤 목적지든 즉시 안전 리포트를 제공합니다.",
+      featureCompareTitle: "목적지 비교",
+      featureCompareDesc: "두 도시의 위험을 나란히 비교해 더 안전한 곳을 선택하세요.",
+      featureTrackingTitle: "실시간 추적",
+      featureTrackingDesc: "신고된 위험 지역에 접근하면 실시간으로 알림을 보냅니다.",
+      featureSosTitle: "긴급 SOS",
+      featureSosDesc: "현지 긴급 연락처와 대사관에 원터치로 접근하세요.",
+      featurePdfTitle: "PDF 리포트",
+      featurePdfDesc: "오프라인에서도 볼 수 있도록 안전 브리핑을 다운로드.",
+      featureLangTitle: "다국어 지원",
+      featureLangDesc: "영어, 한국어, 일본어, 중국어를 지원합니다.",
+      howStep1: "목적지 입력",
+      howStep1Desc: "방문할 도시나 지역을 입력하세요.",
+      howStep2: "AI 안전 분석",
+      howStep2Desc: "Claude가 위험·관습·긴급 정보를 검토합니다.",
+      howStep3: "리포트 확인",
+      howStep3Desc: "지도에서 위험 지역을 확인하고 PDF로 받으세요.",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -2053,6 +2360,28 @@
       ecCardFooter: "🛡️ SafeTrip — 緊急時参照用カード。旅行中に携帯してください。",
       ecCardNotProvided: "—",
       ecCardFilenameLabel: "SafeTrip_緊急カード",
+      landingSubtitle: "AI による旅行先の安全分析",
+      landingTryNowBtn: "今すぐ試す →",
+      landingFeaturesHeading: "主な機能",
+      landingHowItWorks: "使い方",
+      featureAnalysisTitle: "AI 安全分析",
+      featureAnalysisDesc: "Claude AI が任意の目的地の安全レポートを即座に作成。",
+      featureCompareTitle: "目的地の比較",
+      featureCompareDesc: "2 都市のリスクを並べて比較し、より安全な選択を。",
+      featureTrackingTitle: "ライブトラッキング",
+      featureTrackingDesc: "報告された危険ゾーンに近づくとリアルタイム通知。",
+      featureSosTitle: "緊急 SOS",
+      featureSosDesc: "現地の緊急連絡先と大使館にワンタップでアクセス。",
+      featurePdfTitle: "PDF レポート",
+      featurePdfDesc: "オフライン参照用の安全ブリーフィングをダウンロード。",
+      featureLangTitle: "多言語対応",
+      featureLangDesc: "英語、韓国語、日本語、中国語に対応。",
+      howStep1: "目的地を入力",
+      howStep1Desc: "訪問予定の都市や地域を入力します。",
+      howStep2: "AI が安全を分析",
+      howStep2Desc: "Claude がリスク・習慣・緊急情報をレビュー。",
+      howStep3: "レポートを取得",
+      howStep3Desc: "地図で危険ゾーンを確認し PDF をダウンロード。",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -2204,6 +2533,28 @@
       ecCardFooter: "🛡️ SafeTrip — 紧急参考卡。请随身携带。",
       ecCardNotProvided: "—",
       ecCardFilenameLabel: "SafeTrip_紧急联系卡",
+      landingSubtitle: "AI 驱动的旅行安全分析",
+      landingTryNowBtn: "立即体验 →",
+      landingFeaturesHeading: "主要功能",
+      landingHowItWorks: "使用方法",
+      featureAnalysisTitle: "AI 安全分析",
+      featureAnalysisDesc: "Claude AI 为任意目的地提供即时安全报告。",
+      featureCompareTitle: "目的地比较",
+      featureCompareDesc: "并排比较两地风险，选择更安全的出行选项。",
+      featureTrackingTitle: "实时追踪",
+      featureTrackingDesc: "进入已报告的危险区域时获得实时警报。",
+      featureSosTitle: "紧急 SOS",
+      featureSosDesc: "一键访问当地紧急联系方式和您的大使馆。",
+      featurePdfTitle: "PDF 报告",
+      featurePdfDesc: "下载安全简报，离线参考。",
+      featureLangTitle: "多语言支持",
+      featureLangDesc: "支持英语、韩语、日语和中文。",
+      howStep1: "输入目的地",
+      howStep1Desc: "输入您计划访问的城市或地区。",
+      howStep2: "AI 分析安全",
+      howStep2Desc: "Claude 审查风险、习俗和紧急信息。",
+      howStep3: "获取报告",
+      howStep3Desc: "在地图上查看风险区域并下载 PDF。",
     },
   };
 
@@ -2251,6 +2602,19 @@
   document.querySelectorAll("#langSwitcher button").forEach((btn) => {
     btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
   });
+
+  // --- Landing page CTA ---
+  const tryNowBtn = document.getElementById("tryNowBtn");
+  if (tryNowBtn) {
+    tryNowBtn.addEventListener("click", () => {
+      const appEl = document.getElementById("app");
+      if (appEl) {
+        appEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        // Map may have been laid out below the fold — refresh tile grid after scroll.
+        setTimeout(() => { if (typeof map !== "undefined" && map) map.invalidateSize(); }, 700);
+      }
+    });
+  }
 
   // --- Dark mode toggle ---
   const themeToggleBtn = document.getElementById("themeToggle");
