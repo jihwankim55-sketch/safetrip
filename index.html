@@ -404,6 +404,79 @@
     color: #1e293b;
   }
 
+  #recentSearchesSection { margin-bottom: 12px; }
+  .recent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .recent-clear {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 6px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: inherit;
+    border-radius: 4px;
+  }
+  .recent-clear:hover { color: #dc2626; background: #fef2f2; }
+
+  .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .recent-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 11px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.12s;
+  }
+  .recent-card:hover {
+    background: #f8fafc;
+    border-color: #2563eb;
+    transform: translateX(2px);
+  }
+  .recent-card-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .recent-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.35;
+  }
+  .recent-card-date {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  .recent-card .safety-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
   .offline-banner {
     display: none;
     background: #475569;
@@ -1244,6 +1317,19 @@
   body.dark .offline-phrase .local { color: #e0e0e0; }
   body.dark .offline-phrase .roman,
   body.dark .offline-phrase .english { color: #94a3b8; }
+  body.dark .recent-header { color: #cbd5e1; }
+  body.dark .recent-clear { color: #64748b; }
+  body.dark .recent-clear:hover { color: #fca5a5; background: #2a0f12; }
+  body.dark .recent-card {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .recent-card:hover {
+    background: #1f2a4a;
+    border-color: #60a5fa;
+  }
+  body.dark .recent-card-name { color: #e0e0e0; }
+  body.dark .recent-card-date { color: #64748b; }
   body.dark .landing-section h2 { color: #e0e0e0; }
   body.dark .landing-section .section-lead { color: #94a3b8; }
   body.dark .landing-features { background: #0f1626; }
@@ -1805,6 +1891,14 @@
       <input type="text" id="destination" data-i18n-placeholder="destinationPlaceholder" placeholder="e.g. Bangkok, Thailand" />
     </div>
 
+    <div id="recentSearchesSection" style="display:none">
+      <div class="recent-header">
+        <span data-i18n="recentSearchesTitle">📋 Recent Searches</span>
+        <button type="button" id="clearHistoryBtn" class="recent-clear" data-i18n="clearHistoryBtn">Clear</button>
+      </div>
+      <div id="recentList" class="recent-list"></div>
+    </div>
+
     <button id="analyze" data-i18n="analyzeBtn">Analyze Safety</button>
     <button id="compareToggleBtn" class="compare-toggle" type="button" data-i18n="compareToggle">⚖️ Compare Destinations</button>
     <div class="form-group" id="destinationBGroup" style="display:none; margin-top:8px">
@@ -2177,6 +2271,8 @@
       offlineSecPhrases: "Local Emergency Phrases",
       offlineNoPhrases: "No local phrases saved for this destination.",
       offlineNoEmbassy: "Open SOS or Emergency Card while online to save embassy info.",
+      recentSearchesTitle: "📋 Recent Searches",
+      clearHistoryBtn: "Clear",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -2362,6 +2458,8 @@
       offlineSecPhrases: "현지어 긴급 문구",
       offlineNoPhrases: "이 목적지에 저장된 현지어 문구가 없습니다.",
       offlineNoEmbassy: "온라인 상태에서 SOS 또는 긴급 카드를 한번 열어 대사관 정보를 저장하세요.",
+      recentSearchesTitle: "📋 최근 검색",
+      clearHistoryBtn: "지우기",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -2547,6 +2645,8 @@
       offlineSecPhrases: "現地の緊急フレーズ",
       offlineNoPhrases: "この目的地には保存された現地フレーズがありません。",
       offlineNoEmbassy: "オンライン時に SOS または緊急カードを開いて大使館情報を保存してください。",
+      recentSearchesTitle: "📋 最近の検索",
+      clearHistoryBtn: "クリア",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -2732,6 +2832,8 @@
       offlineSecPhrases: "当地紧急用语",
       offlineNoPhrases: "此目的地暂无保存的当地用语。",
       offlineNoEmbassy: "请在联网时打开 SOS 或紧急联系卡以保存大使馆信息。",
+      recentSearchesTitle: "📋 最近搜索",
+      clearHistoryBtn: "清除",
     },
   };
 
@@ -2763,6 +2865,7 @@
     if (typeof updateLegendHtml === "function") updateLegendHtml();
     if (typeof updateSosButtonLabels === "function") updateSosButtonLabels();
     if (typeof renderReportsList === "function") renderReportsList();
+    if (typeof renderRecentSearches === "function") renderRecentSearches();
     // Update active language button styling.
     document.querySelectorAll("#langSwitcher button").forEach((b) => {
       b.classList.toggle("active", b.dataset.lang === currentLang);
@@ -4695,6 +4798,99 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     return 2 * R * Math.asin(Math.sqrt(a));
   }
 
+  // --- Recent searches history ---
+  const HISTORY_KEY = "safetrip_history";
+  const HISTORY_LIMIT = 5;
+  const recentSearchesSection = document.getElementById("recentSearchesSection");
+  const recentListEl = document.getElementById("recentList");
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+  function loadSearchHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }
+    catch (_) { return []; }
+  }
+  function persistSearchHistory(arr) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch (_) {}
+  }
+  function saveSearchHistory(destination, level) {
+    if (!destination) return;
+    let history = loadSearchHistory();
+    // Dedupe: drop existing entry with same destination, then prepend fresh one.
+    history = history.filter((h) => h && h.destination !== destination);
+    history.unshift({
+      destination,
+      level: level || "medium",
+      savedAt: new Date().toISOString(),
+    });
+    history = history.slice(0, HISTORY_LIMIT);
+    persistSearchHistory(history);
+    renderRecentSearches();
+  }
+  function clearSearchHistory() {
+    try { localStorage.removeItem(HISTORY_KEY); } catch (_) {}
+    renderRecentSearches();
+  }
+
+  function recentSafetyLabel(level) {
+    const m = { low: "safetyLow", medium: "safetyMedium", high: "safetyHigh" };
+    return m[level] ? t(m[level]) : t("safetyMedium");
+  }
+
+  function formatRelativeDate(iso) {
+    try {
+      const d = new Date(iso);
+      const diff = Date.now() - d.getTime();
+      const sec = Math.round(diff / 1000);
+      const min = Math.round(sec / 60);
+      const hr = Math.round(min / 60);
+      const day = Math.round(hr / 24);
+      const locale = currentLang === "zh" ? "zh-CN" : currentLang;
+      const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+      if (sec < 60) return rtf.format(-sec, "second");
+      if (min < 60) return rtf.format(-min, "minute");
+      if (hr < 24) return rtf.format(-hr, "hour");
+      if (day < 7) return rtf.format(-day, "day");
+      return d.toLocaleDateString(locale);
+    } catch (_) {
+      try { return new Date(iso).toLocaleDateString(); } catch (__) { return ""; }
+    }
+  }
+
+  function renderRecentSearches() {
+    if (!recentSearchesSection) return;
+    const history = loadSearchHistory();
+    if (!history.length) {
+      recentSearchesSection.style.display = "none";
+      return;
+    }
+    recentSearchesSection.style.display = "";
+    recentListEl.innerHTML = history.map((h) => {
+      const level = h.level || "medium";
+      return `
+        <div class="recent-card" data-dest="${escapeHtml(h.destination)}">
+          <div class="recent-card-main">
+            <div class="recent-card-name">${escapeHtml(h.destination)}</div>
+            <div class="recent-card-date">${escapeHtml(formatRelativeDate(h.savedAt))}</div>
+          </div>
+          <span class="safety-badge ${level}">${escapeHtml(recentSafetyLabel(level))}</span>
+        </div>
+      `;
+    }).join("");
+    recentListEl.querySelectorAll(".recent-card").forEach((el) => {
+      el.addEventListener("click", () => {
+        const dest = el.dataset.dest;
+        if (!dest) return;
+        destinationInput.value = dest;
+        analyzeBtn.click();
+      });
+    });
+  }
+
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", clearSearchHistory);
+  }
+  renderRecentSearches();
+
   // --- Offline emergency info caching ---
   const OFFLINE_KEY = "safetrip_offline_emergency";
   const offlineBanner = document.getElementById("offlineBanner");
@@ -4853,6 +5049,18 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     renderResults = function (data) {
       _origRenderResults(data);
       try { saveOfflineEmergency(); } catch (_) {}
+      try { if (data && data.destination) saveSearchHistory(data.destination, data.overall_safety); } catch (_) {}
+    };
+  }
+  if (typeof renderCompareResults === "function") {
+    const _origRenderCompareResults = renderCompareResults;
+    renderCompareResults = function (a, b) {
+      _origRenderCompareResults(a, b);
+      try {
+        // Save B first then A so A ends up on top after dedupe-and-prepend.
+        if (b && b.destination) saveSearchHistory(b.destination, b.overall_safety);
+        if (a && a.destination) saveSearchHistory(a.destination, a.overall_safety);
+      } catch (_) {}
     };
   }
   if (typeof fetchSosContacts === "function") {
