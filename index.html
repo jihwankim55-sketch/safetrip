@@ -3033,9 +3033,24 @@
     if (e.key === "Enter") analyzeBtn.click();
   });
 
-  analyzeBtn.addEventListener("click", () => {
-    if (compareMode) runCompareAnalysis();
-    else runAnalysis();
+  analyzeBtn.addEventListener("click", async () => {
+    if (compareMode) {
+      await runCompareAnalysis();
+    } else {
+      await runAnalysis();
+    }
+    // Direct save path for search history & offline emergency cache — does not rely
+    // on function wrapping, which is fragile across browsers/strict-mode quirks.
+    if (currentDestinationData && currentDestinationData.destination) {
+      if (typeof saveSearchHistory === "function") {
+        try { saveSearchHistory(currentDestinationData.destination, currentDestinationData.overall_safety); }
+        catch (e) { console.error("[SafeTrip] saveSearchHistory failed:", e); }
+      }
+      if (typeof saveOfflineEmergency === "function") {
+        try { saveOfflineEmergency(); }
+        catch (e) { console.error("[SafeTrip] saveOfflineEmergency failed:", e); }
+      }
+    }
   });
 
   async function runCompareAnalysis() {
@@ -4807,15 +4822,16 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
 
   function loadSearchHistory() {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }
-    catch (_) { return []; }
+    catch (e) { console.error("[SafeTrip] loadSearchHistory parse failed:", e); return []; }
   }
   function persistSearchHistory(arr) {
-    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch (_) {}
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); }
+    catch (e) { console.error("[SafeTrip] persistSearchHistory failed:", e); }
   }
   function saveSearchHistory(destination, level) {
     if (!destination) return;
     let history = loadSearchHistory();
-    // Dedupe: drop existing entry with same destination, then prepend fresh one.
+    if (!Array.isArray(history)) history = [];
     history = history.filter((h) => h && h.destination !== destination);
     history.unshift({
       destination,
@@ -4827,7 +4843,8 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     renderRecentSearches();
   }
   function clearSearchHistory() {
-    try { localStorage.removeItem(HISTORY_KEY); } catch (_) {}
+    try { localStorage.removeItem(HISTORY_KEY); }
+    catch (e) { console.error("[SafeTrip] clearSearchHistory failed:", e); }
     renderRecentSearches();
   }
 
@@ -4857,33 +4874,39 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   function renderRecentSearches() {
-    if (!recentSearchesSection) return;
+    if (!recentSearchesSection || !recentListEl) return;
     const history = loadSearchHistory();
-    if (!history.length) {
+    if (!Array.isArray(history) || history.length === 0) {
       recentSearchesSection.style.display = "none";
+      recentListEl.innerHTML = "";
       return;
     }
-    recentSearchesSection.style.display = "";
-    recentListEl.innerHTML = history.map((h) => {
-      const level = h.level || "medium";
-      return `
-        <div class="recent-card" data-dest="${escapeHtml(h.destination)}">
-          <div class="recent-card-main">
-            <div class="recent-card-name">${escapeHtml(h.destination)}</div>
-            <div class="recent-card-date">${escapeHtml(formatRelativeDate(h.savedAt))}</div>
+    recentSearchesSection.style.display = "block";
+    try {
+      recentListEl.innerHTML = history.map((h) => {
+        if (!h || !h.destination) return "";
+        const level = h.level || "medium";
+        return `
+          <div class="recent-card" data-dest="${escapeHtml(h.destination)}">
+            <div class="recent-card-main">
+              <div class="recent-card-name">${escapeHtml(h.destination)}</div>
+              <div class="recent-card-date">${escapeHtml(formatRelativeDate(h.savedAt))}</div>
+            </div>
+            <span class="safety-badge ${escapeHtml(level)}">${escapeHtml(recentSafetyLabel(level))}</span>
           </div>
-          <span class="safety-badge ${level}">${escapeHtml(recentSafetyLabel(level))}</span>
-        </div>
-      `;
-    }).join("");
-    recentListEl.querySelectorAll(".recent-card").forEach((el) => {
-      el.addEventListener("click", () => {
-        const dest = el.dataset.dest;
-        if (!dest) return;
-        destinationInput.value = dest;
-        analyzeBtn.click();
+        `;
+      }).join("");
+      recentListEl.querySelectorAll(".recent-card").forEach((el) => {
+        el.addEventListener("click", () => {
+          const dest = el.dataset.dest;
+          if (!dest) return;
+          destinationInput.value = dest;
+          analyzeBtn.click();
+        });
       });
-    });
+    } catch (e) {
+      console.error("[SafeTrip] renderRecentSearches failed:", e);
+    }
   }
 
   if (clearHistoryBtn) {
