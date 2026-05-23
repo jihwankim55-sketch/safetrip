@@ -4866,6 +4866,10 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   let userAccuracyCircle = null;
   let firstFix = true;
   const zonesEntered = new Set();
+  // Declared up-front (together with the rest of the live-tracking state) so that
+  // toggleLiveTracking / stopLiveTracking never hit a TDZ ReferenceError, regardless
+  // of when the click fires relative to script evaluation.
+  let reportZonesEntered = new Set();
 
   liveTrackBtn.addEventListener("click", toggleLiveTracking);
 
@@ -4990,9 +4994,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
 
       firstFix = true;
       zonesEntered.clear();
-      if (typeof reportZonesEntered !== "undefined" && reportZonesEntered.clear) {
-        reportZonesEntered.clear();
-      }
+      reportZonesEntered.clear();
 
       try {
         watchId = navigator.geolocation.watchPosition(
@@ -5111,7 +5113,6 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   const REPORT_ALERT_RADIUS_M = 500;
-  const reportZonesEntered = new Set();
   const dangerBannerEl = document.getElementById("dangerBanner");
 
   function checkReportZones(lat, lng) {
