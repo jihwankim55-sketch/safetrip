@@ -4596,18 +4596,44 @@ Do NOT output any text outside the JSON object.`;
 );
 out center tags 80;`;
 
-    let json;
-    try {
-      const response = await fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-        body: query,
-      });
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      json = await response.json();
-    } catch (err) {
-      console.error("[SafeTrip] Overpass fetch failed:", err);
-      showToast(t("safetyPointFetchFailed") + " " + (err.message || ""));
+    // Try multiple Overpass endpoints + request shapes. CORS / network errors at
+    // the primary endpoint should not block the feature — fall back to a mirror.
+    const overpassEndpoints = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+    ];
+    let json = null;
+    let lastErr = null;
+    for (const endpoint of overpassEndpoints) {
+      // Attempt POST first (preferred for long queries), then GET with `?data=`.
+      const attempts = [
+        () => fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "data=" + encodeURIComponent(query),
+        }),
+        () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
+      ];
+      for (const doFetch of attempts) {
+        try {
+          const response = await doFetch();
+          if (!response.ok) {
+            lastErr = new Error("HTTP " + response.status);
+            continue;
+          }
+          json = await response.json();
+          lastErr = null;
+          break;
+        } catch (err) {
+          lastErr = err;
+          console.warn("[SafeTrip] Overpass attempt failed (" + endpoint + "):", err && err.message);
+        }
+      }
+      if (json) break;
+    }
+    if (!json) {
+      console.error("[SafeTrip] Overpass all endpoints failed:", lastErr);
+      showToast(t("safetyPointFetchFailed") + " " + ((lastErr && lastErr.message) || ""));
       return;
     }
 
