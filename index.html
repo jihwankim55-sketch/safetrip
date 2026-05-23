@@ -992,6 +992,48 @@
     line-height: 1;
   }
   .sos-button:hover { transform: scale(1.08); }
+
+  .safety-points-button {
+    background: white;
+    color: #1e293b;
+    border: 2px solid white;
+    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    padding: 0;
+    line-height: 1;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.12s;
+  }
+  .safety-points-button:hover { background: #f1f5f9; transform: scale(1.05); }
+  .safety-points-button.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+  }
+
+  .safety-point-marker { background: transparent; border: none; }
+  .safety-point-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.5px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
   @keyframes sos-pulse {
     0%, 100% { box-shadow: 0 4px 12px rgba(220,38,38,0.45), 0 0 0 0 rgba(220,38,38,0.4); }
     50% { box-shadow: 0 4px 14px rgba(220,38,38,0.6), 0 0 0 10px rgba(220,38,38,0); }
@@ -2273,6 +2315,17 @@
       offlineNoEmbassy: "Open SOS or Emergency Card while online to save embassy info.",
       recentSearchesTitle: "📋 Recent Searches",
       clearHistoryBtn: "Clear",
+      nearbySafetyPointsBtn: "🏥 Nearby Safety Points",
+      nearbySafetyPointsHideBtn: "🏥 Hide Safety Points",
+      safetyPointHospital: "Hospital",
+      safetyPointPolice: "Police",
+      safetyPointPharmacy: "Pharmacy",
+      safetyPointSearching: "Searching nearby safety points...",
+      safetyPointNotFound: "No safety points found within 2 km.",
+      safetyPointFound: "{n} safety points found nearby",
+      safetyPointGeoError: "Could not determine your location.",
+      safetyPointFetchFailed: "Failed to load safety points:",
+      safetyPointUnnamed: "(Unnamed)",
     },
     ko: {
       tagline: "여행지 안전 분석",
@@ -2460,6 +2513,17 @@
       offlineNoEmbassy: "온라인 상태에서 SOS 또는 긴급 카드를 한번 열어 대사관 정보를 저장하세요.",
       recentSearchesTitle: "📋 최근 검색",
       clearHistoryBtn: "지우기",
+      nearbySafetyPointsBtn: "🏥 주변 안전 시설",
+      nearbySafetyPointsHideBtn: "🏥 안전 시설 숨기기",
+      safetyPointHospital: "병원",
+      safetyPointPolice: "경찰서",
+      safetyPointPharmacy: "약국",
+      safetyPointSearching: "주변 안전 시설 검색 중...",
+      safetyPointNotFound: "반경 2km 내에서 안전 시설을 찾지 못했습니다.",
+      safetyPointFound: "주변에서 {n}개의 안전 시설을 찾았습니다",
+      safetyPointGeoError: "위치를 확인할 수 없습니다.",
+      safetyPointFetchFailed: "안전 시설 검색 실패:",
+      safetyPointUnnamed: "(이름 없음)",
     },
     ja: {
       tagline: "旅行先の安全分析",
@@ -2647,6 +2711,17 @@
       offlineNoEmbassy: "オンライン時に SOS または緊急カードを開いて大使館情報を保存してください。",
       recentSearchesTitle: "📋 最近の検索",
       clearHistoryBtn: "クリア",
+      nearbySafetyPointsBtn: "🏥 近くの安全施設",
+      nearbySafetyPointsHideBtn: "🏥 安全施設を非表示",
+      safetyPointHospital: "病院",
+      safetyPointPolice: "警察署",
+      safetyPointPharmacy: "薬局",
+      safetyPointSearching: "近くの安全施設を検索中...",
+      safetyPointNotFound: "半径 2km 以内に安全施設が見つかりません。",
+      safetyPointFound: "近くに {n} 件の安全施設が見つかりました",
+      safetyPointGeoError: "位置情報を取得できません。",
+      safetyPointFetchFailed: "安全施設の取得に失敗しました:",
+      safetyPointUnnamed: "(名称なし)",
     },
     zh: {
       tagline: "旅行目的地安全分析",
@@ -2834,6 +2909,17 @@
       offlineNoEmbassy: "请在联网时打开 SOS 或紧急联系卡以保存大使馆信息。",
       recentSearchesTitle: "📋 最近搜索",
       clearHistoryBtn: "清除",
+      nearbySafetyPointsBtn: "🏥 附近安全设施",
+      nearbySafetyPointsHideBtn: "🏥 隐藏安全设施",
+      safetyPointHospital: "医院",
+      safetyPointPolice: "警察局",
+      safetyPointPharmacy: "药房",
+      safetyPointSearching: "正在搜索附近安全设施...",
+      safetyPointNotFound: "2 公里内未找到安全设施。",
+      safetyPointFound: "附近找到 {n} 个安全设施",
+      safetyPointGeoError: "无法获取您的位置。",
+      safetyPointFetchFailed: "获取安全设施失败：",
+      safetyPointUnnamed: "（无名称）",
     },
   };
 
@@ -2864,6 +2950,7 @@
     if (typeof refreshStatefulLabels === "function") refreshStatefulLabels();
     if (typeof updateLegendHtml === "function") updateLegendHtml();
     if (typeof updateSosButtonLabels === "function") updateSosButtonLabels();
+    if (typeof updateSafetyPointsBtnLabel === "function") updateSafetyPointsBtnLabel();
     if (typeof renderReportsList === "function") renderReportsList();
     if (typeof renderRecentSearches === "function") renderRecentSearches();
     // Update active language button styling.
@@ -4401,6 +4488,179 @@ Do NOT output any text outside the JSON object.`;
     },
   });
   map.addControl(new SOSControl());
+
+  // --- Nearby Safety Points ---
+  const safetyPointsLayer = L.layerGroup().addTo(map);
+  let safetyPointsActive = false;
+  let safetyPointsBtnEl = null;
+
+  const SAFETY_POINT_CONFIG = {
+    hospital: { color: "#dc2626", glyph: "✚", labelKey: "safetyPointHospital" },
+    police:   { color: "#2563eb", glyph: "🛡",  labelKey: "safetyPointPolice" },
+    pharmacy: { color: "#16a34a", glyph: "Rx", labelKey: "safetyPointPharmacy" },
+  };
+
+  function updateSafetyPointsBtnLabel() {
+    if (!safetyPointsBtnEl) return;
+    const label = safetyPointsActive ? t("nearbySafetyPointsHideBtn") : t("nearbySafetyPointsBtn");
+    safetyPointsBtnEl.setAttribute("aria-label", label);
+    safetyPointsBtnEl.title = label;
+    safetyPointsBtnEl.classList.toggle("active", safetyPointsActive);
+  }
+
+  const SafetyPointsControl = L.Control.extend({
+    options: { position: "topright" },
+    onAdd: function () {
+      safetyPointsBtnEl = L.DomUtil.create("button", "safety-points-button");
+      safetyPointsBtnEl.type = "button";
+      safetyPointsBtnEl.innerHTML = "🏥";
+      updateSafetyPointsBtnLabel();
+      L.DomEvent.disableClickPropagation(safetyPointsBtnEl);
+      L.DomEvent.on(safetyPointsBtnEl, "click", (e) => {
+        L.DomEvent.stop(e);
+        toggleSafetyPoints();
+      });
+      return safetyPointsBtnEl;
+    },
+  });
+  map.addControl(new SafetyPointsControl());
+
+  function buildSafetyPointAddress(tags) {
+    if (!tags) return "";
+    if (tags["addr:full"]) return tags["addr:full"];
+    const parts = [];
+    const housenumber = tags["addr:housenumber"];
+    const street = tags["addr:street"];
+    if (housenumber && street) parts.push(`${housenumber} ${street}`);
+    else if (street) parts.push(street);
+    if (tags["addr:city"]) parts.push(tags["addr:city"]);
+    if (tags["addr:state"]) parts.push(tags["addr:state"]);
+    return parts.join(", ");
+  }
+
+  function safetyPointDivIcon(cfg) {
+    return L.divIcon({
+      className: "safety-point-marker",
+      html: `<div class="safety-point-icon" style="background:${cfg.color}">${cfg.glyph}</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -16],
+    });
+  }
+
+  async function getSafetyPointsCenter() {
+    // Prefer fresh GPS fix; fall back to the analyzed destination center.
+    if ("geolocation" in navigator) {
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            maximumAge: 60000,
+            timeout: 12000,
+          });
+        });
+        return { lat: pos.coords.latitude, lng: pos.coords.longitude, source: "gps" };
+      } catch (_) {
+        // permission denied / timeout — fall through
+      }
+    }
+    if (currentDestinationData && currentDestinationData.center
+        && typeof currentDestinationData.center.lat === "number"
+        && typeof currentDestinationData.center.lng === "number") {
+      return { lat: currentDestinationData.center.lat, lng: currentDestinationData.center.lng, source: "destination" };
+    }
+    return null;
+  }
+
+  async function toggleSafetyPoints() {
+    if (safetyPointsActive) {
+      safetyPointsLayer.clearLayers();
+      safetyPointsActive = false;
+      updateSafetyPointsBtnLabel();
+      return;
+    }
+
+    const center = await getSafetyPointsCenter();
+    if (!center) {
+      showToast(t("safetyPointGeoError"));
+      return;
+    }
+
+    showToast(t("safetyPointSearching"));
+
+    const query = `[out:json][timeout:25];
+(
+  node["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
+  way["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
+  relation["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
+);
+out center tags 80;`;
+
+    let json;
+    try {
+      const response = await fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        body: query,
+      });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      json = await response.json();
+    } catch (err) {
+      console.error("[SafeTrip] Overpass fetch failed:", err);
+      showToast(t("safetyPointFetchFailed") + " " + (err.message || ""));
+      return;
+    }
+
+    const elements = (json && json.elements) || [];
+    if (elements.length === 0) {
+      showToast(t("safetyPointNotFound"));
+      return;
+    }
+
+    safetyPointsLayer.clearLayers();
+    const bounds = [];
+    let added = 0;
+    elements.forEach((el) => {
+      const lat = (typeof el.lat === "number") ? el.lat : (el.center && el.center.lat);
+      const lng = (typeof el.lon === "number") ? el.lon : (el.center && el.center.lon);
+      if (typeof lat !== "number" || typeof lng !== "number") return;
+      const amenity = el.tags && el.tags.amenity;
+      const cfg = SAFETY_POINT_CONFIG[amenity];
+      if (!cfg) return;
+      const tags = el.tags || {};
+      const name = tags.name || tags["name:en"] || t("safetyPointUnnamed");
+      const address = buildSafetyPointAddress(tags);
+      const phone = tags.phone || tags["contact:phone"];
+      const popupHtml = `
+        <div style="min-width:200px">
+          <strong>${escapeHtml(name)}</strong><br/>
+          <em style="color:#64748b">${escapeHtml(t(cfg.labelKey))}</em>
+          ${address ? `<div style="margin-top:6px;font-size:12px;color:#475569">📍 ${escapeHtml(address)}</div>` : ""}
+          ${phone ? `<div style="margin-top:4px;font-size:12px"><a href="tel:${escapeHtml(phone.replace(/[^\d+]/g, ""))}">📞 ${escapeHtml(phone)}</a></div>` : ""}
+        </div>
+      `;
+      L.marker([lat, lng], { icon: safetyPointDivIcon(cfg) })
+        .addTo(safetyPointsLayer)
+        .bindPopup(popupHtml);
+      bounds.push([lat, lng]);
+      added += 1;
+    });
+
+    if (added === 0) {
+      showToast(t("safetyPointNotFound"));
+      return;
+    }
+
+    if (bounds.length >= 2) {
+      try { map.fitBounds(L.latLngBounds(bounds).pad(0.2)); } catch (_) {}
+    } else if (bounds.length === 1) {
+      map.setView(bounds[0], 16, { animate: true });
+    }
+
+    safetyPointsActive = true;
+    updateSafetyPointsBtnLabel();
+    showToast(t("safetyPointFound", { n: added }));
+  }
 
   sosClose.addEventListener("click", () => sosModal.classList.remove("visible"));
   sosModal.addEventListener("click", (e) => {
