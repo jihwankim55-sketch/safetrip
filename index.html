@@ -4936,28 +4936,85 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   applyTranslations();
 
   async function toggleLiveTracking() {
-    if (watchId !== null) {
-      stopLiveTracking();
-      return;
+    try {
+      console.log("[SafeTrip] toggleLiveTracking clicked. watchId:", watchId);
+
+      if (watchId !== null) {
+        stopLiveTracking();
+        return;
+      }
+
+      // Robust geolocation feature detection.
+      if (!navigator || !("geolocation" in navigator) ||
+          typeof navigator.geolocation.watchPosition !== "function") {
+        console.error("[SafeTrip] geolocation API not available");
+        showToast(t("toastNoGeolocation"));
+        return;
+      }
+
+      // Geolocation requires a secure context (HTTPS or localhost). file:// or http:// fails silently
+      // on some browsers — call this out explicitly so the user knows what's wrong.
+      if (window.isSecureContext === false) {
+        console.error("[SafeTrip] geolocation requires a secure context (HTTPS).");
+        showToast(t("locationErrorPrefix") + " HTTPS required");
+        return;
+      }
+
+      // Try to detect a hard-denied permission up front for a clearer message.
+      if (navigator.permissions && typeof navigator.permissions.query === "function") {
+        try {
+          const status = await navigator.permissions.query({ name: "geolocation" });
+          console.log("[SafeTrip] geolocation permission state:", status.state);
+          if (status.state === "denied") {
+            showToast(t("locationErrorPrefix") + t("locationPermDenied"));
+            return;
+          }
+        } catch (e) {
+          console.warn("[SafeTrip] Permissions API query failed (non-fatal):", e);
+        }
+      }
+
+      // Optionally request notification permission, but do NOT let it block tracking.
+      try {
+        if (typeof Notification !== "undefined" && Notification &&
+            Notification.permission === "default" &&
+            typeof Notification.requestPermission === "function") {
+          const result = Notification.requestPermission();
+          if (result && typeof result.then === "function") {
+            try { await result; } catch (_) {}
+          }
+        }
+      } catch (e) {
+        console.warn("[SafeTrip] Notification permission request skipped:", e);
+      }
+
+      firstFix = true;
+      zonesEntered.clear();
+      if (typeof reportZonesEntered !== "undefined" && reportZonesEntered.clear) {
+        reportZonesEntered.clear();
+      }
+
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          handleLocationUpdate,
+          handleLocationError,
+          { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+        );
+        console.log("[SafeTrip] watchPosition started, id:", watchId);
+      } catch (e) {
+        console.error("[SafeTrip] watchPosition threw synchronously:", e);
+        showToast(t("locationErrorPrefix") + (e && e.message ? e.message : ""));
+        watchId = null;
+        return;
+      }
+
+      liveTrackBtn.textContent = t("stopLiveTracking");
+      liveTrackBtn.classList.add("active");
+      showToast(t("toastTrackingStart"));
+    } catch (e) {
+      console.error("[SafeTrip] toggleLiveTracking unexpected error:", e);
+      showToast(t("locationErrorPrefix") + (e && e.message ? e.message : "unexpected error"));
     }
-    if (!("geolocation" in navigator)) {
-      showToast(t("toastNoGeolocation"));
-      return;
-    }
-    if ("Notification" in window && Notification.permission === "default") {
-      try { await Notification.requestPermission(); } catch (_) {}
-    }
-    firstFix = true;
-    zonesEntered.clear();
-    reportZonesEntered.clear();
-    watchId = navigator.geolocation.watchPosition(
-      handleLocationUpdate,
-      handleLocationError,
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
-    );
-    liveTrackBtn.textContent = t("stopLiveTracking");
-    liveTrackBtn.classList.add("active");
-    showToast(t("toastTrackingStart"));
   }
 
   function stopLiveTracking() {
@@ -4976,6 +5033,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   function handleLocationUpdate(pos) {
+    console.log("[SafeTrip] geolocation update:", pos.coords.latitude, pos.coords.longitude, "±", pos.coords.accuracy, "m");
     const { latitude, longitude, accuracy } = pos.coords;
     if (!userMarker) {
       userMarker = L.circleMarker([latitude, longitude], {
@@ -5006,8 +5064,9 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   function handleLocationError(err) {
+    console.error("[SafeTrip] geolocation error:", err && err.code, err && err.message);
     const messages = { 1: t("locationPermDenied"), 2: t("locationUnavail"), 3: t("locationTimeout") };
-    showToast(t("locationErrorPrefix") + (messages[err.code] || err.message));
+    showToast(t("locationErrorPrefix") + (messages[err.code] || err.message || ""));
     stopLiveTracking();
   }
 
