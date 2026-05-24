@@ -4870,6 +4870,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   // toggleLiveTracking / stopLiveTracking never hit a TDZ ReferenceError, regardless
   // of when the click fires relative to script evaluation.
   let reportZonesEntered = new Set();
+  const dangerBannerEl = document.getElementById("dangerBanner");
 
   liveTrackBtn.addEventListener("click", toggleLiveTracking);
 
@@ -5113,7 +5114,6 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   const REPORT_ALERT_RADIUS_M = 500;
-  const dangerBannerEl = document.getElementById("dangerBanner");
 
   function checkReportZones(lat, lng) {
     const currentlyInside = new Set();
