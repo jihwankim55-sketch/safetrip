@@ -5116,14 +5116,23 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   const REPORT_ALERT_RADIUS_M = 500;
 
   function checkReportZones(lat, lng) {
+    console.log(`[SafeTrip] checkReportZones — me: ${lat.toFixed(5)}, ${lng.toFixed(5)} | total reports: ${reports.length}`);
     const currentlyInside = new Set();
     reports.forEach((r) => {
-      if (r.analysis?.risk_level === "fake") return;
+      if (typeof r.lat !== "number" || typeof r.lng !== "number") {
+        console.warn("[SafeTrip]   skip report (bad coords):", r.id);
+        return;
+      }
       const distance = haversineMeters(lat, lng, r.lat, r.lng);
+      const level = (r.analysis && r.analysis.risk_level) || "unrated";
+      console.log(`[SafeTrip]   ${r.id} ${r.type} (${level}) @ ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} — distance ${distance.toFixed(0)}m`);
       if (distance <= REPORT_ALERT_RADIUS_M) {
         currentlyInside.add(r.id);
         if (!reportZonesEntered.has(r.id)) {
+          console.log(`[SafeTrip]   → ENTERING zone (≤${REPORT_ALERT_RADIUS_M}m) — firing alert for ${r.id}`);
           triggerReportDangerAlert(r);
+        } else {
+          console.log(`[SafeTrip]   → still inside zone (already alerted earlier) ${r.id}`);
         }
       }
     });
@@ -5138,8 +5147,16 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   }
 
   function triggerReportDangerAlert(report) {
+    console.log("[SafeTrip] triggerReportDangerAlert:", report.id, "type:", report.type, "@", report.lat, report.lng);
     if ("vibrate" in navigator) {
-      try { navigator.vibrate(1000); } catch (_) {}
+      try {
+        const ok = navigator.vibrate(1000);
+        console.log("[SafeTrip]   vibrate(1000) result:", ok);
+      } catch (e) {
+        console.warn("[SafeTrip]   vibrate failed:", e);
+      }
+    } else {
+      console.log("[SafeTrip]   vibrate API not supported (desktop browsers usually don't support it)");
     }
     if ("speechSynthesis" in window) {
       try {
@@ -5148,7 +5165,12 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
         utter.rate = 1.0;
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utter);
-      } catch (_) {}
+        console.log("[SafeTrip]   speech queued (lang:", utter.lang, ")");
+      } catch (e) {
+        console.warn("[SafeTrip]   speech failed:", e);
+      }
+    } else {
+      console.log("[SafeTrip]   speechSynthesis API not supported");
     }
     showToast(`${t("nearReport")}: ${localizedTypeLabel(report.type)}`);
   }
