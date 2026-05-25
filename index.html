@@ -5152,6 +5152,9 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   const REPORT_ALERT_RADIUS_M = 500;
 
   function checkReportZones(lat, lng) {
+    // NOTE: NO risk-level filter here — every reported incident (Low/Medium/High/fake/unrated)
+    // triggers the proximity alert. Filtering would be added here if it existed, so this
+    // comment is the canonical place to remove it.
     console.log(`[SafeTrip] checkReportZones — me: ${lat.toFixed(5)}, ${lng.toFixed(5)} | total reports: ${reports.length}`);
     const currentlyInside = new Set();
     let firstInside = null;
@@ -5162,12 +5165,12 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       }
       const distance = haversineMeters(lat, lng, r.lat, r.lng);
       const level = (r.analysis && r.analysis.risk_level) || "unrated";
-      console.log(`[SafeTrip]   ${r.id} ${r.type} (${level}) @ ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} — distance ${distance.toFixed(0)}m`);
+      console.log(`Checking incident: ${r.type}, distance: ${distance.toFixed(0)}m, risk: ${level}`);
       if (distance <= REPORT_ALERT_RADIUS_M) {
         currentlyInside.add(r.id);
         if (!firstInside) firstInside = r;
         if (!reportZonesEntered.has(r.id)) {
-          console.log(`[SafeTrip]   → ENTERING zone (≤${REPORT_ALERT_RADIUS_M}m) — firing alert for ${r.id}`);
+          console.log(`[SafeTrip]   → ENTERING zone (≤${REPORT_ALERT_RADIUS_M}m) — firing alert for ${r.id} (risk=${level})`);
           triggerReportDangerAlert(r);
         } else {
           console.log(`[SafeTrip]   → still inside zone (already alerted earlier) ${r.id}`);
