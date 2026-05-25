@@ -2185,7 +2185,7 @@
       legendHigh: "High",
       sosButtonAria: "Emergency SOS",
       sosButtonTitle: "Emergency SOS — show local emergency contacts",
-      voiceWarning: "Warning. You are entering a reported danger zone. Please stay alert and watch your belongings.",
+      voiceWarning: "Warning! You are approaching a reported incident area.",
       voiceLang: "en-US",
       toastReportClick: "Click the location on the map where the incident occurred",
       toastTrackingStart: "📍 Live tracking active - You will be alerted when approaching reported danger zones",
@@ -2385,7 +2385,7 @@
       legendHigh: "높음",
       sosButtonAria: "긴급 SOS",
       sosButtonTitle: "긴급 SOS — 현지 긴급 연락처 표시",
-      voiceWarning: "경고. 신고된 위험 지역에 진입하고 있습니다. 주의하시고 소지품을 잘 살피세요.",
+      voiceWarning: "경고! 신고된 사건 지역에 접근하고 있습니다.",
       voiceLang: "ko-KR",
       toastReportClick: "사건이 발생한 지도 위치를 클릭하세요",
       toastTrackingStart: "📍 실시간 추적 활성화 - 신고된 위험 지역 접근 시 알려드립니다",
@@ -2585,7 +2585,7 @@
       legendHigh: "高",
       sosButtonAria: "緊急 SOS",
       sosButtonTitle: "緊急 SOS — 現地の緊急連絡先を表示",
-      voiceWarning: "警告。報告された危険ゾーンに入ろうとしています。警戒し、所持品にご注意ください。",
+      voiceWarning: "警告！報告された事件エリアに近づいています。",
       voiceLang: "ja-JP",
       toastReportClick: "事件が発生した地図上の場所をクリックしてください",
       toastTrackingStart: "📍 ライブトラッキング有効 - 報告された危険ゾーンに近づくと通知します",
@@ -2785,7 +2785,7 @@
       legendHigh: "高",
       sosButtonAria: "紧急 SOS",
       sosButtonTitle: "紧急 SOS — 显示本地紧急联系方式",
-      voiceWarning: "警告。您正在进入已报告的危险区域。请保持警惕并注意您的物品。",
+      voiceWarning: "警告！您正在接近已报告的事件区域。",
       voiceLang: "zh-CN",
       toastReportClick: "请点击事件发生的地图位置",
       toastTrackingStart: "📍 实时追踪已激活 - 接近已报告的危险区域时将提醒您",
@@ -4997,6 +4997,33 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       zonesEntered.clear();
       reportZonesEntered.clear();
 
+      // Prime SpeechSynthesis from inside the user gesture so later alerts
+      // (which fire from non-gesture geolocation callbacks) are allowed to speak.
+      if ("speechSynthesis" in window) {
+        try {
+          const primer = new SpeechSynthesisUtterance(" ");
+          primer.volume = 0;
+          window.speechSynthesis.speak(primer);
+          console.log("[SafeTrip] speech synthesis primed");
+        } catch (e) {
+          console.warn("[SafeTrip] speech prime failed (non-fatal):", e);
+        }
+      }
+      // Also prime AudioContext for the fallback beep so it can resume later.
+      try {
+        if (!window.__safetripAudioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (Ctx) {
+            window.__safetripAudioCtx = new Ctx();
+            console.log("[SafeTrip] AudioContext primed (state:", window.__safetripAudioCtx.state, ")");
+          }
+        } else if (window.__safetripAudioCtx.state === "suspended") {
+          window.__safetripAudioCtx.resume();
+        }
+      } catch (e) {
+        console.warn("[SafeTrip] AudioContext prime failed (non-fatal):", e);
+      }
+
       try {
         watchId = navigator.geolocation.watchPosition(
           handleLocationUpdate,
@@ -5146,32 +5173,79 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     }
   }
 
+  function playFallbackBeep() {
+    // Desktop browsers don't vibrate. Play a short beep so the alert is audible
+    // even if SpeechSynthesis is blocked or queued behind another utterance.
+    try {
+      const ctx = window.__safetripAudioCtx;
+      if (!ctx) {
+        console.log("[SafeTrip]   audio fallback skipped (no AudioContext primed)");
+        return;
+      }
+      if (ctx.state === "suspended") ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+      console.log("[SafeTrip]   fallback beep played");
+    } catch (e) {
+      console.warn("[SafeTrip]   beep failed:", e);
+    }
+  }
+
   function triggerReportDangerAlert(report) {
     console.log("[SafeTrip] triggerReportDangerAlert:", report.id, "type:", report.type, "@", report.lat, report.lng);
+
+    // 1) Vibration (mobile only — no-op silently on desktop).
     if ("vibrate" in navigator) {
       try {
-        const ok = navigator.vibrate(1000);
-        console.log("[SafeTrip]   vibrate(1000) result:", ok);
+        const ok = navigator.vibrate([400, 120, 400, 120, 400]);
+        console.log("[SafeTrip]   vibrate result:", ok);
       } catch (e) {
         console.warn("[SafeTrip]   vibrate failed:", e);
       }
     } else {
-      console.log("[SafeTrip]   vibrate API not supported (desktop browsers usually don't support it)");
+      console.log("[SafeTrip]   vibrate API not supported (typical on desktop)");
     }
+
+    // 2) Voice via SpeechSynthesis. Primed earlier on the user gesture (toggleLiveTracking).
+    let spoke = false;
     if ("speechSynthesis" in window) {
       try {
+        const synth = window.speechSynthesis;
+        synth.cancel();
         const utter = new SpeechSynthesisUtterance(t("voiceWarning"));
         utter.lang = t("voiceLang");
         utter.rate = 1.0;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utter);
-        console.log("[SafeTrip]   speech queued (lang:", utter.lang, ")");
+        utter.pitch = 1.0;
+        utter.volume = 1.0;
+        utter.onstart = () => console.log("[SafeTrip]   speech started");
+        utter.onend = () => console.log("[SafeTrip]   speech ended");
+        utter.onerror = (ev) => console.warn("[SafeTrip]   speech error:", ev && ev.error);
+        synth.speak(utter);
+        spoke = true;
+        console.log("[SafeTrip]   speech queued (lang:", utter.lang, "speaking:", synth.speaking, "pending:", synth.pending, ")");
       } catch (e) {
         console.warn("[SafeTrip]   speech failed:", e);
       }
     } else {
       console.log("[SafeTrip]   speechSynthesis API not supported");
     }
+
+    // 3) Fallback beep if speech wasn't queued (always safe to call — no-op if not primed).
+    if (!spoke) playFallbackBeep();
+
+    // 4) Red banner — force-show even if it was somehow already in DOM with stale state.
+    showDangerBanner();
+    console.log("[SafeTrip]   banner classList after show:", dangerBannerEl.className);
+
+    // 5) Toast.
     showToast(`${t("nearReport")}: ${localizedTypeLabel(report.type)}`);
   }
 
