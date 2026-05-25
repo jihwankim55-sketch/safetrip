@@ -2179,6 +2179,7 @@
       sosModalSub: "Local emergency contacts",
       closeBtn: "Close",
       dangerBannerText: "⚠️ You are near a reported incident area. Stay alert!",
+      dangerBannerNearby: "Nearby reported incident:",
       legendTitle: "Risk Level",
       legendLow: "Low",
       legendMedium: "Medium",
@@ -2379,6 +2380,7 @@
       sosModalSub: "현지 긴급 연락처",
       closeBtn: "닫기",
       dangerBannerText: "⚠️ 신고된 사건 지역 근처에 있습니다. 주의하세요!",
+      dangerBannerNearby: "근처 신고된 사건:",
       legendTitle: "위험 수준",
       legendLow: "낮음",
       legendMedium: "보통",
@@ -2579,6 +2581,7 @@
       sosModalSub: "現地の緊急連絡先",
       closeBtn: "閉じる",
       dangerBannerText: "⚠️ 報告された事件エリアの近くにいます。警戒してください！",
+      dangerBannerNearby: "近くで報告された事件:",
       legendTitle: "危険レベル",
       legendLow: "低",
       legendMedium: "中",
@@ -2779,6 +2782,7 @@
       sosModalSub: "本地紧急联系方式",
       closeBtn: "关闭",
       dangerBannerText: "⚠️ 您靠近已报告的事件区域。请保持警惕！",
+      dangerBannerNearby: "附近报告的事件:",
       legendTitle: "风险等级",
       legendLow: "低",
       legendMedium: "中",
@@ -4215,9 +4219,14 @@ Do NOT output any text outside the JSON object.`;
 
   try {
     const saved = JSON.parse(localStorage.getItem("safetrip_reports") || "[]");
-    saved.forEach((r) => { reports.push(r); addReportMarker(r); });
+    console.log(`[SafeTrip] Loaded ${saved.length} reports from localStorage key "safetrip_reports"`);
+    saved.forEach((r, i) => {
+      console.log(`[SafeTrip]   report[${i}]: id=${r.id} type=${r.type} @ ${r.lat}, ${r.lng}`);
+      reports.push(r);
+      addReportMarker(r);
+    });
     renderReportsList();
-  } catch (_) {}
+  } catch (e) { console.error("[SafeTrip] Failed to load reports:", e); }
 
   reportModeBtn.addEventListener("click", toggleReportMode);
   reportCancel.addEventListener("click", () => reportModal.classList.remove("visible"));
@@ -5145,6 +5154,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   function checkReportZones(lat, lng) {
     console.log(`[SafeTrip] checkReportZones — me: ${lat.toFixed(5)}, ${lng.toFixed(5)} | total reports: ${reports.length}`);
     const currentlyInside = new Set();
+    let firstInside = null;
     reports.forEach((r) => {
       if (typeof r.lat !== "number" || typeof r.lng !== "number") {
         console.warn("[SafeTrip]   skip report (bad coords):", r.id);
@@ -5155,6 +5165,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       console.log(`[SafeTrip]   ${r.id} ${r.type} (${level}) @ ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} — distance ${distance.toFixed(0)}m`);
       if (distance <= REPORT_ALERT_RADIUS_M) {
         currentlyInside.add(r.id);
+        if (!firstInside) firstInside = r;
         if (!reportZonesEntered.has(r.id)) {
           console.log(`[SafeTrip]   → ENTERING zone (≤${REPORT_ALERT_RADIUS_M}m) — firing alert for ${r.id}`);
           triggerReportDangerAlert(r);
@@ -5167,7 +5178,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     currentlyInside.forEach((id) => reportZonesEntered.add(id));
 
     if (currentlyInside.size > 0) {
-      showDangerBanner();
+      showDangerBanner(firstInside);
     } else {
       hideDangerBanner();
     }
@@ -5205,8 +5216,8 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     // 1) Vibration (mobile only — no-op silently on desktop).
     if ("vibrate" in navigator) {
       try {
-        const ok = navigator.vibrate([400, 120, 400, 120, 400]);
-        console.log("[SafeTrip]   vibrate result:", ok);
+        const ok = navigator.vibrate([200, 100, 200]);
+        console.log("[SafeTrip]   vibrate([200,100,200]) result:", ok);
       } catch (e) {
         console.warn("[SafeTrip]   vibrate failed:", e);
       }
@@ -5241,16 +5252,20 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     // 3) Fallback beep if speech wasn't queued (always safe to call — no-op if not primed).
     if (!spoke) playFallbackBeep();
 
-    // 4) Red banner — force-show even if it was somehow already in DOM with stale state.
-    showDangerBanner();
+    // 4) Red banner with incident type (checkReportZones also keeps it in sync).
+    showDangerBanner(report);
     console.log("[SafeTrip]   banner classList after show:", dangerBannerEl.className);
 
     // 5) Toast.
     showToast(`${t("nearReport")}: ${localizedTypeLabel(report.type)}`);
   }
 
-  function showDangerBanner() {
+  function showDangerBanner(incident) {
     dangerBannerEl.classList.add("visible");
+    if (incident && incident.type) {
+      const typeLabel = localizedTypeLabel(incident.type);
+      dangerBannerEl.textContent = `⚠️ ${t("dangerBannerNearby")} ${typeLabel}`;
+    }
   }
 
   function hideDangerBanner() {
