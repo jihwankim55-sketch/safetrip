@@ -2446,7 +2446,8 @@
       clearHistoryBtn: "Clear",
       nearbySafetyPointsBtn: "🏥 Nearby Safety Points",
       safetyPointConfirmMsg: "This may take 4-5 minutes. Proceed?",
-      safetyPointSearchingAttempt: "Searching... (attempt {current}/{total})",
+      safetyPointSearchingAttempt: "Searching nearby safety points... (attempt {current}/{total})",
+      safetyPointProgress: "Found {h} hospitals, {p} police stations, {ph} pharmacies so far...",
       safetyPointAllAttemptsFailed: "Could not find results. Please try again later.",
       nearbySafetyPointsHideBtn: "🏥 Hide Safety Points",
       safetyPointHospital: "Hospital",
@@ -2663,7 +2664,8 @@
       clearHistoryBtn: "지우기",
       nearbySafetyPointsBtn: "🏥 주변 안전 시설",
       safetyPointConfirmMsg: "최대 4-5분 소요됩니다. 계속하시겠습니까?",
-      safetyPointSearchingAttempt: "검색 중... ({current}/{total}회 시도)",
+      safetyPointSearchingAttempt: "주변 안전 시설 검색 중... ({current}/{total}회 시도)",
+      safetyPointProgress: "지금까지 병원 {h}곳, 경찰서 {p}곳, 약국 {ph}곳 발견...",
       safetyPointAllAttemptsFailed: "결과를 찾지 못했습니다. 잠시 후 다시 시도해주세요.",
       nearbySafetyPointsHideBtn: "🏥 안전 시설 숨기기",
       safetyPointHospital: "병원",
@@ -2880,7 +2882,8 @@
       clearHistoryBtn: "クリア",
       nearbySafetyPointsBtn: "🏥 近くの安全施設",
       safetyPointConfirmMsg: "最大 4〜5 分かかる場合があります。続行しますか？",
-      safetyPointSearchingAttempt: "検索中... (試行 {current}/{total})",
+      safetyPointSearchingAttempt: "近くの安全施設を検索中... (試行 {current}/{total})",
+      safetyPointProgress: "これまでに病院 {h} 件、警察署 {p} 件、薬局 {ph} 件発見...",
       safetyPointAllAttemptsFailed: "結果が見つかりませんでした。しばらくしてから再試行してください。",
       nearbySafetyPointsHideBtn: "🏥 安全施設を非表示",
       safetyPointHospital: "病院",
@@ -3097,7 +3100,8 @@
       clearHistoryBtn: "清除",
       nearbySafetyPointsBtn: "🏥 附近安全设施",
       safetyPointConfirmMsg: "最多可能需要 4-5 分钟，是否继续？",
-      safetyPointSearchingAttempt: "正在搜索... (尝试 {current}/{total})",
+      safetyPointSearchingAttempt: "正在搜索附近安全设施... (尝试 {current}/{total})",
+      safetyPointProgress: "目前找到医院 {h} 处, 警察局 {p} 处, 药房 {ph} 处...",
       safetyPointAllAttemptsFailed: "未能找到结果。请稍后重试。",
       nearbySafetyPointsHideBtn: "🏥 隐藏安全设施",
       safetyPointHospital: "医院",
@@ -4790,13 +4794,31 @@ Do NOT output any text outside the JSON object.`;
     // Confirm before kicking off the search (Overpass can take several minutes).
     if (!window.confirm(t("safetyPointConfirmMsg"))) return;
 
-    const center = await getSafetyPointsCenter();
-    if (!center) {
-      showToast(t("safetyPointGeoError"));
-      return;
-    }
+    // Bug 2: lock the map button so duplicate clicks during the async search
+    // can't spawn a parallel run. Cleared in `finally` below regardless of outcome.
+    if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = true;
 
-    const query = `[out:json][timeout:25];
+    // Bug 3: keep the current progress message on screen the whole time. The
+    // built-in `showToast` fades after ~3.2s, but Overpass requests routinely
+    // take 5–30 seconds. We re-show whatever the current message is just before
+    // it would fade, so the user never stares at an empty screen.
+    let currentProgressMsg = "";
+    function setProgress(msg) {
+      currentProgressMsg = msg;
+      showToast(msg);
+    }
+    const progressInterval = setInterval(() => {
+      if (currentProgressMsg) showToast(currentProgressMsg);
+    }, 2800);
+
+    try {
+      const center = await getSafetyPointsCenter();
+      if (!center) {
+        setProgress(t("safetyPointGeoError"));
+        return;
+      }
+
+      const query = `[out:json][timeout:25];
 (
   node["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
   way["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
@@ -4804,68 +4826,79 @@ Do NOT output any text outside the JSON object.`;
 );
 out center tags 80;`;
 
-    // Try multiple Overpass endpoints + request shapes. CORS / network errors at
-    // the primary endpoint should not block the feature — fall back to a mirror.
-    const overpassEndpoints = [
-      "https://overpass-api.de/api/interpreter",
-      "https://overpass.kumi.systems/api/interpreter",
-    ];
-    // Retry the full endpoint chain up to 3 times with a 2s gap whenever the
-    // Overpass call fails OR returns zero elements (which usually means the
-    // server replied with an empty stub under load rather than truly nothing).
-    const MAX_ATTEMPTS = 3;
-    const RETRY_DELAY_MS = 2000;
-    let json = null;
-    let lastErr = null;
-    let elements = [];
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      showToast(t("safetyPointSearchingAttempt", { current: attempt, total: MAX_ATTEMPTS }));
-      json = null;
-      lastErr = null;
-      for (const endpoint of overpassEndpoints) {
-        // Attempt POST first (preferred for long queries), then GET with `?data=`.
-        const fetchAttempts = [
-          () => fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "data=" + encodeURIComponent(query),
-          }),
-          () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
-        ];
-        for (const doFetch of fetchAttempts) {
-          try {
-            const response = await doFetch();
-            if (!response.ok) {
-              lastErr = new Error("HTTP " + response.status);
-              continue;
+      // Try multiple Overpass endpoints + request shapes. CORS / network errors at
+      // the primary endpoint should not block the feature — fall back to a mirror.
+      const overpassEndpoints = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+      ];
+      // Bug 1: retry the full endpoint chain up to 3 times with a 2s gap when
+      // Overpass fails OR returns zero elements (often an empty stub under load).
+      const MAX_ATTEMPTS = 3;
+      const RETRY_DELAY_MS = 2000;
+      let json = null;
+      let lastErr = null;
+      let elements = [];
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        setProgress(t("safetyPointSearchingAttempt", { current: attempt, total: MAX_ATTEMPTS }));
+        json = null;
+        lastErr = null;
+        for (const endpoint of overpassEndpoints) {
+          // Attempt POST first (preferred for long queries), then GET with `?data=`.
+          const fetchAttempts = [
+            () => fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: "data=" + encodeURIComponent(query),
+            }),
+            () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
+          ];
+          for (const doFetch of fetchAttempts) {
+            try {
+              const response = await doFetch();
+              if (!response.ok) {
+                lastErr = new Error("HTTP " + response.status);
+                continue;
+              }
+              json = await response.json();
+              lastErr = null;
+              break;
+            } catch (err) {
+              lastErr = err;
+              console.warn("[SafeTrip] Overpass attempt failed (" + endpoint + "):", err && err.message);
             }
-            json = await response.json();
-            lastErr = null;
-            break;
-          } catch (err) {
-            lastErr = err;
-            console.warn("[SafeTrip] Overpass attempt failed (" + endpoint + "):", err && err.message);
           }
+          if (json) break;
         }
-        if (json) break;
-      }
-      elements = (json && json.elements) || [];
-      if (json && elements.length > 0) break;
-      console.log(`[SafeTrip] safety points attempt ${attempt}/${MAX_ATTEMPTS} failed (json=${!!json}, elements=${elements.length})`);
-      if (attempt < MAX_ATTEMPTS) {
-        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-      }
-    }
-    if (!json || elements.length === 0) {
-      console.error("[SafeTrip] Overpass all retries failed:", lastErr);
-      showToast(t("safetyPointAllAttemptsFailed"));
-      return;
-    }
+        elements = (json && json.elements) || [];
 
-    safetyPointsLayer.clearLayers();
-    const bounds = [];
-    let added = 0;
-    elements.forEach((el) => {
+        // Bug 3: once an attempt returns ANY elements, show the per-category
+        // breakdown so the user sees what we got before plotting starts.
+        if (elements.length > 0) {
+          const counts = { hospital: 0, police: 0, pharmacy: 0 };
+          for (const el of elements) {
+            const a = el.tags && el.tags.amenity;
+            if (counts[a] !== undefined) counts[a]++;
+          }
+          setProgress(t("safetyPointProgress", { h: counts.hospital, p: counts.police, ph: counts.pharmacy }));
+        }
+
+        if (json && elements.length > 0) break;
+        console.log(`[SafeTrip] safety points attempt ${attempt}/${MAX_ATTEMPTS} failed (json=${!!json}, elements=${elements.length})`);
+        if (attempt < MAX_ATTEMPTS) {
+          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+        }
+      }
+      if (!json || elements.length === 0) {
+        console.error("[SafeTrip] Overpass all retries failed:", lastErr);
+        setProgress(t("safetyPointAllAttemptsFailed"));
+        return;
+      }
+
+      safetyPointsLayer.clearLayers();
+      const bounds = [];
+      let added = 0;
+      elements.forEach((el) => {
       const lat = (typeof el.lat === "number") ? el.lat : (el.center && el.center.lat);
       const lng = (typeof el.lon === "number") ? el.lon : (el.center && el.center.lon);
       if (typeof lat !== "number" || typeof lng !== "number") return;
@@ -4891,20 +4924,27 @@ out center tags 80;`;
       added += 1;
     });
 
-    if (added === 0) {
-      showToast(t("safetyPointNotFound"));
-      return;
-    }
+      if (added === 0) {
+        setProgress(t("safetyPointNotFound"));
+        return;
+      }
 
-    if (bounds.length >= 2) {
-      try { map.fitBounds(L.latLngBounds(bounds).pad(0.2)); } catch (_) {}
-    } else if (bounds.length === 1) {
-      map.setView(bounds[0], 16, { animate: true });
-    }
+      if (bounds.length >= 2) {
+        try { map.fitBounds(L.latLngBounds(bounds).pad(0.2)); } catch (_) {}
+      } else if (bounds.length === 1) {
+        map.setView(bounds[0], 16, { animate: true });
+      }
 
-    safetyPointsActive = true;
-    updateSafetyPointsBtnLabel();
-    showToast(t("safetyPointFound", { n: added }));
+      safetyPointsActive = true;
+      updateSafetyPointsBtnLabel();
+      setProgress(t("safetyPointFound", { n: added }));
+    } finally {
+      // Clear the keep-alive interval and re-enable the button so the next
+      // click works. Runs whether we returned early, hit an error, or finished
+      // plotting markers.
+      clearInterval(progressInterval);
+      if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = false;
+    }
   }
 
   sosClose.addEventListener("click", () => sosModal.classList.remove("visible"));
