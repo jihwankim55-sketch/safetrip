@@ -2448,13 +2448,13 @@
       safetyPointTimeout: "Search completed with partial results. Tap to search again for more.",
       safetyPointCancelled: "Search cancelled",
       safetyPointConfirmTitle: "🏥 Nearby Safety Points",
-      safetyPointConfirmSub: "Searching nearby safety points may take 4-5 minutes. Would you like to proceed?",
+      safetyPointConfirmSub: "Searching nearby safety points may take 1-2 minutes. Would you like to proceed?",
       safetyPointConfirmYes: "Yes, search",
       safetyPointCountHospital: "{n} hospitals",
       safetyPointCountPolice: "{n} police stations",
       safetyPointCountPharmacy: "{n} pharmacies",
       safetyPointProgressText: "Searching... Found {found} so far...",
-      safetyPointNotFound: "No safety points found within 2 km.",
+      safetyPointNotFound: "No safety points found within 1.5 km.",
       safetyPointFound: "{n} safety points found nearby",
       safetyPointGeoError: "Could not determine your location.",
       safetyPointFetchFailed: "Failed to load safety points:",
@@ -2661,13 +2661,13 @@
       safetyPointTimeout: "일부 결과로 검색을 완료했습니다. 더 많은 결과를 보려면 다시 검색하세요.",
       safetyPointCancelled: "검색이 취소되었습니다",
       safetyPointConfirmTitle: "🏥 주변 안전 시설",
-      safetyPointConfirmSub: "주변 안전 시설 검색은 4-5분 정도 걸릴 수 있습니다. 계속하시겠습니까?",
+      safetyPointConfirmSub: "주변 안전 시설 검색은 1-2분 정도 걸릴 수 있습니다. 계속하시겠습니까?",
       safetyPointConfirmYes: "네, 검색합니다",
       safetyPointCountHospital: "병원 {n}곳",
       safetyPointCountPolice: "경찰서 {n}곳",
       safetyPointCountPharmacy: "약국 {n}곳",
       safetyPointProgressText: "검색 중... 지금까지 {found} 발견...",
-      safetyPointNotFound: "반경 2km 내에서 안전 시설을 찾지 못했습니다.",
+      safetyPointNotFound: "반경 1.5km 내에서 안전 시설을 찾지 못했습니다.",
       safetyPointFound: "주변에서 {n}개의 안전 시설을 찾았습니다",
       safetyPointGeoError: "위치를 확인할 수 없습니다.",
       safetyPointFetchFailed: "안전 시설 검색 실패:",
@@ -2874,13 +2874,13 @@
       safetyPointTimeout: "一部の結果で検索を完了しました。さらに探すには再度検索してください。",
       safetyPointCancelled: "検索をキャンセルしました",
       safetyPointConfirmTitle: "🏥 近くの安全施設",
-      safetyPointConfirmSub: "近くの安全施設の検索は 4〜5 分かかる場合があります。続行しますか？",
+      safetyPointConfirmSub: "近くの安全施設の検索は 1〜2 分かかる場合があります。続行しますか？",
       safetyPointConfirmYes: "はい、検索する",
       safetyPointCountHospital: "病院 {n} 件",
       safetyPointCountPolice: "警察署 {n} 件",
       safetyPointCountPharmacy: "薬局 {n} 件",
       safetyPointProgressText: "検索中... これまでに {found} 見つかりました...",
-      safetyPointNotFound: "半径 2km 以内に安全施設が見つかりません。",
+      safetyPointNotFound: "半径 1.5km 以内に安全施設が見つかりません。",
       safetyPointFound: "近くに {n} 件の安全施設が見つかりました",
       safetyPointGeoError: "位置情報を取得できません。",
       safetyPointFetchFailed: "安全施設の取得に失敗しました:",
@@ -3087,13 +3087,13 @@
       safetyPointTimeout: "已用部分结果完成搜索。点击可再次搜索以获取更多。",
       safetyPointCancelled: "已取消搜索",
       safetyPointConfirmTitle: "🏥 附近安全设施",
-      safetyPointConfirmSub: "搜索附近安全设施可能需要 4-5 分钟。是否继续？",
+      safetyPointConfirmSub: "搜索附近安全设施可能需要 1-2 分钟。是否继续？",
       safetyPointConfirmYes: "是的，开始搜索",
       safetyPointCountHospital: "医院 {n} 处",
       safetyPointCountPolice: "警察局 {n} 处",
       safetyPointCountPharmacy: "药房 {n} 处",
       safetyPointProgressText: "正在搜索... 已找到 {found}...",
-      safetyPointNotFound: "2 公里内未找到安全设施。",
+      safetyPointNotFound: "1.5 公里内未找到安全设施。",
       safetyPointFound: "附近找到 {n} 个安全设施",
       safetyPointGeoError: "无法获取您的位置。",
       safetyPointFetchFailed: "获取安全设施失败：",
@@ -4805,16 +4805,21 @@ Do NOT output any text outside the JSON object.`;
     police:   [["amenity", "police"]],
     pharmacy: [["amenity", "pharmacy"], ["healthcare", "pharmacy"], ["shop", "chemist"]],
   };
+  // Search radius (m) and per-category result cap. Tuned for speed: 1.5 km is
+  // dense enough for urban centres, and 10 results per category keeps payload
+  // small so each parallel fetch finishes fast.
+  const SAFETY_POINT_RADIUS_M = 1500;
+  const SAFETY_POINT_LIMIT = 10;
   async function fetchSafetyPointsByType(type, center, signal) {
     const selectors = SAFETY_POINT_SELECTORS[type] || [["amenity", type]];
-    const around = `(around:2000,${center.lat},${center.lng})`;
+    const around = `(around:${SAFETY_POINT_RADIUS_M},${center.lat},${center.lng})`;
     const parts = [];
     for (const [k, v] of selectors) {
       parts.push(`  node["${k}"="${v}"]${around};`);
       parts.push(`  way["${k}"="${v}"]${around};`);
       parts.push(`  relation["${k}"="${v}"]${around};`);
     }
-    const query = `[out:json][timeout:25];\n(\n${parts.join("\n")}\n);\nout center tags 80;`;
+    const query = `[out:json][timeout:20];\n(\n${parts.join("\n")}\n);\nout center tags ${SAFETY_POINT_LIMIT};`;
     const endpoints = [
       "https://overpass-api.de/api/interpreter",
       "https://overpass.kumi.systems/api/interpreter",
@@ -4957,14 +4962,14 @@ Do NOT output any text outside the JSON object.`;
     const counts = { hospital: 0, police: 0, pharmacy: 0 };
     const allPoints = [];
 
-    // 3-4 min budget — hard cap at 240s so the search can't hang forever.
+    // 1-2 min budget — hard cap at 120s so the search can't hang forever.
     const overallTimer = setTimeout(() => {
       if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
         console.log("[SafeTrip] safety points search hit timeout — aborting");
         safetyPointsAbortReason = "timeout";
         safetyPointsAbortCtrl.abort();
       }
-    }, 240000);
+    }, 120000);
 
     // 10s "still working" hint — only used while nothing has come back yet.
     const slowTimer = setTimeout(() => {
@@ -4973,7 +4978,10 @@ Do NOT output any text outside the JSON object.`;
       }
     }, 10000);
 
-    await Promise.allSettled(types.map(async (type) => {
+    // All three categories fetched in parallel via Promise.all. Each task has its
+    // own try/catch so per-type failures (network, abort, parse) never reject the
+    // overall promise — partial results are still surfaced and plotted.
+    await Promise.all(types.map(async (type) => {
       try {
         const { elements, error } = await fetchSafetyPointsByType(type, center, signal);
         if (error) {
