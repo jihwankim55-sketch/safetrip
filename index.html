@@ -2445,6 +2445,7 @@
       recentSearchesTitle: "📋 Recent Searches",
       clearHistoryBtn: "Clear",
       nearbySafetyPointsBtn: "🏥 Nearby Safety Points",
+      safetyPointConfirmMsg: "This may take 4-5 minutes. Proceed?",
       nearbySafetyPointsHideBtn: "🏥 Hide Safety Points",
       safetyPointHospital: "Hospital",
       safetyPointPolice: "Police",
@@ -2659,6 +2660,7 @@
       recentSearchesTitle: "📋 최근 검색",
       clearHistoryBtn: "지우기",
       nearbySafetyPointsBtn: "🏥 주변 안전 시설",
+      safetyPointConfirmMsg: "최대 4-5분 소요됩니다. 계속하시겠습니까?",
       nearbySafetyPointsHideBtn: "🏥 안전 시설 숨기기",
       safetyPointHospital: "병원",
       safetyPointPolice: "경찰서",
@@ -2873,6 +2875,7 @@
       recentSearchesTitle: "📋 最近の検索",
       clearHistoryBtn: "クリア",
       nearbySafetyPointsBtn: "🏥 近くの安全施設",
+      safetyPointConfirmMsg: "最大 4〜5 分かかる場合があります。続行しますか？",
       nearbySafetyPointsHideBtn: "🏥 安全施設を非表示",
       safetyPointHospital: "病院",
       safetyPointPolice: "警察署",
@@ -3087,6 +3090,7 @@
       recentSearchesTitle: "📋 最近搜索",
       clearHistoryBtn: "清除",
       nearbySafetyPointsBtn: "🏥 附近安全设施",
+      safetyPointConfirmMsg: "最多可能需要 4-5 分钟，是否继续？",
       nearbySafetyPointsHideBtn: "🏥 隐藏安全设施",
       safetyPointHospital: "医院",
       safetyPointPolice: "警察局",
@@ -4767,342 +4771,90 @@ Do NOT output any text outside the JSON object.`;
     return null;
   }
 
-  // Cached references for the safety-points loader UI.
-  const safetyPointsLoader = document.getElementById("safetyPointsLoader");
-  const safetyPointsLoaderText = document.getElementById("safetyPointsLoaderText");
-  const safetyPointsLoaderProgress = document.getElementById("safetyPointsLoaderProgress");
-
-  function showSafetyPointsLoader(message) {
-    if (!safetyPointsLoader) return;
-    safetyPointsLoaderText.textContent = message;
-    safetyPointsLoader.classList.add("visible");
-  }
-  function setSafetyPointsLoaderMessage(message) {
-    if (safetyPointsLoaderText) safetyPointsLoaderText.textContent = message;
-  }
-  function showSafetyPointsLoaderProgress() {
-    if (safetyPointsLoaderProgress) safetyPointsLoaderProgress.style.display = "";
-  }
-  function updateSafetyPointsLoaderCount(type, n, done) {
-    if (!safetyPointsLoaderProgress) return;
-    const countEl = safetyPointsLoaderProgress.querySelector(`[data-sp-count="${type}"]`);
-    if (countEl) countEl.textContent = String(n);
-    const chip = safetyPointsLoaderProgress.querySelector(`[data-sp-chip="${type}"]`);
-    if (chip && done) chip.classList.add("done");
-  }
-  function resetSafetyPointsLoaderChips() {
-    if (!safetyPointsLoaderProgress) return;
-    safetyPointsLoaderProgress.style.display = "none";
-    safetyPointsLoaderProgress.querySelectorAll(".sp-loader-chip").forEach((c) => {
-      c.classList.remove("done");
-      const cnt = c.querySelector("[data-sp-count]");
-      if (cnt) cnt.textContent = "0";
-    });
-  }
-  function hideSafetyPointsLoader() {
-    if (!safetyPointsLoader) return;
-    safetyPointsLoader.classList.remove("visible");
-    resetSafetyPointsLoaderChips();
-  }
-
-  // Per-type Overpass query with the same fallback chain as before.
-  // `signal` lets the caller cancel mid-flight (user click or 30s timeout).
-  //
-  // NOTE: Pharmacies in OSM are tagged inconsistently — `amenity=pharmacy` is the
-  // most common, but plenty of pharmacies (especially in EU/JP/KR data) use
-  // `healthcare=pharmacy` or `shop=chemist`. Querying only amenity=pharmacy was
-  // dropping a lot of real pharmacies, so we union the alternates here.
-  const SAFETY_POINT_SELECTORS = {
-    hospital: [["amenity", "hospital"]],
-    police:   [["amenity", "police"]],
-    pharmacy: [["amenity", "pharmacy"], ["healthcare", "pharmacy"], ["shop", "chemist"]],
-  };
-  // Search radius (m) and per-category result cap. Combined-query path uses
-  // its own radius/cap below (`SAFETY_POINT_COMBINED_*`) — the per-type
-  // helpers underneath this point are kept for fallback but are not used by
-  // the active search path.
-  const SAFETY_POINT_RADIUS_M = 2000;
-  const SAFETY_POINT_LIMIT = 30;
-
-  // Combined-query knobs — used by runSafetyPointsSearch. One Overpass call
-  // covers all three categories so hospital + police results don't get held
-  // hostage by a slow pharmacy fetch (and vice versa).
-  const SAFETY_POINT_COMBINED_RADIUS_M = 3000;
-  const SAFETY_POINT_COMBINED_LIMIT = 150;
-  const SAFETY_POINT_COMBINED_TIMEOUT_S = 30;
-
-  function classifySafetyPointType(tags) {
-    if (!tags) return null;
-    if (tags.amenity === "hospital") return "hospital";
-    if (tags.amenity === "police") return "police";
-    if (tags.amenity === "pharmacy") return "pharmacy";
-    // Cover the common alternate pharmacy tags so we don't silently drop them
-    // when the response comes back from the combined query below.
-    if (tags.healthcare === "pharmacy") return "pharmacy";
-    if (tags.shop === "chemist") return "pharmacy";
-    return null;
-  }
-
-  // Single combined Overpass call covering hospital + police + pharmacy. Falls
-  // back from overpass-api.de to overpass.kumi.systems when the primary
-  // returns 5xx / 504 / network error.
-  async function fetchAllSafetyPoints(center, signal) {
-    const around = `(around:${SAFETY_POINT_COMBINED_RADIUS_M},${center.lat},${center.lng})`;
-    const query = `[out:json][timeout:${SAFETY_POINT_COMBINED_TIMEOUT_S}];\n(\n  node["amenity"="hospital"]${around};\n  node["amenity"="police"]${around};\n  node["amenity"="pharmacy"]${around};\n  node["healthcare"="pharmacy"]${around};\n  node["shop"="chemist"]${around};\n);\nout body ${SAFETY_POINT_COMBINED_LIMIT};`;
-    console.log("[SafeTrip] combined safety-points query:\n" + query);
-
-    if (signal && signal.aborted) {
-      const err = new Error("Aborted");
-      err.name = "AbortError";
-      throw err;
+  async function toggleSafetyPoints() {
+    if (safetyPointsActive) {
+      safetyPointsLayer.clearLayers();
+      safetyPointsActive = false;
+      updateSafetyPointsBtnLabel();
+      return;
     }
-    const endpoints = [
+
+    // Confirm before kicking off the search (Overpass can take several minutes).
+    if (!window.confirm(t("safetyPointConfirmMsg"))) return;
+
+    const center = await getSafetyPointsCenter();
+    if (!center) {
+      showToast(t("safetyPointGeoError"));
+      return;
+    }
+
+    showToast(t("safetyPointSearching"));
+
+    const query = `[out:json][timeout:25];
+(
+  node["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
+  way["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
+  relation["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
+);
+out center tags 80;`;
+
+    // Try multiple Overpass endpoints + request shapes. CORS / network errors at
+    // the primary endpoint should not block the feature — fall back to a mirror.
+    const overpassEndpoints = [
       "https://overpass-api.de/api/interpreter",
       "https://overpass.kumi.systems/api/interpreter",
     ];
+    let json = null;
     let lastErr = null;
-    for (const endpoint of endpoints) {
-      if (signal && signal.aborted) {
-        const err = new Error("Aborted");
-        err.name = "AbortError";
-        throw err;
-      }
+    for (const endpoint of overpassEndpoints) {
+      // Attempt POST first (preferred for long queries), then GET with `?data=`.
       const attempts = [
         () => fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: "data=" + encodeURIComponent(query),
-          signal,
         }),
-        () => fetch(endpoint + "?data=" + encodeURIComponent(query), { signal }),
+        () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
       ];
       for (const doFetch of attempts) {
         try {
-          const r = await doFetch();
-          if (!r || !r.ok) {
-            const status = r && r.status;
-            console.warn(`[SafeTrip] combined query HTTP ${status} from ${endpoint}`);
-            lastErr = new Error("HTTP " + status);
+          const response = await doFetch();
+          if (!response.ok) {
+            lastErr = new Error("HTTP " + response.status);
             continue;
           }
-          const json = await r.json();
-          const elements = (json && json.elements) || [];
-          console.log(`[SafeTrip] combined query returned ${elements.length} elements from ${endpoint}`);
-          return { elements, error: null };
+          json = await response.json();
+          lastErr = null;
+          break;
         } catch (err) {
-          if (err && err.name === "AbortError") throw err;
-          console.warn(`[SafeTrip] combined query failed @ ${endpoint}:`, err && err.message);
           lastErr = err;
+          console.warn("[SafeTrip] Overpass attempt failed (" + endpoint + "):", err && err.message);
         }
       }
-      console.log(`[SafeTrip] combined query: ${endpoint} exhausted, trying next mirror`);
+      if (json) break;
     }
-    return { elements: [], error: lastErr };
-  }
-  // Pharmacy-tuned values — smaller payload than the hospital/police query because
-  // the 3-tag union frequently hits 504 Gateway Timeout on the public Overpass
-  // server. Nodes only (no `way` — pharmacies are POIs), tight radius, short
-  // server timeout so a stuck request fails fast and the mirror gets its turn.
-  const SAFETY_POINT_PHARMACY_RADIUS_M = 1500;
-  const SAFETY_POINT_PHARMACY_TIMEOUT_S = 10;
-  const SAFETY_POINT_PHARMACY_LIMIT = 15;
-  let safetyPointsPharmacyFailed = false;
+    if (!json) {
+      console.error("[SafeTrip] Overpass all endpoints failed:", lastErr);
+      showToast(t("safetyPointFetchFailed") + " " + ((lastErr && lastErr.message) || ""));
+      return;
+    }
 
-  // Pharmacy-only branch: each tag selector is fetched as its own small query
-  // (sequential mirror fallback) and then unioned client-side. Hospital/police
-  // code path is untouched.
-  async function fetchSafetyPointsForPharmacy(center, signal) {
-    safetyPointsPharmacyFailed = false;
-    const selectors = SAFETY_POINT_SELECTORS.pharmacy;
-    console.log("[SafeTrip][pharmacy] selectors to query:", selectors);
-    let okCount = 0;
-    let failCount = 0;
-    const batches = await Promise.all(selectors.map(async ([k, v]) => {
-      try {
-        const elements = await fetchPharmacySingleTag(k, v, center, signal);
-        console.log(`[SafeTrip][pharmacy] ${k}=${v} returned ${elements.length} elements`);
-        okCount++;
-        return elements;
-      } catch (err) {
-        if (err && err.name === "AbortError") throw err;
-        failCount++;
-        console.warn(`[SafeTrip][pharmacy] ${k}=${v} failed:`, err && err.message);
-        return [];
-      }
-    }));
-    // Dedupe across the 3 tag queries (same OSM element can match multiple tags).
-    const seen = new Set();
-    const merged = [];
-    for (const batch of batches) {
-      for (const el of batch) {
-        const key = `${el.type}:${el.id}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          merged.push(el);
-        }
-      }
+    const elements = (json && json.elements) || [];
+    if (elements.length === 0) {
+      showToast(t("safetyPointNotFound"));
+      return;
     }
-    console.log(`[SafeTrip][pharmacy] ok=${okCount} fail=${failCount} unique merged=${merged.length}`);
-    // Flag a failure only when every tag query errored AND nothing came back —
-    // a non-empty result (even partial) is success.
-    if (failCount > 0 && okCount === 0 && merged.length === 0) {
-      safetyPointsPharmacyFailed = true;
-    }
-    return { elements: merged, error: null };
-  }
 
-  // Try one endpoint at a time (POST then GET fallback) so a 504 on the primary
-  // automatically switches to the mirror. Each attempt also gets its own
-  // AbortController with a short per-request timeout so a hung connection
-  // can't stall the whole search.
-  const PHARMACY_PER_REQUEST_TIMEOUT_MS = 12000;
-  async function fetchPharmacySingleTag(tagKey, tagValue, center, signal) {
-    const around = `(around:${SAFETY_POINT_PHARMACY_RADIUS_M},${center.lat},${center.lng})`;
-    // Nodes-only query — keeps the payload tiny so the mirror can handle it
-    // even when the primary server is overloaded.
-    const query = `[out:json][timeout:${SAFETY_POINT_PHARMACY_TIMEOUT_S}];\n(\n  node["${tagKey}"="${tagValue}"]${around};\n);\nout tags ${SAFETY_POINT_PHARMACY_LIMIT};`;
-    console.log(`[SafeTrip][pharmacy] query for ${tagKey}=${tagValue}:\n${query}`);
-    if (signal && signal.aborted) {
-      const err = new Error("Aborted");
-      err.name = "AbortError";
-      throw err;
-    }
-    const endpoints = [
-      "https://overpass-api.de/api/interpreter",
-      "https://overpass.kumi.systems/api/interpreter",
-    ];
-    const errors = [];
-    for (const endpoint of endpoints) {
-      if (signal && signal.aborted) {
-        const err = new Error("Aborted");
-        err.name = "AbortError";
-        throw err;
-      }
-      const attempts = [
-        () => fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: "data=" + encodeURIComponent(query),
-          signal,
-        }),
-        () => fetch(endpoint + "?data=" + encodeURIComponent(query), { signal }),
-      ];
-      for (const doFetch of attempts) {
-        // Per-attempt timeout — if a request hangs, abort it and try the next.
-        const localCtrl = new AbortController();
-        const linkAbort = () => localCtrl.abort();
-        if (signal) signal.addEventListener("abort", linkAbort);
-        const timeoutId = setTimeout(() => localCtrl.abort(), PHARMACY_PER_REQUEST_TIMEOUT_MS);
-        try {
-          const r = await doFetch();
-          if (!r || !r.ok) {
-            const status = r && r.status;
-            console.warn(`[SafeTrip][pharmacy] HTTP ${status} from ${endpoint}`);
-            errors.push(new Error("HTTP " + status));
-            continue;
-          }
-          const json = await r.json();
-          return (json && json.elements) || [];
-        } catch (err) {
-          if (signal && signal.aborted) {
-            const a = new Error("Aborted");
-            a.name = "AbortError";
-            throw a;
-          }
-          console.warn(`[SafeTrip][pharmacy] attempt failed @ ${endpoint}:`, err && err.message);
-          errors.push(err);
-        } finally {
-          clearTimeout(timeoutId);
-          if (signal) signal.removeEventListener("abort", linkAbort);
-        }
-      }
-      // Primary endpoint exhausted — fall back to the mirror automatically.
-      console.log(`[SafeTrip][pharmacy] ${endpoint} exhausted, trying next mirror`);
-    }
-    console.warn(`[SafeTrip][pharmacy] all endpoints failed for ${tagKey}=${tagValue}`);
-    throw errors[errors.length - 1] || new Error("All endpoints failed");
-  }
-
-  async function fetchSafetyPointsByType(type, center, signal) {
-    // Pharmacy is handled via the per-tag merge path above so the union query
-    // can't drop results during the endpoint race.
-    if (type === "pharmacy") return fetchSafetyPointsForPharmacy(center, signal);
-
-    const selectors = SAFETY_POINT_SELECTORS[type] || [["amenity", type]];
-    const around = `(around:${SAFETY_POINT_RADIUS_M},${center.lat},${center.lng})`;
-    const parts = [];
-    for (const [k, v] of selectors) {
-      // Skip `relation` — hospitals/police/pharmacies are almost never tagged as
-      // relations, but including them roughly triples Overpass processing time.
-      parts.push(`  node["${k}"="${v}"]${around};`);
-      parts.push(`  way["${k}"="${v}"]${around};`);
-    }
-    const query = `[out:json][timeout:15];\n(\n${parts.join("\n")}\n);\nout center tags ${SAFETY_POINT_LIMIT};`;
-    const endpoints = [
-      "https://overpass-api.de/api/interpreter",
-      "https://overpass.kumi.systems/api/interpreter",
-    ];
-    if (signal && signal.aborted) {
-      const err = new Error("Aborted");
-      err.name = "AbortError";
-      throw err;
-    }
-    // Race every attempt — first successful response wins. This avoids the
-    // worst-case where the primary endpoint is slow and the fallback never gets
-    // its turn until ~60s later.
-    const attempts = [];
-    for (const endpoint of endpoints) {
-      attempts.push(
-        fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: "data=" + encodeURIComponent(query),
-          signal,
-        }).then((r) => (r && r.ok ? r : Promise.reject(new Error("HTTP " + (r && r.status)))))
-      );
-      attempts.push(
-        fetch(endpoint + "?data=" + encodeURIComponent(query), { signal })
-          .then((r) => (r && r.ok ? r : Promise.reject(new Error("HTTP " + (r && r.status)))))
-      );
-    }
-    try {
-      const response = await Promise.any(attempts);
-      const json = await response.json();
-      return { elements: (json && json.elements) || [], error: null };
-    } catch (err) {
-      const errors = (err && err.errors) || [err];
-      // Bubble AbortError up so the outer task records it as a cancel, not a failure.
-      if (errors.some((e) => e && e.name === "AbortError")) {
-        const a = new Error("Aborted");
-        a.name = "AbortError";
-        throw a;
-      }
-      console.warn(`[SafeTrip] all overpass attempts failed for ${type}:`, errors.map((e) => e && e.message));
-      return { elements: [], error: errors[errors.length - 1] };
-    }
-  }
-
-  function plotSafetyPointElements(elements, type) {
-    const cfg = SAFETY_POINT_CONFIG[type];
-    if (!cfg) return 0;
-    if (type === "pharmacy") {
-      console.log(`[SafeTrip][pharmacy] plotSafetyPointElements got ${elements.length} elements`);
-    }
-    const points = [];
-    let skippedNoCoords = 0;
+    safetyPointsLayer.clearLayers();
+    const bounds = [];
+    let added = 0;
     elements.forEach((el) => {
       const lat = (typeof el.lat === "number") ? el.lat : (el.center && el.center.lat);
       const lng = (typeof el.lon === "number") ? el.lon : (el.center && el.center.lon);
-      if (typeof lat !== "number" || typeof lng !== "number") {
-        if (type === "pharmacy") {
-          skippedNoCoords++;
-          console.warn("[SafeTrip][pharmacy] skipped element (no coords):", el.type, el.id, el);
-        }
-        return;
-      }
-      if (type === "pharmacy") {
-        console.log(`[SafeTrip][pharmacy] plotting Rx marker @ ${lat.toFixed(5)}, ${lng.toFixed(5)} name="${(el.tags && (el.tags.name || el.tags["name:en"])) || "(none)"}"`);
-      }
+      if (typeof lat !== "number" || typeof lng !== "number") return;
+      const amenity = el.tags && el.tags.amenity;
+      const cfg = SAFETY_POINT_CONFIG[amenity];
+      if (!cfg) return;
       const tags = el.tags || {};
       const name = tags.name || tags["name:en"] || t("safetyPointUnnamed");
       const address = buildSafetyPointAddress(tags);
@@ -5118,221 +4870,24 @@ Do NOT output any text outside the JSON object.`;
       L.marker([lat, lng], { icon: safetyPointDivIcon(cfg) })
         .addTo(safetyPointsLayer)
         .bindPopup(popupHtml);
-      points.push([lat, lng]);
+      bounds.push([lat, lng]);
+      added += 1;
     });
-    if (type === "pharmacy") {
-      console.log(`[SafeTrip][pharmacy] plotted ${points.length} markers, skipped ${skippedNoCoords} (no coords)`);
-    }
-    return points;
-  }
 
-  // Tracks the in-flight search so the cancel button and 30s timeout can abort it.
-  let safetyPointsAbortCtrl = null;
-  let safetyPointsAbortReason = null; // "timeout" | "user" | null
-
-  function cleanupSafetyPointsSearch() {
-    hideSafetyPointsLoader();
-    if (safetyPointsBtnEl) {
-      safetyPointsBtnEl.disabled = false;
-      safetyPointsBtnEl.innerHTML = "🏥";
-      safetyPointsBtnEl.classList.remove("searching");
-      updateSafetyPointsBtnLabel();
-    }
-    safetyPointsAbortCtrl = null;
-    safetyPointsAbortReason = null;
-  }
-
-  // Build the running progress text: "Searching... Found 2 hospitals, 5 police stations so far..."
-  function safetyPointsProgressText(counts) {
-    const parts = [];
-    if (counts.hospital > 0) parts.push(t("safetyPointCountHospital", { n: counts.hospital }));
-    if (counts.police > 0) parts.push(t("safetyPointCountPolice", { n: counts.police }));
-    if (counts.pharmacy > 0) parts.push(t("safetyPointCountPharmacy", { n: counts.pharmacy }));
-    if (parts.length === 0) return t("safetyPointSearching");
-    return t("safetyPointProgressText", { found: parts.join(", ") });
-  }
-
-  // Cached refs for the confirm modal.
-  const safetyPointsConfirmModal = document.getElementById("safetyPointsConfirmModal");
-  const safetyPointsConfirmYes = document.getElementById("safetyPointsConfirmYes");
-  const safetyPointsConfirmCancel = document.getElementById("safetyPointsConfirmCancel");
-
-  function closeSafetyPointsConfirm() {
-    if (safetyPointsConfirmModal) safetyPointsConfirmModal.classList.remove("visible");
-  }
-  function openSafetyPointsConfirm() {
-    if (safetyPointsConfirmModal) safetyPointsConfirmModal.classList.add("visible");
-  }
-
-  // Top-level handler: clicking the map button now shows a confirm modal first.
-  function toggleSafetyPoints() {
-    // ON → OFF: clear markers immediately, no modal.
-    if (safetyPointsActive) {
-      safetyPointsLayer.clearLayers();
-      safetyPointsActive = false;
-      updateSafetyPointsBtnLabel();
-      return;
-    }
-    // Re-entry guard: never run two searches at once.
-    if (safetyPointsAbortCtrl) {
-      console.log("[SafeTrip] safety points search already in progress — ignoring click");
-      return;
-    }
-    openSafetyPointsConfirm();
-  }
-
-  // The actual search — only invoked when the user accepts the confirm modal.
-  async function runSafetyPointsSearch() {
-    if (safetyPointsAbortCtrl) return;
-    if (safetyPointsBtnEl) {
-      safetyPointsBtnEl.disabled = true;
-      safetyPointsBtnEl.innerHTML = "⏳";
-      safetyPointsBtnEl.classList.add("searching");
-      const label = t("safetyPointSearching");
-      safetyPointsBtnEl.setAttribute("aria-label", label);
-      safetyPointsBtnEl.title = label;
-    }
-
-    safetyPointsAbortCtrl = new AbortController();
-    safetyPointsAbortReason = null;
-    const signal = safetyPointsAbortCtrl.signal;
-
-    showSafetyPointsLoader(t("safetyPointSearching"));
-
-    // Resolve center (GPS first, destination center as fallback).
-    const center = await getSafetyPointsCenter();
-    if (signal.aborted) { cleanupSafetyPointsSearch(); return; }
-    if (!center) {
-      cleanupSafetyPointsSearch();
-      showToast(t("safetyPointGeoError"));
-      return;
-    }
-
-    // Clear previous markers, prepare progress UI and counters up-front
-    // so timer closures below can safely reference them.
-    safetyPointsLayer.clearLayers();
-    showSafetyPointsLoaderProgress();
-    const types = ["hospital", "police", "pharmacy"];
-    const counts = { hospital: 0, police: 0, pharmacy: 0 };
-    const allPoints = [];
-
-    // 1-2 min budget — hard cap at 120s so the search can't hang forever.
-    const overallTimer = setTimeout(() => {
-      if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
-        console.log("[SafeTrip] safety points search hit timeout — aborting");
-        safetyPointsAbortReason = "timeout";
-        safetyPointsAbortCtrl.abort();
-      }
-    }, 120000);
-
-    // 10s "still working" hint — only used while nothing has come back yet.
-    const slowTimer = setTimeout(() => {
-      if (counts.hospital + counts.police + counts.pharmacy === 0) {
-        setSafetyPointsLoaderMessage(t("safetyPointSlowWarn"));
-      }
-    }, 10000);
-
-    // Single combined Overpass query covering all three categories. Splits the
-    // response into per-type buckets via the amenity (and pharmacy alternate)
-    // tags, then plots and counts each bucket separately.
-    safetyPointsPharmacyFailed = false;
-    try {
-      const { elements: allElements, error } = await fetchAllSafetyPoints(center, signal);
-      if (error) {
-        console.error("[SafeTrip] combined fetch error:", error);
-      }
-      const byType = { hospital: [], police: [], pharmacy: [] };
-      for (const el of allElements) {
-        const t = classifySafetyPointType(el.tags);
-        if (t && byType[t]) byType[t].push(el);
-      }
-      console.log(`[SafeTrip] classified — hospital=${byType.hospital.length} police=${byType.police.length} pharmacy=${byType.pharmacy.length}`);
-      for (const type of types) {
-        const points = plotSafetyPointElements(byType[type], type);
-        counts[type] = points.length;
-        points.forEach((p) => allPoints.push(p));
-        updateSafetyPointsLoaderCount(type, points.length, true);
-        console.log(`[SafeTrip] ${type}: ${points.length} found`);
-      }
-      setSafetyPointsLoaderMessage(safetyPointsProgressText(counts));
-      // Pharmacy-specific failure surface: only when the combined query errored
-      // outright AND no pharmacy markers were plotted.
-      if (error && counts.pharmacy === 0) {
-        safetyPointsPharmacyFailed = true;
-      }
-    } catch (e) {
-      if (e && e.name === "AbortError") {
-        console.log("[SafeTrip] combined fetch aborted");
-      } else {
-        console.error("[SafeTrip] combined fetch unexpected error:", e);
-      }
-    }
-
-    clearTimeout(overallTimer);
-    clearTimeout(slowTimer);
-
-    const wasAborted = signal.aborted;
-    const abortReason = safetyPointsAbortReason;
-    const total = counts.hospital + counts.police + counts.pharmacy;
-
-    // Keep whatever markers were plotted before the abort — preserve partial results.
-    if (allPoints.length >= 2) {
-      try { map.fitBounds(L.latLngBounds(allPoints).pad(0.2)); } catch (_) {}
-    } else if (allPoints.length === 1) {
-      map.setView(allPoints[0], 16, { animate: true });
-    }
-
-    if (total > 0) {
-      safetyPointsActive = true;
-      updateSafetyPointsBtnLabel();
-    }
-
-    cleanupSafetyPointsSearch();
-
-    if (wasAborted) {
-      if (abortReason === "timeout") {
-        showToast(t("safetyPointTimeout"));
-      } else {
-        showToast(t("safetyPointCancelled"));
-      }
-    } else if (total === 0) {
+    if (added === 0) {
       showToast(t("safetyPointNotFound"));
-    } else {
-      showToast(t("safetyPointSummary", { h: counts.hospital, p: counts.police, ph: counts.pharmacy }));
+      return;
     }
-    // Pharmacy-specific failure surface — only when pharmacy hit hard errors
-    // (504s / timeouts on every tag) and zero pharmacies were plotted. Stagger
-    // after the summary toast so both are visible.
-    if (safetyPointsPharmacyFailed && counts.pharmacy === 0) {
-      setTimeout(() => showToast(t("safetyPointPharmacyFailed")), 600);
+
+    if (bounds.length >= 2) {
+      try { map.fitBounds(L.latLngBounds(bounds).pad(0.2)); } catch (_) {}
+    } else if (bounds.length === 1) {
+      map.setView(bounds[0], 16, { animate: true });
     }
-  }
 
-  if (safetyPointsConfirmYes) {
-    safetyPointsConfirmYes.addEventListener("click", () => {
-      closeSafetyPointsConfirm();
-      runSafetyPointsSearch();
-    });
-  }
-  if (safetyPointsConfirmCancel) {
-    safetyPointsConfirmCancel.addEventListener("click", closeSafetyPointsConfirm);
-  }
-  if (safetyPointsConfirmModal) {
-    safetyPointsConfirmModal.addEventListener("click", (e) => {
-      if (e.target === safetyPointsConfirmModal) closeSafetyPointsConfirm();
-    });
-  }
-
-  // Wire the cancel button (always sits inside the loader).
-  const safetyPointsCancelBtn = document.getElementById("safetyPointsCancelBtn");
-  if (safetyPointsCancelBtn) {
-    safetyPointsCancelBtn.addEventListener("click", () => {
-      if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
-        console.log("[SafeTrip] safety points search cancelled by user");
-        safetyPointsAbortReason = "user";
-        safetyPointsAbortCtrl.abort();
-      }
-    });
+    safetyPointsActive = true;
+    updateSafetyPointsBtnLabel();
+    showToast(t("safetyPointFound", { n: added }));
   }
 
   sosClose.addEventListener("click", () => sosModal.classList.remove("visible"));
