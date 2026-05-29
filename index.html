@@ -1064,6 +1064,33 @@
     font-weight: 700;
   }
   .sp-loader-chip.done { background: #dcfce7; color: #166534; }
+  .sp-loader-cancel {
+    margin-left: 6px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .sp-loader-cancel:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: #94a3b8;
+  }
+  .safety-points-button:disabled {
+    opacity: 0.6;
+    cursor: progress;
+    transform: none;
+  }
+  .safety-points-button:disabled:hover {
+    background: white;
+    transform: none;
+  }
 
   .safety-point-marker { background: transparent; border: none; }
   .safety-point-icon {
@@ -1426,6 +1453,16 @@
   }
   body.dark .sp-loader-chip { background: #1f2a4a; color: #cbd5e1; }
   body.dark .sp-loader-chip.done { background: #14532d; color: #86efac; }
+  body.dark .sp-loader-cancel {
+    background: #1f2a4a;
+    border-color: #334155;
+    color: #cbd5e1;
+  }
+  body.dark .sp-loader-cancel:hover {
+    background: #283455;
+    color: #e0e0e0;
+    border-color: #64748b;
+  }
   body.dark .landing-section h2 { color: #e0e0e0; }
   body.dark .landing-section .section-lead { color: #94a3b8; }
   body.dark .landing-features { background: #0f1626; }
@@ -2168,6 +2205,7 @@
     <span class="sp-loader-chip" data-sp-chip="police">🛡 <span data-sp-count="police">0</span></span>
     <span class="sp-loader-chip" data-sp-chip="pharmacy">💊 <span data-sp-count="pharmacy">0</span></span>
   </span>
+  <button type="button" id="safetyPointsCancelBtn" class="sp-loader-cancel" data-i18n="safetyPointCancelBtn">Cancel search</button>
 </div>
 
 <footer class="site-footer">
@@ -2395,6 +2433,9 @@
       safetyPointSearching: "Searching nearby safety points...",
       safetyPointSlowWarn: "This is taking longer than expected. Please wait...",
       safetyPointSummary: "Found {h} hospitals, {p} police stations, and {ph} pharmacies nearby",
+      safetyPointCancelBtn: "Cancel search",
+      safetyPointTimeout: "Search timed out. Please try again.",
+      safetyPointCancelled: "Search cancelled",
       safetyPointNotFound: "No safety points found within 2 km.",
       safetyPointFound: "{n} safety points found nearby",
       safetyPointGeoError: "Could not determine your location.",
@@ -2598,6 +2639,9 @@
       safetyPointSearching: "주변 안전 시설을 검색 중입니다...",
       safetyPointSlowWarn: "검색에 시간이 걸리고 있습니다. 잠시만 기다려주세요",
       safetyPointSummary: "근처에서 병원 {h}곳, 경찰서 {p}곳, 약국 {ph}곳을 찾았습니다",
+      safetyPointCancelBtn: "검색 취소",
+      safetyPointTimeout: "시간 초과. 다시 시도해주세요",
+      safetyPointCancelled: "검색이 취소되었습니다",
       safetyPointNotFound: "반경 2km 내에서 안전 시설을 찾지 못했습니다.",
       safetyPointFound: "주변에서 {n}개의 안전 시설을 찾았습니다",
       safetyPointGeoError: "위치를 확인할 수 없습니다.",
@@ -2801,6 +2845,9 @@
       safetyPointSearching: "近くの安全施設を検索しています...",
       safetyPointSlowWarn: "検索に時間がかかっています。少々お待ちください",
       safetyPointSummary: "近くに病院 {h} 件、警察署 {p} 件、薬局 {ph} 件が見つかりました",
+      safetyPointCancelBtn: "検索をキャンセル",
+      safetyPointTimeout: "タイムアウトしました。もう一度お試しください",
+      safetyPointCancelled: "検索をキャンセルしました",
       safetyPointNotFound: "半径 2km 以内に安全施設が見つかりません。",
       safetyPointFound: "近くに {n} 件の安全施設が見つかりました",
       safetyPointGeoError: "位置情報を取得できません。",
@@ -3004,6 +3051,9 @@
       safetyPointSearching: "正在搜索附近的安全设施...",
       safetyPointSlowWarn: "搜索时间较长，请稍候",
       safetyPointSummary: "附近找到医院 {h} 处，警察局 {p} 处，药房 {ph} 处",
+      safetyPointCancelBtn: "取消搜索",
+      safetyPointTimeout: "搜索超时。请重试",
+      safetyPointCancelled: "已取消搜索",
       safetyPointNotFound: "2 公里内未找到安全设施。",
       safetyPointFound: "附近找到 {n} 个安全设施",
       safetyPointGeoError: "无法获取您的位置。",
@@ -4705,7 +4755,8 @@ Do NOT output any text outside the JSON object.`;
   }
 
   // Per-type Overpass query with the same fallback chain as before.
-  async function fetchSafetyPointsByType(type, center) {
+  // `signal` lets the caller cancel mid-flight (user click or 30s timeout).
+  async function fetchSafetyPointsByType(type, center, signal) {
     const query = `[out:json][timeout:25];
 (
   node["amenity"="${type}"](around:2000,${center.lat},${center.lng});
@@ -4719,13 +4770,19 @@ out center tags 60;`;
     ];
     let lastErr = null;
     for (const endpoint of endpoints) {
+      if (signal && signal.aborted) {
+        const err = new Error("Aborted");
+        err.name = "AbortError";
+        throw err;
+      }
       const attempts = [
         () => fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: "data=" + encodeURIComponent(query),
+          signal,
         }),
-        () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
+        () => fetch(endpoint + "?data=" + encodeURIComponent(query), { signal }),
       ];
       for (const doFetch of attempts) {
         try {
@@ -4734,6 +4791,7 @@ out center tags 60;`;
           const json = await response.json();
           return { elements: (json && json.elements) || [], error: null };
         } catch (err) {
+          if (err && err.name === "AbortError") throw err;
           lastErr = err;
           console.warn(`[SafeTrip] Overpass attempt (${type}) failed @ ${endpoint}:`, err && err.message);
         }
@@ -4770,33 +4828,63 @@ out center tags 60;`;
     return points;
   }
 
+  // Tracks the in-flight search so the cancel button and 30s timeout can abort it.
+  let safetyPointsAbortCtrl = null;
+  let safetyPointsAbortReason = null; // "timeout" | "user" | null
+
+  function cleanupSafetyPointsSearch() {
+    hideSafetyPointsLoader();
+    if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = false;
+    safetyPointsAbortCtrl = null;
+    safetyPointsAbortReason = null;
+  }
+
   async function toggleSafetyPoints() {
+    // ON → OFF: clear markers, no async work.
     if (safetyPointsActive) {
       safetyPointsLayer.clearLayers();
       safetyPointsActive = false;
       updateSafetyPointsBtnLabel();
-      hideSafetyPointsLoader();
       return;
     }
 
-    // 1) Show the sticky loader immediately — before we even ask for geolocation.
+    // Re-entry guard: never run two searches at once.
+    if (safetyPointsAbortCtrl) {
+      console.log("[SafeTrip] safety points search already in progress — ignoring click");
+      return;
+    }
+    if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = true;
+
+    safetyPointsAbortCtrl = new AbortController();
+    safetyPointsAbortReason = null;
+    const signal = safetyPointsAbortCtrl.signal;
+
     showSafetyPointsLoader(t("safetyPointSearching"));
 
-    // 2) Resolve center (GPS first, destination center as fallback).
+    // Resolve center (GPS first, destination center as fallback).
     const center = await getSafetyPointsCenter();
+    if (signal.aborted) { cleanupSafetyPointsSearch(); return; }
     if (!center) {
-      hideSafetyPointsLoader();
+      cleanupSafetyPointsSearch();
       showToast(t("safetyPointGeoError"));
       return;
     }
 
-    // 3) 10s "still working" warning that updates the loader text in place.
+    // Hard 30s timeout — aborts ongoing fetches but keeps whatever was found.
+    const overallTimer = setTimeout(() => {
+      if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
+        console.log("[SafeTrip] safety points search hit 30s timeout — aborting");
+        safetyPointsAbortReason = "timeout";
+        safetyPointsAbortCtrl.abort();
+      }
+    }, 30000);
+
+    // 10s "still working" warning that updates the loader text in place.
     const slowTimer = setTimeout(() => {
       setSafetyPointsLoaderMessage(t("safetyPointSlowWarn"));
     }, 10000);
 
-    // 4) Start parallel per-type fetches. As each one resolves, plot its markers
-    //    on the map and tick the progress chip in the loader.
+    // Clear previous markers, prepare progress UI.
     safetyPointsLayer.clearLayers();
     showSafetyPointsLoaderProgress();
     const types = ["hospital", "police", "pharmacy"];
@@ -4804,36 +4892,69 @@ out center tags 60;`;
     const allPoints = [];
 
     await Promise.allSettled(types.map(async (type) => {
-      const { elements, error } = await fetchSafetyPointsByType(type, center);
-      if (error) {
-        console.error(`[SafeTrip] safety points (${type}) failed:`, error);
+      try {
+        const { elements, error } = await fetchSafetyPointsByType(type, center, signal);
+        if (error) {
+          console.error(`[SafeTrip] safety points (${type}) failed:`, error);
+        }
+        const points = plotSafetyPointElements(elements, type);
+        counts[type] = points.length;
+        points.forEach((p) => allPoints.push(p));
+        updateSafetyPointsLoaderCount(type, points.length, true);
+        console.log(`[SafeTrip] ${type}: ${points.length} found`);
+      } catch (e) {
+        if (e && e.name === "AbortError") {
+          console.log(`[SafeTrip] ${type} fetch aborted`);
+        } else {
+          console.error(`[SafeTrip] ${type} unexpected error:`, e);
+        }
       }
-      const points = plotSafetyPointElements(elements, type);
-      counts[type] = points.length;
-      points.forEach((p) => allPoints.push(p));
-      updateSafetyPointsLoaderCount(type, points.length, true);
-      console.log(`[SafeTrip] ${type}: ${points.length} found`);
     }));
 
+    clearTimeout(overallTimer);
     clearTimeout(slowTimer);
 
+    const wasAborted = signal.aborted;
+    const abortReason = safetyPointsAbortReason;
     const total = counts.hospital + counts.police + counts.pharmacy;
-    if (total === 0) {
-      hideSafetyPointsLoader();
-      showToast(t("safetyPointNotFound"));
-      return;
-    }
 
+    // Keep whatever markers were plotted before the abort — preserve partial results.
     if (allPoints.length >= 2) {
       try { map.fitBounds(L.latLngBounds(allPoints).pad(0.2)); } catch (_) {}
     } else if (allPoints.length === 1) {
       map.setView(allPoints[0], 16, { animate: true });
     }
 
-    safetyPointsActive = true;
-    updateSafetyPointsBtnLabel();
-    hideSafetyPointsLoader();
-    showToast(t("safetyPointSummary", { h: counts.hospital, p: counts.police, ph: counts.pharmacy }));
+    if (total > 0) {
+      safetyPointsActive = true;
+      updateSafetyPointsBtnLabel();
+    }
+
+    cleanupSafetyPointsSearch();
+
+    if (wasAborted) {
+      if (abortReason === "timeout") {
+        showToast(t("safetyPointTimeout"));
+      } else {
+        showToast(t("safetyPointCancelled"));
+      }
+    } else if (total === 0) {
+      showToast(t("safetyPointNotFound"));
+    } else {
+      showToast(t("safetyPointSummary", { h: counts.hospital, p: counts.police, ph: counts.pharmacy }));
+    }
+  }
+
+  // Wire the cancel button (always sits inside the loader).
+  const safetyPointsCancelBtn = document.getElementById("safetyPointsCancelBtn");
+  if (safetyPointsCancelBtn) {
+    safetyPointsCancelBtn.addEventListener("click", () => {
+      if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
+        console.log("[SafeTrip] safety points search cancelled by user");
+        safetyPointsAbortReason = "user";
+        safetyPointsAbortCtrl.abort();
+      }
+    });
   }
 
   sosClose.addEventListener("click", () => sosModal.classList.remove("visible"));
