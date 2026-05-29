@@ -2197,6 +2197,17 @@
 
 <div id="dangerBanner" class="danger-banner" data-i18n="dangerBannerText">⚠️ You are near a reported incident area. Stay alert!</div>
 
+<div id="safetyPointsConfirmModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#2563eb" data-i18n="safetyPointConfirmTitle">🏥 Nearby Safety Points</h2>
+    <div class="modal-sub" data-i18n="safetyPointConfirmSub">Searching nearby safety points may take 3-4 minutes. Would you like to proceed?</div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" id="safetyPointsConfirmCancel" data-i18n="cancelBtn">Cancel</button>
+      <button type="button" class="btn-primary" id="safetyPointsConfirmYes" data-i18n="safetyPointConfirmYes">Yes, search</button>
+    </div>
+  </div>
+</div>
+
 <div id="safetyPointsLoader" class="sp-loader" role="status" aria-live="polite">
   <div class="sp-loader-spinner"></div>
   <span id="safetyPointsLoaderText"></span>
@@ -2434,8 +2445,15 @@
       safetyPointSlowWarn: "This is taking longer than expected. Please wait...",
       safetyPointSummary: "Found {h} hospitals, {p} police stations, and {ph} pharmacies nearby",
       safetyPointCancelBtn: "Cancel search",
-      safetyPointTimeout: "Search timed out. Please try again.",
+      safetyPointTimeout: "Search completed with partial results. Tap to search again for more.",
       safetyPointCancelled: "Search cancelled",
+      safetyPointConfirmTitle: "🏥 Nearby Safety Points",
+      safetyPointConfirmSub: "Searching nearby safety points may take 3-4 minutes. Would you like to proceed?",
+      safetyPointConfirmYes: "Yes, search",
+      safetyPointCountHospital: "{n} hospitals",
+      safetyPointCountPolice: "{n} police stations",
+      safetyPointCountPharmacy: "{n} pharmacies",
+      safetyPointProgressText: "Searching... Found {found} so far...",
       safetyPointNotFound: "No safety points found within 2 km.",
       safetyPointFound: "{n} safety points found nearby",
       safetyPointGeoError: "Could not determine your location.",
@@ -2640,8 +2658,15 @@
       safetyPointSlowWarn: "검색에 시간이 걸리고 있습니다. 잠시만 기다려주세요",
       safetyPointSummary: "근처에서 병원 {h}곳, 경찰서 {p}곳, 약국 {ph}곳을 찾았습니다",
       safetyPointCancelBtn: "검색 취소",
-      safetyPointTimeout: "시간 초과. 다시 시도해주세요",
+      safetyPointTimeout: "일부 결과로 검색을 완료했습니다. 더 많은 결과를 보려면 다시 검색하세요.",
       safetyPointCancelled: "검색이 취소되었습니다",
+      safetyPointConfirmTitle: "🏥 주변 안전 시설",
+      safetyPointConfirmSub: "주변 안전 시설 검색은 3-4분 정도 걸릴 수 있습니다. 계속하시겠습니까?",
+      safetyPointConfirmYes: "네, 검색합니다",
+      safetyPointCountHospital: "병원 {n}곳",
+      safetyPointCountPolice: "경찰서 {n}곳",
+      safetyPointCountPharmacy: "약국 {n}곳",
+      safetyPointProgressText: "검색 중... 지금까지 {found} 발견...",
       safetyPointNotFound: "반경 2km 내에서 안전 시설을 찾지 못했습니다.",
       safetyPointFound: "주변에서 {n}개의 안전 시설을 찾았습니다",
       safetyPointGeoError: "위치를 확인할 수 없습니다.",
@@ -2846,8 +2871,15 @@
       safetyPointSlowWarn: "検索に時間がかかっています。少々お待ちください",
       safetyPointSummary: "近くに病院 {h} 件、警察署 {p} 件、薬局 {ph} 件が見つかりました",
       safetyPointCancelBtn: "検索をキャンセル",
-      safetyPointTimeout: "タイムアウトしました。もう一度お試しください",
+      safetyPointTimeout: "一部の結果で検索を完了しました。さらに探すには再度検索してください。",
       safetyPointCancelled: "検索をキャンセルしました",
+      safetyPointConfirmTitle: "🏥 近くの安全施設",
+      safetyPointConfirmSub: "近くの安全施設の検索は 3〜4 分かかる場合があります。続行しますか？",
+      safetyPointConfirmYes: "はい、検索する",
+      safetyPointCountHospital: "病院 {n} 件",
+      safetyPointCountPolice: "警察署 {n} 件",
+      safetyPointCountPharmacy: "薬局 {n} 件",
+      safetyPointProgressText: "検索中... これまでに {found} 見つかりました...",
       safetyPointNotFound: "半径 2km 以内に安全施設が見つかりません。",
       safetyPointFound: "近くに {n} 件の安全施設が見つかりました",
       safetyPointGeoError: "位置情報を取得できません。",
@@ -3052,8 +3084,15 @@
       safetyPointSlowWarn: "搜索时间较长，请稍候",
       safetyPointSummary: "附近找到医院 {h} 处，警察局 {p} 处，药房 {ph} 处",
       safetyPointCancelBtn: "取消搜索",
-      safetyPointTimeout: "搜索超时。请重试",
+      safetyPointTimeout: "已用部分结果完成搜索。点击可再次搜索以获取更多。",
       safetyPointCancelled: "已取消搜索",
+      safetyPointConfirmTitle: "🏥 附近安全设施",
+      safetyPointConfirmSub: "搜索附近安全设施可能需要 3-4 分钟。是否继续？",
+      safetyPointConfirmYes: "是的，开始搜索",
+      safetyPointCountHospital: "医院 {n} 处",
+      safetyPointCountPolice: "警察局 {n} 处",
+      safetyPointCountPharmacy: "药房 {n} 处",
+      safetyPointProgressText: "正在搜索... 已找到 {found}...",
       safetyPointNotFound: "2 公里内未找到安全设施。",
       safetyPointFound: "附近找到 {n} 个安全设施",
       safetyPointGeoError: "无法获取您的位置。",
@@ -4839,20 +4878,48 @@ out center tags 60;`;
     safetyPointsAbortReason = null;
   }
 
-  async function toggleSafetyPoints() {
-    // ON → OFF: clear markers, no async work.
+  // Build the running progress text: "Searching... Found 2 hospitals, 5 police stations so far..."
+  function safetyPointsProgressText(counts) {
+    const parts = [];
+    if (counts.hospital > 0) parts.push(t("safetyPointCountHospital", { n: counts.hospital }));
+    if (counts.police > 0) parts.push(t("safetyPointCountPolice", { n: counts.police }));
+    if (counts.pharmacy > 0) parts.push(t("safetyPointCountPharmacy", { n: counts.pharmacy }));
+    if (parts.length === 0) return t("safetyPointSearching");
+    return t("safetyPointProgressText", { found: parts.join(", ") });
+  }
+
+  // Cached refs for the confirm modal.
+  const safetyPointsConfirmModal = document.getElementById("safetyPointsConfirmModal");
+  const safetyPointsConfirmYes = document.getElementById("safetyPointsConfirmYes");
+  const safetyPointsConfirmCancel = document.getElementById("safetyPointsConfirmCancel");
+
+  function closeSafetyPointsConfirm() {
+    if (safetyPointsConfirmModal) safetyPointsConfirmModal.classList.remove("visible");
+  }
+  function openSafetyPointsConfirm() {
+    if (safetyPointsConfirmModal) safetyPointsConfirmModal.classList.add("visible");
+  }
+
+  // Top-level handler: clicking the map button now shows a confirm modal first.
+  function toggleSafetyPoints() {
+    // ON → OFF: clear markers immediately, no modal.
     if (safetyPointsActive) {
       safetyPointsLayer.clearLayers();
       safetyPointsActive = false;
       updateSafetyPointsBtnLabel();
       return;
     }
-
     // Re-entry guard: never run two searches at once.
     if (safetyPointsAbortCtrl) {
       console.log("[SafeTrip] safety points search already in progress — ignoring click");
       return;
     }
+    openSafetyPointsConfirm();
+  }
+
+  // The actual search — only invoked when the user accepts the confirm modal.
+  async function runSafetyPointsSearch() {
+    if (safetyPointsAbortCtrl) return;
     if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = true;
 
     safetyPointsAbortCtrl = new AbortController();
@@ -4870,26 +4937,29 @@ out center tags 60;`;
       return;
     }
 
-    // Hard 30s timeout — aborts ongoing fetches but keeps whatever was found.
-    const overallTimer = setTimeout(() => {
-      if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
-        console.log("[SafeTrip] safety points search hit 30s timeout — aborting");
-        safetyPointsAbortReason = "timeout";
-        safetyPointsAbortCtrl.abort();
-      }
-    }, 30000);
-
-    // 10s "still working" warning that updates the loader text in place.
-    const slowTimer = setTimeout(() => {
-      setSafetyPointsLoaderMessage(t("safetyPointSlowWarn"));
-    }, 10000);
-
-    // Clear previous markers, prepare progress UI.
+    // Clear previous markers, prepare progress UI and counters up-front
+    // so timer closures below can safely reference them.
     safetyPointsLayer.clearLayers();
     showSafetyPointsLoaderProgress();
     const types = ["hospital", "police", "pharmacy"];
     const counts = { hospital: 0, police: 0, pharmacy: 0 };
     const allPoints = [];
+
+    // 3-4 min budget — hard cap at 240s so the search can't hang forever.
+    const overallTimer = setTimeout(() => {
+      if (safetyPointsAbortCtrl && !safetyPointsAbortCtrl.signal.aborted) {
+        console.log("[SafeTrip] safety points search hit timeout — aborting");
+        safetyPointsAbortReason = "timeout";
+        safetyPointsAbortCtrl.abort();
+      }
+    }, 240000);
+
+    // 10s "still working" hint — only used while nothing has come back yet.
+    const slowTimer = setTimeout(() => {
+      if (counts.hospital + counts.police + counts.pharmacy === 0) {
+        setSafetyPointsLoaderMessage(t("safetyPointSlowWarn"));
+      }
+    }, 10000);
 
     await Promise.allSettled(types.map(async (type) => {
       try {
@@ -4901,6 +4971,8 @@ out center tags 60;`;
         counts[type] = points.length;
         points.forEach((p) => allPoints.push(p));
         updateSafetyPointsLoaderCount(type, points.length, true);
+        // Live running summary in the loader.
+        setSafetyPointsLoaderMessage(safetyPointsProgressText(counts));
         console.log(`[SafeTrip] ${type}: ${points.length} found`);
       } catch (e) {
         if (e && e.name === "AbortError") {
@@ -4943,6 +5015,21 @@ out center tags 60;`;
     } else {
       showToast(t("safetyPointSummary", { h: counts.hospital, p: counts.police, ph: counts.pharmacy }));
     }
+  }
+
+  if (safetyPointsConfirmYes) {
+    safetyPointsConfirmYes.addEventListener("click", () => {
+      closeSafetyPointsConfirm();
+      runSafetyPointsSearch();
+    });
+  }
+  if (safetyPointsConfirmCancel) {
+    safetyPointsConfirmCancel.addEventListener("click", closeSafetyPointsConfirm);
+  }
+  if (safetyPointsConfirmModal) {
+    safetyPointsConfirmModal.addEventListener("click", (e) => {
+      if (e.target === safetyPointsConfirmModal) closeSafetyPointsConfirm();
+    });
   }
 
   // Wire the cancel button (always sits inside the loader).
