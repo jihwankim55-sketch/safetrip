@@ -4817,12 +4817,88 @@ Do NOT output any text outside the JSON object.`;
     police:   [["amenity", "police"]],
     pharmacy: [["amenity", "pharmacy"], ["healthcare", "pharmacy"], ["shop", "chemist"]],
   };
-  // Search radius (m) and per-category result cap. Restored to the previous values
-  // so the result set isn't artificially narrow — speed comes from killing slow
-  // queries (no relations, tighter server-side timeout, racing both endpoints in
-  // parallel via Promise.any) instead of shrinking the search area.
+  // Search radius (m) and per-category result cap. Combined-query path uses
+  // its own radius/cap below (`SAFETY_POINT_COMBINED_*`) — the per-type
+  // helpers underneath this point are kept for fallback but are not used by
+  // the active search path.
   const SAFETY_POINT_RADIUS_M = 2000;
   const SAFETY_POINT_LIMIT = 30;
+
+  // Combined-query knobs — used by runSafetyPointsSearch. One Overpass call
+  // covers all three categories so hospital + police results don't get held
+  // hostage by a slow pharmacy fetch (and vice versa).
+  const SAFETY_POINT_COMBINED_RADIUS_M = 3000;
+  const SAFETY_POINT_COMBINED_LIMIT = 150;
+  const SAFETY_POINT_COMBINED_TIMEOUT_S = 30;
+
+  function classifySafetyPointType(tags) {
+    if (!tags) return null;
+    if (tags.amenity === "hospital") return "hospital";
+    if (tags.amenity === "police") return "police";
+    if (tags.amenity === "pharmacy") return "pharmacy";
+    // Cover the common alternate pharmacy tags so we don't silently drop them
+    // when the response comes back from the combined query below.
+    if (tags.healthcare === "pharmacy") return "pharmacy";
+    if (tags.shop === "chemist") return "pharmacy";
+    return null;
+  }
+
+  // Single combined Overpass call covering hospital + police + pharmacy. Falls
+  // back from overpass-api.de to overpass.kumi.systems when the primary
+  // returns 5xx / 504 / network error.
+  async function fetchAllSafetyPoints(center, signal) {
+    const around = `(around:${SAFETY_POINT_COMBINED_RADIUS_M},${center.lat},${center.lng})`;
+    const query = `[out:json][timeout:${SAFETY_POINT_COMBINED_TIMEOUT_S}];\n(\n  node["amenity"="hospital"]${around};\n  node["amenity"="police"]${around};\n  node["amenity"="pharmacy"]${around};\n  node["healthcare"="pharmacy"]${around};\n  node["shop"="chemist"]${around};\n);\nout body ${SAFETY_POINT_COMBINED_LIMIT};`;
+    console.log("[SafeTrip] combined safety-points query:\n" + query);
+
+    if (signal && signal.aborted) {
+      const err = new Error("Aborted");
+      err.name = "AbortError";
+      throw err;
+    }
+    const endpoints = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+    ];
+    let lastErr = null;
+    for (const endpoint of endpoints) {
+      if (signal && signal.aborted) {
+        const err = new Error("Aborted");
+        err.name = "AbortError";
+        throw err;
+      }
+      const attempts = [
+        () => fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "data=" + encodeURIComponent(query),
+          signal,
+        }),
+        () => fetch(endpoint + "?data=" + encodeURIComponent(query), { signal }),
+      ];
+      for (const doFetch of attempts) {
+        try {
+          const r = await doFetch();
+          if (!r || !r.ok) {
+            const status = r && r.status;
+            console.warn(`[SafeTrip] combined query HTTP ${status} from ${endpoint}`);
+            lastErr = new Error("HTTP " + status);
+            continue;
+          }
+          const json = await r.json();
+          const elements = (json && json.elements) || [];
+          console.log(`[SafeTrip] combined query returned ${elements.length} elements from ${endpoint}`);
+          return { elements, error: null };
+        } catch (err) {
+          if (err && err.name === "AbortError") throw err;
+          console.warn(`[SafeTrip] combined query failed @ ${endpoint}:`, err && err.message);
+          lastErr = err;
+        }
+      }
+      console.log(`[SafeTrip] combined query: ${endpoint} exhausted, trying next mirror`);
+    }
+    return { elements: [], error: lastErr };
+  }
   // Pharmacy-tuned values — smaller payload than the hospital/police query because
   // the 3-tag union frequently hits 504 Gateway Timeout on the public Overpass
   // server. Nodes only (no `way` — pharmacies are POIs), tight radius, short
@@ -5156,30 +5232,41 @@ Do NOT output any text outside the JSON object.`;
       }
     }, 10000);
 
-    // All three categories fetched in parallel via Promise.all. Each task has its
-    // own try/catch so per-type failures (network, abort, parse) never reject the
-    // overall promise — partial results are still surfaced and plotted.
-    await Promise.all(types.map(async (type) => {
-      try {
-        const { elements, error } = await fetchSafetyPointsByType(type, center, signal);
-        if (error) {
-          console.error(`[SafeTrip] safety points (${type}) failed:`, error);
-        }
-        const points = plotSafetyPointElements(elements, type);
+    // Single combined Overpass query covering all three categories. Splits the
+    // response into per-type buckets via the amenity (and pharmacy alternate)
+    // tags, then plots and counts each bucket separately.
+    safetyPointsPharmacyFailed = false;
+    try {
+      const { elements: allElements, error } = await fetchAllSafetyPoints(center, signal);
+      if (error) {
+        console.error("[SafeTrip] combined fetch error:", error);
+      }
+      const byType = { hospital: [], police: [], pharmacy: [] };
+      for (const el of allElements) {
+        const t = classifySafetyPointType(el.tags);
+        if (t && byType[t]) byType[t].push(el);
+      }
+      console.log(`[SafeTrip] classified — hospital=${byType.hospital.length} police=${byType.police.length} pharmacy=${byType.pharmacy.length}`);
+      for (const type of types) {
+        const points = plotSafetyPointElements(byType[type], type);
         counts[type] = points.length;
         points.forEach((p) => allPoints.push(p));
         updateSafetyPointsLoaderCount(type, points.length, true);
-        // Live running summary in the loader.
-        setSafetyPointsLoaderMessage(safetyPointsProgressText(counts));
         console.log(`[SafeTrip] ${type}: ${points.length} found`);
-      } catch (e) {
-        if (e && e.name === "AbortError") {
-          console.log(`[SafeTrip] ${type} fetch aborted`);
-        } else {
-          console.error(`[SafeTrip] ${type} unexpected error:`, e);
-        }
       }
-    }));
+      setSafetyPointsLoaderMessage(safetyPointsProgressText(counts));
+      // Pharmacy-specific failure surface: only when the combined query errored
+      // outright AND no pharmacy markers were plotted.
+      if (error && counts.pharmacy === 0) {
+        safetyPointsPharmacyFailed = true;
+      }
+    } catch (e) {
+      if (e && e.name === "AbortError") {
+        console.log("[SafeTrip] combined fetch aborted");
+      } else {
+        console.error("[SafeTrip] combined fetch unexpected error:", e);
+      }
+    }
 
     clearTimeout(overallTimer);
     clearTimeout(slowTimer);
