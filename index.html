@@ -1083,13 +1083,21 @@
     border-color: #94a3b8;
   }
   .safety-points-button:disabled {
-    opacity: 0.6;
+    opacity: 0.85;
     cursor: progress;
     transform: none;
   }
   .safety-points-button:disabled:hover {
     background: white;
     transform: none;
+  }
+  .safety-points-button.searching {
+    background: #f1f5f9;
+    color: #475569;
+  }
+  body.dark .safety-points-button.searching {
+    background: #1f2a4a;
+    color: #cbd5e1;
   }
 
   .safety-point-marker { background: transparent; border: none; }
@@ -4805,55 +4813,65 @@ Do NOT output any text outside the JSON object.`;
     police:   [["amenity", "police"]],
     pharmacy: [["amenity", "pharmacy"], ["healthcare", "pharmacy"], ["shop", "chemist"]],
   };
-  // Search radius (m) and per-category result cap. Tuned for speed: 1.5 km is
-  // dense enough for urban centres, and 10 results per category keeps payload
-  // small so each parallel fetch finishes fast.
-  const SAFETY_POINT_RADIUS_M = 1500;
-  const SAFETY_POINT_LIMIT = 10;
+  // Search radius (m) and per-category result cap. Restored to the previous values
+  // so the result set isn't artificially narrow — speed comes from killing slow
+  // queries (no relations, tighter server-side timeout, racing both endpoints in
+  // parallel via Promise.any) instead of shrinking the search area.
+  const SAFETY_POINT_RADIUS_M = 2000;
+  const SAFETY_POINT_LIMIT = 30;
   async function fetchSafetyPointsByType(type, center, signal) {
     const selectors = SAFETY_POINT_SELECTORS[type] || [["amenity", type]];
     const around = `(around:${SAFETY_POINT_RADIUS_M},${center.lat},${center.lng})`;
     const parts = [];
     for (const [k, v] of selectors) {
+      // Skip `relation` — hospitals/police/pharmacies are almost never tagged as
+      // relations, but including them roughly triples Overpass processing time.
       parts.push(`  node["${k}"="${v}"]${around};`);
       parts.push(`  way["${k}"="${v}"]${around};`);
-      parts.push(`  relation["${k}"="${v}"]${around};`);
     }
-    const query = `[out:json][timeout:20];\n(\n${parts.join("\n")}\n);\nout center tags ${SAFETY_POINT_LIMIT};`;
+    const query = `[out:json][timeout:15];\n(\n${parts.join("\n")}\n);\nout center tags ${SAFETY_POINT_LIMIT};`;
     const endpoints = [
       "https://overpass-api.de/api/interpreter",
       "https://overpass.kumi.systems/api/interpreter",
     ];
-    let lastErr = null;
+    if (signal && signal.aborted) {
+      const err = new Error("Aborted");
+      err.name = "AbortError";
+      throw err;
+    }
+    // Race every attempt — first successful response wins. This avoids the
+    // worst-case where the primary endpoint is slow and the fallback never gets
+    // its turn until ~60s later.
+    const attempts = [];
     for (const endpoint of endpoints) {
-      if (signal && signal.aborted) {
-        const err = new Error("Aborted");
-        err.name = "AbortError";
-        throw err;
-      }
-      const attempts = [
-        () => fetch(endpoint, {
+      attempts.push(
+        fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: "data=" + encodeURIComponent(query),
           signal,
-        }),
-        () => fetch(endpoint + "?data=" + encodeURIComponent(query), { signal }),
-      ];
-      for (const doFetch of attempts) {
-        try {
-          const response = await doFetch();
-          if (!response.ok) { lastErr = new Error("HTTP " + response.status); continue; }
-          const json = await response.json();
-          return { elements: (json && json.elements) || [], error: null };
-        } catch (err) {
-          if (err && err.name === "AbortError") throw err;
-          lastErr = err;
-          console.warn(`[SafeTrip] Overpass attempt (${type}) failed @ ${endpoint}:`, err && err.message);
-        }
-      }
+        }).then((r) => (r && r.ok ? r : Promise.reject(new Error("HTTP " + (r && r.status)))))
+      );
+      attempts.push(
+        fetch(endpoint + "?data=" + encodeURIComponent(query), { signal })
+          .then((r) => (r && r.ok ? r : Promise.reject(new Error("HTTP " + (r && r.status)))))
+      );
     }
-    return { elements: [], error: lastErr };
+    try {
+      const response = await Promise.any(attempts);
+      const json = await response.json();
+      return { elements: (json && json.elements) || [], error: null };
+    } catch (err) {
+      const errors = (err && err.errors) || [err];
+      // Bubble AbortError up so the outer task records it as a cancel, not a failure.
+      if (errors.some((e) => e && e.name === "AbortError")) {
+        const a = new Error("Aborted");
+        a.name = "AbortError";
+        throw a;
+      }
+      console.warn(`[SafeTrip] all overpass attempts failed for ${type}:`, errors.map((e) => e && e.message));
+      return { elements: [], error: errors[errors.length - 1] };
+    }
   }
 
   function plotSafetyPointElements(elements, type) {
@@ -4890,7 +4908,12 @@ Do NOT output any text outside the JSON object.`;
 
   function cleanupSafetyPointsSearch() {
     hideSafetyPointsLoader();
-    if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = false;
+    if (safetyPointsBtnEl) {
+      safetyPointsBtnEl.disabled = false;
+      safetyPointsBtnEl.innerHTML = "🏥";
+      safetyPointsBtnEl.classList.remove("searching");
+      updateSafetyPointsBtnLabel();
+    }
     safetyPointsAbortCtrl = null;
     safetyPointsAbortReason = null;
   }
@@ -4937,7 +4960,14 @@ Do NOT output any text outside the JSON object.`;
   // The actual search — only invoked when the user accepts the confirm modal.
   async function runSafetyPointsSearch() {
     if (safetyPointsAbortCtrl) return;
-    if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = true;
+    if (safetyPointsBtnEl) {
+      safetyPointsBtnEl.disabled = true;
+      safetyPointsBtnEl.innerHTML = "⏳";
+      safetyPointsBtnEl.classList.add("searching");
+      const label = t("safetyPointSearching");
+      safetyPointsBtnEl.setAttribute("aria-label", label);
+      safetyPointsBtnEl.title = label;
+    }
 
     safetyPointsAbortCtrl = new AbortController();
     safetyPointsAbortReason = null;
