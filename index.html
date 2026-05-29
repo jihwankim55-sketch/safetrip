@@ -378,6 +378,120 @@
   }
   button.emergency-card:hover { background: #eef2ff; }
 
+  button.transport {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #0d9488;
+    border: 1px solid #0d9488;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.transport:hover { background: #f0fdfa; }
+
+  .tr-section { margin-bottom: 18px; }
+  .tr-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tr-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #0d9488;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .tr-card:last-child { margin-bottom: 0; }
+  .tr-card .tr-row-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .tr-card .tr-icon {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .tr-card .tr-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+  }
+  .tr-card .tr-desc {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .tr-card .tr-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: #475569;
+    margin-top: 4px;
+  }
+  .tr-card .tr-meta span strong {
+    color: #1e293b;
+    font-weight: 700;
+  }
+  .tr-fare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .tr-fare-chip {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #166534;
+  }
+  .tr-fare-chip .tr-fare-label {
+    font-size: 11px;
+    color: #475569;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .tr-fare-chip .tr-fare-amount {
+    font-weight: 700;
+    color: #166534;
+  }
+  .tr-caution-list { list-style: none; padding: 0; }
+  .tr-caution-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    line-height: 1.5;
+    font-size: 13px;
+    color: #334155;
+    display: flex;
+    gap: 8px;
+  }
+  .tr-caution-list li:last-child { border-bottom: none; }
+  .tr-caution-list li::before {
+    content: "⚠️";
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    .tr-fare-grid { grid-template-columns: 1fr; }
+  }
+
   button.offline-emergency {
     width: 100%;
     padding: 10px;
@@ -762,14 +876,16 @@
   }
   .btn-grid > #phrasesBtn,
   .btn-grid > #shareBtn,
-  .btn-grid > #ecCardBtn {
+  .btn-grid > #ecCardBtn,
+  .btn-grid > #transportGuideBtn {
     grid-column: 1 / -1;
   }
   @media (max-width: 480px) {
     .btn-grid { grid-template-columns: 1fr; }
     .btn-grid > #phrasesBtn,
     .btn-grid > #shareBtn,
-    .btn-grid > #ecCardBtn { grid-column: auto; }
+    .btn-grid > #ecCardBtn,
+    .btn-grid > #transportGuideBtn { grid-column: auto; }
   }
 
   .phrase-card {
@@ -1404,6 +1520,32 @@
     border-color: #6366f1;
   }
   body.dark button.emergency-card:hover { background: #1f2a4a; }
+  body.dark button.transport {
+    background: #16213e;
+    color: #5eead4;
+    border-color: #14b8a6;
+  }
+  body.dark button.transport:hover { background: #1f2a4a; }
+  body.dark .tr-section h3 { color: #e0e0e0; border-bottom-color: #1f2a4a; }
+  body.dark .tr-card {
+    background: #0f1626;
+    border-color: #1f2a4a;
+  }
+  body.dark .tr-card .tr-title { color: #e0e0e0; }
+  body.dark .tr-card .tr-desc { color: #cbd5e1; }
+  body.dark .tr-card .tr-meta { color: #94a3b8; }
+  body.dark .tr-card .tr-meta span strong { color: #e0e0e0; }
+  body.dark .tr-fare-chip {
+    background: #0f3a2a;
+    border-color: #166534;
+    color: #86efac;
+  }
+  body.dark .tr-fare-chip .tr-fare-label { color: #94a3b8; }
+  body.dark .tr-fare-chip .tr-fare-amount { color: #86efac; }
+  body.dark .tr-caution-list li {
+    color: #cbd5e1;
+    border-bottom-color: #1f2a4a;
+  }
   body.dark .ec-inputs label { color: #cbd5e1; }
   body.dark .ec-inputs input {
     background: #0f1626;
@@ -2059,6 +2201,7 @@
       <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
       <button id="shareBtn" class="share" type="button" style="display:none" data-i18n="shareBtn">📤 Share Results</button>
       <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
+      <button id="transportGuideBtn" class="transport" type="button" style="display:none" data-i18n="transportGuideBtn">🚊 Transportation Guide</button>
     </div>
 
     <button id="offlineEmergencyBtn" class="offline-emergency" type="button" style="display:none" data-i18n="offlineBtn">📴 Offline Emergency Info</button>
@@ -2177,6 +2320,17 @@
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="ecCardSave" style="background:#4f46e5" data-i18n="ecCardSaveBtn">📸 Save as Image</button>
       <button type="button" class="btn-secondary" id="ecCardClose" data-i18n="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="transportGuideModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#0d9488" data-i18n="transportGuideTitle">🚊 Transportation Guide</h2>
+    <div class="modal-sub" data-i18n="transportGuideSub">Local transport options and tips for your destination</div>
+    <div id="transportGuideContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="transportGuideClose" style="background:#0d9488" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -2375,6 +2529,20 @@
       compareErrorBoth: "Please enter both destinations.",
       localLawsTitle: "⚖️ Local Laws & Customs",
       ecCardBtn: "🆔 Generate Emergency Card",
+      transportGuideBtn: "🚊 Transportation Guide",
+      transportGuideTitle: "🚊 Transportation Guide",
+      transportGuideSub: "Local transport options and tips for your destination",
+      transportGuideLoading: "Generating transportation guide...",
+      transportGuideError: "Could not load transportation guide:",
+      transportSecAirport: "🛬 Airport to City",
+      transportSecPublic: "🚇 Public Transport",
+      transportSecPass: "💳 Transit Cards & Passes",
+      transportSecCaution: "🚕 Taxi & Rental Cautions",
+      transportSecFares: "💰 Approximate Fares",
+      transportLabelFare: "Fare",
+      transportLabelDuration: "Duration",
+      transportLabelWhereToBuy: "Where to buy",
+      transportLabelCost: "Cost",
       ecCardTitle: "🆔 Emergency Contact Card",
       ecCardSub: "Fill in your info, then save the card as an image to keep offline.",
       ecCardNameLabel: "Full Name",
@@ -2593,6 +2761,20 @@
       compareErrorBoth: "두 목적지를 모두 입력하세요.",
       localLawsTitle: "⚖️ 현지 법률 & 관습",
       ecCardBtn: "🆔 긴급 카드 생성",
+      transportGuideBtn: "🚊 교통 가이드",
+      transportGuideTitle: "🚊 교통 가이드",
+      transportGuideSub: "목적지의 교통 옵션과 이용 팁",
+      transportGuideLoading: "교통 가이드 생성 중...",
+      transportGuideError: "교통 가이드를 불러오지 못했습니다:",
+      transportSecAirport: "🛬 공항에서 시내로",
+      transportSecPublic: "🚇 주요 대중교통",
+      transportSecPass: "💳 교통카드 / 패스",
+      transportSecCaution: "🚕 택시·렌터카 주의사항",
+      transportSecFares: "💰 대략적인 요금",
+      transportLabelFare: "요금",
+      transportLabelDuration: "소요 시간",
+      transportLabelWhereToBuy: "구매 장소",
+      transportLabelCost: "비용",
       ecCardTitle: "🆔 긴급 연락 카드",
       ecCardSub: "정보를 입력한 뒤 이미지로 저장해 오프라인에서 휴대하세요.",
       ecCardNameLabel: "이름",
@@ -2811,6 +2993,20 @@
       compareErrorBoth: "両方の目的地を入力してください。",
       localLawsTitle: "⚖️ 現地の法律と習慣",
       ecCardBtn: "🆔 緊急カードを作成",
+      transportGuideBtn: "🚊 交通ガイド",
+      transportGuideTitle: "🚊 交通ガイド",
+      transportGuideSub: "目的地の交通手段とヒント",
+      transportGuideLoading: "交通ガイドを生成中...",
+      transportGuideError: "交通ガイドの読み込みに失敗しました:",
+      transportSecAirport: "🛬 空港から市内へ",
+      transportSecPublic: "🚇 主な公共交通",
+      transportSecPass: "💳 交通カード / パス",
+      transportSecCaution: "🚕 タクシー・レンタカー注意事項",
+      transportSecFares: "💰 おおよその料金",
+      transportLabelFare: "運賃",
+      transportLabelDuration: "所要時間",
+      transportLabelWhereToBuy: "購入場所",
+      transportLabelCost: "費用",
       ecCardTitle: "🆔 緊急連絡カード",
       ecCardSub: "情報を入力後、画像として保存してオフラインで携帯してください。",
       ecCardNameLabel: "氏名",
@@ -3029,6 +3225,20 @@
       compareErrorBoth: "请输入两个目的地。",
       localLawsTitle: "⚖️ 当地法律与习俗",
       ecCardBtn: "🆔 生成紧急联系卡",
+      transportGuideBtn: "🚊 交通指南",
+      transportGuideTitle: "🚊 交通指南",
+      transportGuideSub: "目的地的交通方式与使用提示",
+      transportGuideLoading: "正在生成交通指南...",
+      transportGuideError: "无法加载交通指南:",
+      transportSecAirport: "🛬 机场到市区",
+      transportSecPublic: "🚇 主要公共交通",
+      transportSecPass: "💳 交通卡 / 通票",
+      transportSecCaution: "🚕 出租车·租车注意事项",
+      transportSecFares: "💰 大致费用",
+      transportLabelFare: "费用",
+      transportLabelDuration: "时长",
+      transportLabelWhereToBuy: "购买地点",
+      transportLabelCost: "费用",
       ecCardTitle: "🆔 紧急联系卡",
       ecCardSub: "填写信息后保存为图片，离线携带使用。",
       ecCardNameLabel: "姓名",
@@ -3710,6 +3920,8 @@ Do NOT output any text outside the JSON object.`;
     if (shareEl) shareEl.style.display = visible ? "" : "none";
     const ecCardEl = document.getElementById("ecCardBtn");
     if (ecCardEl) ecCardEl.style.display = visible ? "" : "none";
+    const transportEl = document.getElementById("transportGuideBtn");
+    if (transportEl) transportEl.style.display = visible ? "" : "none";
   }
 
   insuranceBtn.addEventListener("click", () => {
@@ -4046,6 +4258,206 @@ Do NOT output any text outside the JSON object.`;
       ecCardSave.textContent = t("ecCardSaveBtn");
     }
   });
+
+  // --- Transportation Guide ---
+  const transportGuideBtn = document.getElementById("transportGuideBtn");
+  const transportGuideModal = document.getElementById("transportGuideModal");
+  const transportGuideClose = document.getElementById("transportGuideClose");
+  const transportGuideContent = document.getElementById("transportGuideContent");
+
+  async function fetchTransportationGuide(apiKey, model, destination) {
+    const system = `You are a travel transportation expert. Return ONLY a JSON object describing public transport, taxi info, and approximate fares for the given destination. All human-readable strings must be in English.`;
+    const userPrompt = `Destination: "${destination}"
+
+Return a JSON object that matches exactly this schema:
+
+{
+  "destination": "<normalized destination name>",
+  "airport_to_city": [
+    {
+      "mode": "<e.g. Taxi / Express Train / Limousine Bus>",
+      "icon": "<single emoji like 🚕 🚆 🚌>",
+      "description": "<1-2 sentence English description>",
+      "fare": "<approximate fare with local currency, e.g. '¥3070' or '$50-70'>",
+      "duration": "<typical journey duration, e.g. '30-45 min'>"
+    }
+  ],
+  "public_transport": [
+    {
+      "name": "<e.g. Subway / Tram / Bus>",
+      "icon": "<single emoji like 🚇 🚊 🚌>",
+      "tip": "<1-2 sentence English usage tip — hours, payment, etiquette, key lines>"
+    }
+  ],
+  "transit_pass": {
+    "name": "<e.g. Suica / Oyster / T-money>",
+    "icon": "<single emoji like 💳 🎫>",
+    "description": "<1-2 sentence English explanation>",
+    "where_to_buy": "<short English location>",
+    "cost": "<approximate price including any deposit>"
+  },
+  "taxi_rental_cautions": [
+    "<1 short English caution sentence>",
+    "<another caution>"
+  ],
+  "approximate_fares": [
+    {
+      "label": "<e.g. Subway one ride>",
+      "icon": "<single emoji>",
+      "amount": "<approximate price with currency>"
+    }
+  ]
+}
+
+Provide 2-4 airport-to-city options, 3-5 public_transport modes, exactly one transit_pass (or "N/A" name if none exists), 3-6 taxi_rental_cautions, and 4-8 approximate_fares. Do NOT output any text outside the JSON object.`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1800,
+        system,
+        messages: [{ role: "user", content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const txt = await response.text();
+      let msg = `HTTP ${response.status}`;
+      try { msg = JSON.parse(txt).error?.message || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+    const json = await response.json();
+    const text = json.content?.[0]?.text ?? "";
+    const parsed = extractJson(text);
+    if (!parsed) throw new Error("Failed to parse transportation response");
+    return parsed;
+  }
+
+  function renderTransportationGuide(data) {
+    if (!data) {
+      transportGuideContent.innerHTML = `<div class="status-card error">❌ No data</div>`;
+      return;
+    }
+
+    const airportItems = (data.airport_to_city || []).map((o) => `
+      <div class="tr-card">
+        <div class="tr-row-head">
+          <span class="tr-icon">${escapeHtml(o.icon || "🛬")}</span>
+          <span class="tr-title">${escapeHtml(o.mode || "—")}</span>
+        </div>
+        ${o.description ? `<div class="tr-desc">${escapeHtml(o.description)}</div>` : ""}
+        <div class="tr-meta">
+          ${o.fare ? `<span><strong>${escapeHtml(t("transportLabelFare"))}:</strong> ${escapeHtml(o.fare)}</span>` : ""}
+          ${o.duration ? `<span><strong>${escapeHtml(t("transportLabelDuration"))}:</strong> ${escapeHtml(o.duration)}</span>` : ""}
+        </div>
+      </div>
+    `).join("");
+
+    const publicItems = (data.public_transport || []).map((m) => `
+      <div class="tr-card">
+        <div class="tr-row-head">
+          <span class="tr-icon">${escapeHtml(m.icon || "🚇")}</span>
+          <span class="tr-title">${escapeHtml(m.name || "—")}</span>
+        </div>
+        ${m.tip ? `<div class="tr-desc">${escapeHtml(m.tip)}</div>` : ""}
+      </div>
+    `).join("");
+
+    const pass = data.transit_pass || {};
+    const passHtml = (pass.name && pass.name !== "N/A") ? `
+      <div class="tr-card">
+        <div class="tr-row-head">
+          <span class="tr-icon">${escapeHtml(pass.icon || "💳")}</span>
+          <span class="tr-title">${escapeHtml(pass.name)}</span>
+        </div>
+        ${pass.description ? `<div class="tr-desc">${escapeHtml(pass.description)}</div>` : ""}
+        <div class="tr-meta">
+          ${pass.where_to_buy ? `<span><strong>${escapeHtml(t("transportLabelWhereToBuy"))}:</strong> ${escapeHtml(pass.where_to_buy)}</span>` : ""}
+          ${pass.cost ? `<span><strong>${escapeHtml(t("transportLabelCost"))}:</strong> ${escapeHtml(pass.cost)}</span>` : ""}
+        </div>
+      </div>
+    ` : `<div class="tr-card"><div class="tr-desc" style="color:#94a3b8">—</div></div>`;
+
+    const cautionItems = (data.taxi_rental_cautions || []).map((c) =>
+      `<li>${escapeHtml(c)}</li>`
+    ).join("");
+
+    const fareItems = (data.approximate_fares || []).map((f) => `
+      <div class="tr-fare-chip">
+        <span class="tr-fare-label">${escapeHtml(f.icon || "")} ${escapeHtml(f.label || "")}</span>
+        <span class="tr-fare-amount">${escapeHtml(f.amount || "—")}</span>
+      </div>
+    `).join("");
+
+    transportGuideContent.innerHTML = `
+      <div class="tr-section">
+        <h3>${escapeHtml(t("transportSecAirport"))}</h3>
+        ${airportItems || `<div class="tr-card"><div class="tr-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+      <div class="tr-section">
+        <h3>${escapeHtml(t("transportSecPublic"))}</h3>
+        ${publicItems || `<div class="tr-card"><div class="tr-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+      <div class="tr-section">
+        <h3>${escapeHtml(t("transportSecPass"))}</h3>
+        ${passHtml}
+      </div>
+      <div class="tr-section">
+        <h3>${escapeHtml(t("transportSecCaution"))}</h3>
+        ${cautionItems ? `<ul class="tr-caution-list">${cautionItems}</ul>` : `<div class="tr-card"><div class="tr-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+      <div class="tr-section">
+        <h3>${escapeHtml(t("transportSecFares"))}</h3>
+        ${fareItems ? `<div class="tr-fare-grid">${fareItems}</div>` : `<div class="tr-card"><div class="tr-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+    `;
+  }
+
+  async function openTransportationGuide() {
+    if (!currentDestinationData?.destination) {
+      showToast(t("toastNoDestForSos"));
+      return;
+    }
+    transportGuideModal.classList.add("visible");
+
+    // Cached on currentDestinationData so re-opening doesn't re-bill the API.
+    if (currentDestinationData.transport_guide) {
+      renderTransportationGuide(currentDestinationData.transport_guide);
+      return;
+    }
+
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      transportGuideContent.innerHTML = `<div class="status-card error">❌ ${escapeHtml(t("errorNoApiKey"))}</div>`;
+      return;
+    }
+
+    transportGuideContent.innerHTML = `<div class="status-card loading"><span class="spinner"></span>${escapeHtml(t("transportGuideLoading"))}</div>`;
+
+    try {
+      const data = await fetchTransportationGuide(apiKey, modelSelect.value, currentDestinationData.destination);
+      currentDestinationData.transport_guide = data;
+      renderTransportationGuide(data);
+    } catch (err) {
+      console.error("[SafeTrip] transport guide failed:", err);
+      transportGuideContent.innerHTML = `<div class="status-card error">❌ ${escapeHtml(t("transportGuideError"))} ${escapeHtml(err.message || "")}</div>`;
+    }
+  }
+
+  if (transportGuideBtn) transportGuideBtn.addEventListener("click", openTransportationGuide);
+  if (transportGuideClose) transportGuideClose.addEventListener("click", () => transportGuideModal.classList.remove("visible"));
+  if (transportGuideModal) {
+    transportGuideModal.addEventListener("click", (e) => {
+      if (e.target === transportGuideModal) transportGuideModal.classList.remove("visible");
+    });
+  }
 
   // --- Emergency Phrases ---
   const phrasesBtn = document.getElementById("phrasesBtn");
