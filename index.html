@@ -4750,7 +4750,7 @@ Return a JSON object that matches exactly this schema:
   ],
   "korean_card_tips": {
     "icon": "🇰🇷",
-    "supported": <true | false>,
+    "supported": "<one of 'yes' | 'limited' | 'no'>",
     "notes": "<1-3 English sentences on Korean-issued (KB, Shinhan, Samsung, Hana etc.) Visa / Mastercard / UnionPay acceptance at this destination>",
     "tips": [
       "<short English tip 1>",
@@ -4759,7 +4759,7 @@ Return a JSON object that matches exactly this schema:
   },
   "tipping_culture": {
     "icon": "<single emoji>",
-    "is_customary": <true | false>,
+    "is_customary": "<one of 'yes' | 'no'>",
     "summary": "<1-2 sentence English summary>",
     "guidelines": [
       "<short English guideline like 'Restaurants: 15-20%'>",
@@ -4843,12 +4843,18 @@ Provide 3-5 exchange_methods, 3-4 payment_methods, 2-4 tips inside korean_card_t
     `).join("");
 
     const kor = data.korean_card_tips || {};
+    // `supported` is a string from the AI ("yes" | "limited" | "no"). Booleans
+    // are also accepted just in case so old cached responses still render.
+    const korSupportedRaw = (typeof kor.supported === "string") ? kor.supported.toLowerCase() : kor.supported;
+    const korSupportedYes = korSupportedRaw === "yes" || korSupportedRaw === true;
+    const korSupportedLimited = korSupportedRaw === "limited";
+    const korStatusLabel = korSupportedYes ? "✓ Widely accepted" : (korSupportedLimited ? "△ Limited" : "✗ Rarely accepted");
     const korTips = (kor.tips || []).map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
     const korHtml = `
       <div class="pay-card">
         <div class="pay-row-head">
           <span class="pay-icon">${escapeHtml(kor.icon || "🇰🇷")}</span>
-          <span class="pay-title">${kor.supported ? "✓" : "✗"} ${kor.supported === false ? "Limited" : "Widely accepted"}</span>
+          <span class="pay-title">${escapeHtml(korStatusLabel)}</span>
         </div>
         ${kor.notes ? `<div class="pay-desc">${escapeHtml(kor.notes)}</div>` : ""}
         ${korTips ? `<ul class="pay-list" style="margin-top:6px">${korTips}</ul>` : ""}
@@ -4856,10 +4862,12 @@ Provide 3-5 exchange_methods, 3-4 payment_methods, 2-4 tips inside korean_card_t
     `;
 
     const tip = data.tipping_culture || {};
+    const tipCustomaryRaw = (typeof tip.is_customary === "string") ? tip.is_customary.toLowerCase() : tip.is_customary;
+    const tipCustomary = tipCustomaryRaw === "yes" || tipCustomaryRaw === true;
     const tippingBanner = `
-      <div class="pay-tipping-banner ${tip.is_customary ? "yes" : "no"}">
+      <div class="pay-tipping-banner ${tipCustomary ? "yes" : "no"}">
         <span style="font-size:18px">${escapeHtml(tip.icon || "💸")}</span>
-        <span>${escapeHtml(tip.is_customary ? t("paymentTipCustomary") : t("paymentTipNotCustomary"))}</span>
+        <span>${escapeHtml(tipCustomary ? t("paymentTipCustomary") : t("paymentTipNotCustomary"))}</span>
       </div>
     `;
     const tippingSummary = tip.summary ? `<div class="pay-card"><div class="pay-desc">${escapeHtml(tip.summary)}</div></div>` : "";
