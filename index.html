@@ -2448,7 +2448,7 @@
       safetyPointTimeout: "Search completed with partial results. Tap to search again for more.",
       safetyPointCancelled: "Search cancelled",
       safetyPointConfirmTitle: "🏥 Nearby Safety Points",
-      safetyPointConfirmSub: "Searching nearby safety points may take 3-4 minutes. Would you like to proceed?",
+      safetyPointConfirmSub: "Searching nearby safety points may take 4-5 minutes. Would you like to proceed?",
       safetyPointConfirmYes: "Yes, search",
       safetyPointCountHospital: "{n} hospitals",
       safetyPointCountPolice: "{n} police stations",
@@ -2661,7 +2661,7 @@
       safetyPointTimeout: "일부 결과로 검색을 완료했습니다. 더 많은 결과를 보려면 다시 검색하세요.",
       safetyPointCancelled: "검색이 취소되었습니다",
       safetyPointConfirmTitle: "🏥 주변 안전 시설",
-      safetyPointConfirmSub: "주변 안전 시설 검색은 3-4분 정도 걸릴 수 있습니다. 계속하시겠습니까?",
+      safetyPointConfirmSub: "주변 안전 시설 검색은 4-5분 정도 걸릴 수 있습니다. 계속하시겠습니까?",
       safetyPointConfirmYes: "네, 검색합니다",
       safetyPointCountHospital: "병원 {n}곳",
       safetyPointCountPolice: "경찰서 {n}곳",
@@ -2874,7 +2874,7 @@
       safetyPointTimeout: "一部の結果で検索を完了しました。さらに探すには再度検索してください。",
       safetyPointCancelled: "検索をキャンセルしました",
       safetyPointConfirmTitle: "🏥 近くの安全施設",
-      safetyPointConfirmSub: "近くの安全施設の検索は 3〜4 分かかる場合があります。続行しますか？",
+      safetyPointConfirmSub: "近くの安全施設の検索は 4〜5 分かかる場合があります。続行しますか？",
       safetyPointConfirmYes: "はい、検索する",
       safetyPointCountHospital: "病院 {n} 件",
       safetyPointCountPolice: "警察署 {n} 件",
@@ -3087,7 +3087,7 @@
       safetyPointTimeout: "已用部分结果完成搜索。点击可再次搜索以获取更多。",
       safetyPointCancelled: "已取消搜索",
       safetyPointConfirmTitle: "🏥 附近安全设施",
-      safetyPointConfirmSub: "搜索附近安全设施可能需要 3-4 分钟。是否继续？",
+      safetyPointConfirmSub: "搜索附近安全设施可能需要 4-5 分钟。是否继续？",
       safetyPointConfirmYes: "是的，开始搜索",
       safetyPointCountHospital: "医院 {n} 处",
       safetyPointCountPolice: "警察局 {n} 处",
@@ -4795,14 +4795,26 @@ Do NOT output any text outside the JSON object.`;
 
   // Per-type Overpass query with the same fallback chain as before.
   // `signal` lets the caller cancel mid-flight (user click or 30s timeout).
+  //
+  // NOTE: Pharmacies in OSM are tagged inconsistently — `amenity=pharmacy` is the
+  // most common, but plenty of pharmacies (especially in EU/JP/KR data) use
+  // `healthcare=pharmacy` or `shop=chemist`. Querying only amenity=pharmacy was
+  // dropping a lot of real pharmacies, so we union the alternates here.
+  const SAFETY_POINT_SELECTORS = {
+    hospital: [["amenity", "hospital"]],
+    police:   [["amenity", "police"]],
+    pharmacy: [["amenity", "pharmacy"], ["healthcare", "pharmacy"], ["shop", "chemist"]],
+  };
   async function fetchSafetyPointsByType(type, center, signal) {
-    const query = `[out:json][timeout:25];
-(
-  node["amenity"="${type}"](around:2000,${center.lat},${center.lng});
-  way["amenity"="${type}"](around:2000,${center.lat},${center.lng});
-  relation["amenity"="${type}"](around:2000,${center.lat},${center.lng});
-);
-out center tags 60;`;
+    const selectors = SAFETY_POINT_SELECTORS[type] || [["amenity", type]];
+    const around = `(around:2000,${center.lat},${center.lng})`;
+    const parts = [];
+    for (const [k, v] of selectors) {
+      parts.push(`  node["${k}"="${v}"]${around};`);
+      parts.push(`  way["${k}"="${v}"]${around};`);
+      parts.push(`  relation["${k}"="${v}"]${around};`);
+    }
+    const query = `[out:json][timeout:25];\n(\n${parts.join("\n")}\n);\nout center tags 80;`;
     const endpoints = [
       "https://overpass-api.de/api/interpreter",
       "https://overpass.kumi.systems/api/interpreter",
