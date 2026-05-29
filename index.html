@@ -5117,6 +5117,10 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
   // of when the click fires relative to script evaluation.
   let reportZonesEntered = new Set();
   const dangerBannerEl = document.getElementById("dangerBanner");
+  // Declared up-front alongside the rest of the live-tracking state so that
+  // checkReportZones (which is hoisted but uses this const) never hits a TDZ
+  // ReferenceError regardless of when the geolocation callback first fires.
+  const REPORT_ALERT_RADIUS_M = 500;
 
   liveTrackBtn.addEventListener("click", toggleLiveTracking);
 
@@ -5385,8 +5389,6 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     }
     showToast(`⚠️ ${body}`);
   }
-
-  const REPORT_ALERT_RADIUS_M = 500;
 
   function checkReportZones(lat, lng) {
     // NOTE: NO risk-level filter here — every reported incident (Low/Medium/High/fake/unrated)
