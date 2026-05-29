@@ -394,6 +394,143 @@
   }
   button.transport:hover { background: #f0fdfa; }
 
+  button.payment {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #7c3aed;
+    border: 1px solid #7c3aed;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.payment:hover { background: #f5f3ff; }
+
+  .pay-section { margin-bottom: 18px; }
+  .pay-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pay-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #7c3aed;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .pay-card:last-child { margin-bottom: 0; }
+  .pay-card .pay-row-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .pay-card .pay-icon {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .pay-card .pay-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+  }
+  .pay-card .pay-desc {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .pay-card .pay-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: #475569;
+    margin-top: 4px;
+  }
+  .pay-card .pay-meta span strong {
+    color: #1e293b;
+    font-weight: 700;
+  }
+  .pay-currency-hero {
+    background: #faf5ff;
+    border: 1px solid #ddd6fe;
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pay-currency-hero .pay-currency-symbol {
+    font-size: 26px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .pay-currency-hero .pay-currency-info { flex: 1; min-width: 0; }
+  .pay-currency-hero .pay-currency-name {
+    font-weight: 700;
+    color: #6d28d9;
+    font-size: 14px;
+  }
+  .pay-currency-hero .pay-currency-rate {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .pay-tipping-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .pay-tipping-banner.yes {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+  .pay-tipping-banner.no {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+  .pay-list { list-style: none; padding: 0; }
+  .pay-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    line-height: 1.5;
+    font-size: 13px;
+    color: #334155;
+    display: flex;
+    gap: 8px;
+  }
+  .pay-list li:last-child { border-bottom: none; }
+  .pay-list li::before {
+    content: "•";
+    color: #7c3aed;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pay-list.cautions li::before { content: "⚠️"; }
+
   .tr-section { margin-bottom: 18px; }
   .tr-section h3 {
     font-size: 13px;
@@ -877,7 +1014,8 @@
   .btn-grid > #phrasesBtn,
   .btn-grid > #shareBtn,
   .btn-grid > #ecCardBtn,
-  .btn-grid > #transportGuideBtn {
+  .btn-grid > #transportGuideBtn,
+  .btn-grid > #paymentGuideBtn {
     grid-column: 1 / -1;
   }
   @media (max-width: 480px) {
@@ -885,7 +1023,8 @@
     .btn-grid > #phrasesBtn,
     .btn-grid > #shareBtn,
     .btn-grid > #ecCardBtn,
-    .btn-grid > #transportGuideBtn { grid-column: auto; }
+    .btn-grid > #transportGuideBtn,
+    .btn-grid > #paymentGuideBtn { grid-column: auto; }
   }
 
   .phrase-card {
@@ -1546,6 +1685,41 @@
     color: #cbd5e1;
     border-bottom-color: #1f2a4a;
   }
+  body.dark button.payment {
+    background: #16213e;
+    color: #c4b5fd;
+    border-color: #8b5cf6;
+  }
+  body.dark button.payment:hover { background: #1f2a4a; }
+  body.dark .pay-section h3 { color: #e0e0e0; border-bottom-color: #1f2a4a; }
+  body.dark .pay-card {
+    background: #0f1626;
+    border-color: #1f2a4a;
+  }
+  body.dark .pay-card .pay-title { color: #e0e0e0; }
+  body.dark .pay-card .pay-desc { color: #cbd5e1; }
+  body.dark .pay-card .pay-meta { color: #94a3b8; }
+  body.dark .pay-card .pay-meta span strong { color: #e0e0e0; }
+  body.dark .pay-currency-hero {
+    background: #2a1f4a;
+    border-color: #6d28d9;
+  }
+  body.dark .pay-currency-hero .pay-currency-name { color: #c4b5fd; }
+  body.dark .pay-currency-hero .pay-currency-rate { color: #94a3b8; }
+  body.dark .pay-tipping-banner.yes {
+    background: #0f3a2a;
+    border-color: #166534;
+    color: #86efac;
+  }
+  body.dark .pay-tipping-banner.no {
+    background: #2a0f12;
+    border-color: #5b1f25;
+    color: #fca5a5;
+  }
+  body.dark .pay-list li {
+    color: #cbd5e1;
+    border-bottom-color: #1f2a4a;
+  }
   body.dark .ec-inputs label { color: #cbd5e1; }
   body.dark .ec-inputs input {
     background: #0f1626;
@@ -2202,6 +2376,7 @@
       <button id="shareBtn" class="share" type="button" style="display:none" data-i18n="shareBtn">📤 Share Results</button>
       <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
       <button id="transportGuideBtn" class="transport" type="button" style="display:none" data-i18n="transportGuideBtn">🚊 Transportation Guide</button>
+      <button id="paymentGuideBtn" class="payment" type="button" style="display:none" data-i18n="paymentGuideBtn">💴 Payment & Currency Guide</button>
     </div>
 
     <button id="offlineEmergencyBtn" class="offline-emergency" type="button" style="display:none" data-i18n="offlineBtn">📴 Offline Emergency Info</button>
@@ -2331,6 +2506,17 @@
     <div id="transportGuideContent"></div>
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="transportGuideClose" style="background:#0d9488" data-i18n="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="paymentGuideModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color:#7c3aed" data-i18n="paymentGuideTitle">💴 Payment & Currency Guide</h2>
+    <div class="modal-sub" data-i18n="paymentGuideSub">Currency, exchange, and payment tips for your destination</div>
+    <div id="paymentGuideContent"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="paymentGuideClose" style="background:#7c3aed" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -2543,6 +2729,22 @@
       transportLabelDuration: "Duration",
       transportLabelWhereToBuy: "Where to buy",
       transportLabelCost: "Cost",
+      paymentGuideBtn: "💴 Payment & Currency Guide",
+      paymentGuideTitle: "💴 Payment & Currency Guide",
+      paymentGuideSub: "Currency, exchange, and payment tips for your destination",
+      paymentGuideLoading: "Generating payment guide...",
+      paymentGuideError: "Could not load payment guide:",
+      paymentSecCurrency: "💴 Local Currency",
+      paymentSecExchange: "💱 Exchange Methods",
+      paymentSecMethods: "💳 Payment Methods",
+      paymentSecKorean: "🇰🇷 Korean Cards",
+      paymentSecTipping: "💸 Tipping Culture",
+      paymentSecCautions: "⚠️ Cautions",
+      paymentLabelRate: "Rate",
+      paymentLabelUsage: "Usage",
+      paymentLabelTip: "Tip",
+      paymentTipNotCustomary: "Tipping is NOT customary",
+      paymentTipCustomary: "Tipping is customary",
       ecCardTitle: "🆔 Emergency Contact Card",
       ecCardSub: "Fill in your info, then save the card as an image to keep offline.",
       ecCardNameLabel: "Full Name",
@@ -2775,6 +2977,22 @@
       transportLabelDuration: "소요 시간",
       transportLabelWhereToBuy: "구매 장소",
       transportLabelCost: "비용",
+      paymentGuideBtn: "💴 결제·통화 가이드",
+      paymentGuideTitle: "💴 결제·통화 가이드",
+      paymentGuideSub: "목적지의 통화·환전·결제 정보",
+      paymentGuideLoading: "결제 가이드 생성 중...",
+      paymentGuideError: "결제 가이드를 불러오지 못했습니다:",
+      paymentSecCurrency: "💴 현지 통화",
+      paymentSecExchange: "💱 환전 방법",
+      paymentSecMethods: "💳 주요 결제 수단",
+      paymentSecKorean: "🇰🇷 한국 카드",
+      paymentSecTipping: "💸 팁 문화",
+      paymentSecCautions: "⚠️ 주의사항",
+      paymentLabelRate: "환율",
+      paymentLabelUsage: "사용처",
+      paymentLabelTip: "팁",
+      paymentTipNotCustomary: "팁은 일반적이지 않음",
+      paymentTipCustomary: "팁이 일반적임",
       ecCardTitle: "🆔 긴급 연락 카드",
       ecCardSub: "정보를 입력한 뒤 이미지로 저장해 오프라인에서 휴대하세요.",
       ecCardNameLabel: "이름",
@@ -3007,6 +3225,22 @@
       transportLabelDuration: "所要時間",
       transportLabelWhereToBuy: "購入場所",
       transportLabelCost: "費用",
+      paymentGuideBtn: "💴 支払い・通貨ガイド",
+      paymentGuideTitle: "💴 支払い・通貨ガイド",
+      paymentGuideSub: "目的地の通貨・両替・支払い情報",
+      paymentGuideLoading: "支払いガイドを生成中...",
+      paymentGuideError: "支払いガイドの読み込みに失敗しました:",
+      paymentSecCurrency: "💴 現地通貨",
+      paymentSecExchange: "💱 両替方法",
+      paymentSecMethods: "💳 主な支払い手段",
+      paymentSecKorean: "🇰🇷 韓国のカード",
+      paymentSecTipping: "💸 チップ文化",
+      paymentSecCautions: "⚠️ 注意事項",
+      paymentLabelRate: "レート",
+      paymentLabelUsage: "用途",
+      paymentLabelTip: "ヒント",
+      paymentTipNotCustomary: "チップは一般的ではありません",
+      paymentTipCustomary: "チップが一般的です",
       ecCardTitle: "🆔 緊急連絡カード",
       ecCardSub: "情報を入力後、画像として保存してオフラインで携帯してください。",
       ecCardNameLabel: "氏名",
@@ -3239,6 +3473,22 @@
       transportLabelDuration: "时长",
       transportLabelWhereToBuy: "购买地点",
       transportLabelCost: "费用",
+      paymentGuideBtn: "💴 支付与货币指南",
+      paymentGuideTitle: "💴 支付与货币指南",
+      paymentGuideSub: "目的地的货币、兑换与支付提示",
+      paymentGuideLoading: "正在生成支付指南...",
+      paymentGuideError: "无法加载支付指南:",
+      paymentSecCurrency: "💴 当地货币",
+      paymentSecExchange: "💱 兑换方式",
+      paymentSecMethods: "💳 主要支付方式",
+      paymentSecKorean: "🇰🇷 韩国信用卡",
+      paymentSecTipping: "💸 小费文化",
+      paymentSecCautions: "⚠️ 注意事项",
+      paymentLabelRate: "汇率",
+      paymentLabelUsage: "使用场景",
+      paymentLabelTip: "提示",
+      paymentTipNotCustomary: "通常不需要小费",
+      paymentTipCustomary: "通常需要小费",
       ecCardTitle: "🆔 紧急联系卡",
       ecCardSub: "填写信息后保存为图片，离线携带使用。",
       ecCardNameLabel: "姓名",
@@ -3922,6 +4172,8 @@ Do NOT output any text outside the JSON object.`;
     if (ecCardEl) ecCardEl.style.display = visible ? "" : "none";
     const transportEl = document.getElementById("transportGuideBtn");
     if (transportEl) transportEl.style.display = visible ? "" : "none";
+    const paymentEl = document.getElementById("paymentGuideBtn");
+    if (paymentEl) paymentEl.style.display = visible ? "" : "none";
   }
 
   insuranceBtn.addEventListener("click", () => {
@@ -4456,6 +4708,229 @@ Provide 2-4 airport-to-city options, 3-5 public_transport modes, exactly one tra
   if (transportGuideModal) {
     transportGuideModal.addEventListener("click", (e) => {
       if (e.target === transportGuideModal) transportGuideModal.classList.remove("visible");
+    });
+  }
+
+  // --- Payment & Currency Guide ---
+  const paymentGuideBtn = document.getElementById("paymentGuideBtn");
+  const paymentGuideModal = document.getElementById("paymentGuideModal");
+  const paymentGuideClose = document.getElementById("paymentGuideClose");
+  const paymentGuideContent = document.getElementById("paymentGuideContent");
+
+  async function fetchPaymentGuide(apiKey, model, destination) {
+    const system = `You are a travel finance expert. Return ONLY a JSON object describing local currency, payment methods, exchange options, and tipping culture for the given destination. All human-readable strings must be in English.`;
+    const userPrompt = `Destination: "${destination}"
+
+Return a JSON object that matches exactly this schema:
+
+{
+  "destination": "<normalized destination name>",
+  "local_currency": {
+    "name": "<currency name, e.g. 'Japanese Yen'>",
+    "code": "<ISO code, e.g. 'JPY'>",
+    "symbol": "<symbol, e.g. '¥'>",
+    "icon": "<single emoji like 💴 💵 💶 💷>",
+    "exchange_rate_note": "<short English note with approximate rate vs USD and EUR, e.g. '1 USD ≈ 150 JPY, 1 EUR ≈ 162 JPY (rates fluctuate)'>"
+  },
+  "exchange_methods": [
+    {
+      "method": "<e.g. Airport currency exchange / City forex office / ATM withdrawal>",
+      "icon": "<single emoji>",
+      "description": "<1-2 sentence English description>",
+      "rate_note": "<short English note on rate quality / fees>"
+    }
+  ],
+  "payment_methods": [
+    {
+      "type": "<e.g. Cash / Credit & Debit Card / Mobile Payment>",
+      "icon": "<single emoji>",
+      "usage": "<1-2 sentence English description of where this is accepted>",
+      "tip": "<short English usage tip>"
+    }
+  ],
+  "korean_card_tips": {
+    "icon": "🇰🇷",
+    "supported": <true | false>,
+    "notes": "<1-3 English sentences on Korean-issued (KB, Shinhan, Samsung, Hana etc.) Visa / Mastercard / UnionPay acceptance at this destination>",
+    "tips": [
+      "<short English tip 1>",
+      "<short English tip 2>"
+    ]
+  },
+  "tipping_culture": {
+    "icon": "<single emoji>",
+    "is_customary": <true | false>,
+    "summary": "<1-2 sentence English summary>",
+    "guidelines": [
+      "<short English guideline like 'Restaurants: 15-20%'>",
+      "<another guideline>"
+    ]
+  },
+  "cautions": [
+    "<short English caution about fees / scams / counterfeit bills / skimmers etc.>",
+    "<another caution>"
+  ]
+}
+
+Provide 3-5 exchange_methods, 3-4 payment_methods, 2-4 tips inside korean_card_tips, 2-5 tipping guidelines, and 3-6 cautions. Do NOT output any text outside the JSON object.`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1800,
+        system,
+        messages: [{ role: "user", content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const txt = await response.text();
+      let msg = `HTTP ${response.status}`;
+      try { msg = JSON.parse(txt).error?.message || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+    const json = await response.json();
+    const text = json.content?.[0]?.text ?? "";
+    const parsed = extractJson(text);
+    if (!parsed) throw new Error("Failed to parse payment response");
+    return parsed;
+  }
+
+  function renderPaymentGuide(data) {
+    if (!data) {
+      paymentGuideContent.innerHTML = `<div class="status-card error">❌ No data</div>`;
+      return;
+    }
+
+    const cur = data.local_currency || {};
+    const currencyHero = `
+      <div class="pay-currency-hero">
+        <div class="pay-currency-symbol">${escapeHtml(cur.symbol || cur.icon || "💴")}</div>
+        <div class="pay-currency-info">
+          <div class="pay-currency-name">${escapeHtml(cur.name || "—")}${cur.code ? ` <span style="font-weight:600;color:#7c3aed">(${escapeHtml(cur.code)})</span>` : ""}</div>
+          ${cur.exchange_rate_note ? `<div class="pay-currency-rate">${escapeHtml(cur.exchange_rate_note)}</div>` : ""}
+        </div>
+      </div>
+    `;
+
+    const exchangeItems = (data.exchange_methods || []).map((m) => `
+      <div class="pay-card">
+        <div class="pay-row-head">
+          <span class="pay-icon">${escapeHtml(m.icon || "💱")}</span>
+          <span class="pay-title">${escapeHtml(m.method || "—")}</span>
+        </div>
+        ${m.description ? `<div class="pay-desc">${escapeHtml(m.description)}</div>` : ""}
+        ${m.rate_note ? `<div class="pay-meta"><span><strong>${escapeHtml(t("paymentLabelRate"))}:</strong> ${escapeHtml(m.rate_note)}</span></div>` : ""}
+      </div>
+    `).join("");
+
+    const methodItems = (data.payment_methods || []).map((m) => `
+      <div class="pay-card">
+        <div class="pay-row-head">
+          <span class="pay-icon">${escapeHtml(m.icon || "💳")}</span>
+          <span class="pay-title">${escapeHtml(m.type || "—")}</span>
+        </div>
+        ${m.usage ? `<div class="pay-desc"><strong>${escapeHtml(t("paymentLabelUsage"))}:</strong> ${escapeHtml(m.usage)}</div>` : ""}
+        ${m.tip ? `<div class="pay-desc" style="color:#6d28d9"><strong>${escapeHtml(t("paymentLabelTip"))}:</strong> ${escapeHtml(m.tip)}</div>` : ""}
+      </div>
+    `).join("");
+
+    const kor = data.korean_card_tips || {};
+    const korTips = (kor.tips || []).map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
+    const korHtml = `
+      <div class="pay-card">
+        <div class="pay-row-head">
+          <span class="pay-icon">${escapeHtml(kor.icon || "🇰🇷")}</span>
+          <span class="pay-title">${kor.supported ? "✓" : "✗"} ${kor.supported === false ? "Limited" : "Widely accepted"}</span>
+        </div>
+        ${kor.notes ? `<div class="pay-desc">${escapeHtml(kor.notes)}</div>` : ""}
+        ${korTips ? `<ul class="pay-list" style="margin-top:6px">${korTips}</ul>` : ""}
+      </div>
+    `;
+
+    const tip = data.tipping_culture || {};
+    const tippingBanner = `
+      <div class="pay-tipping-banner ${tip.is_customary ? "yes" : "no"}">
+        <span style="font-size:18px">${escapeHtml(tip.icon || "💸")}</span>
+        <span>${escapeHtml(tip.is_customary ? t("paymentTipCustomary") : t("paymentTipNotCustomary"))}</span>
+      </div>
+    `;
+    const tippingSummary = tip.summary ? `<div class="pay-card"><div class="pay-desc">${escapeHtml(tip.summary)}</div></div>` : "";
+    const tippingGuides = (tip.guidelines || []).map((g) => `<li>${escapeHtml(g)}</li>`).join("");
+    const tippingHtml = tippingBanner + tippingSummary + (tippingGuides ? `<ul class="pay-list">${tippingGuides}</ul>` : "");
+
+    const cautionItems = (data.cautions || []).map((c) => `<li>${escapeHtml(c)}</li>`).join("");
+
+    paymentGuideContent.innerHTML = `
+      <div class="pay-section">
+        <h3>${escapeHtml(t("paymentSecCurrency"))}</h3>
+        ${currencyHero}
+      </div>
+      <div class="pay-section">
+        <h3>${escapeHtml(t("paymentSecExchange"))}</h3>
+        ${exchangeItems || `<div class="pay-card"><div class="pay-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+      <div class="pay-section">
+        <h3>${escapeHtml(t("paymentSecMethods"))}</h3>
+        ${methodItems || `<div class="pay-card"><div class="pay-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+      <div class="pay-section">
+        <h3>${escapeHtml(t("paymentSecKorean"))}</h3>
+        ${korHtml}
+      </div>
+      <div class="pay-section">
+        <h3>${escapeHtml(t("paymentSecTipping"))}</h3>
+        ${tippingHtml}
+      </div>
+      <div class="pay-section">
+        <h3>${escapeHtml(t("paymentSecCautions"))}</h3>
+        ${cautionItems ? `<ul class="pay-list cautions">${cautionItems}</ul>` : `<div class="pay-card"><div class="pay-desc" style="color:#94a3b8">—</div></div>`}
+      </div>
+    `;
+  }
+
+  async function openPaymentGuide() {
+    if (!currentDestinationData?.destination) {
+      showToast(t("toastNoDestForSos"));
+      return;
+    }
+    paymentGuideModal.classList.add("visible");
+
+    if (currentDestinationData.payment_guide) {
+      renderPaymentGuide(currentDestinationData.payment_guide);
+      return;
+    }
+
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      paymentGuideContent.innerHTML = `<div class="status-card error">❌ ${escapeHtml(t("errorNoApiKey"))}</div>`;
+      return;
+    }
+
+    paymentGuideContent.innerHTML = `<div class="status-card loading"><span class="spinner"></span>${escapeHtml(t("paymentGuideLoading"))}</div>`;
+
+    try {
+      const data = await fetchPaymentGuide(apiKey, modelSelect.value, currentDestinationData.destination);
+      currentDestinationData.payment_guide = data;
+      renderPaymentGuide(data);
+    } catch (err) {
+      console.error("[SafeTrip] payment guide failed:", err);
+      paymentGuideContent.innerHTML = `<div class="status-card error">❌ ${escapeHtml(t("paymentGuideError"))} ${escapeHtml(err.message || "")}</div>`;
+    }
+  }
+
+  if (paymentGuideBtn) paymentGuideBtn.addEventListener("click", openPaymentGuide);
+  if (paymentGuideClose) paymentGuideClose.addEventListener("click", () => paymentGuideModal.classList.remove("visible"));
+  if (paymentGuideModal) {
+    paymentGuideModal.addEventListener("click", (e) => {
+      if (e.target === paymentGuideModal) paymentGuideModal.classList.remove("visible");
     });
   }
 
