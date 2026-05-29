@@ -2446,6 +2446,8 @@
       clearHistoryBtn: "Clear",
       nearbySafetyPointsBtn: "🏥 Nearby Safety Points",
       safetyPointConfirmMsg: "This may take 4-5 minutes. Proceed?",
+      safetyPointSearchingAttempt: "Searching... (attempt {current}/{total})",
+      safetyPointAllAttemptsFailed: "Could not find results. Please try again later.",
       nearbySafetyPointsHideBtn: "🏥 Hide Safety Points",
       safetyPointHospital: "Hospital",
       safetyPointPolice: "Police",
@@ -2661,6 +2663,8 @@
       clearHistoryBtn: "지우기",
       nearbySafetyPointsBtn: "🏥 주변 안전 시설",
       safetyPointConfirmMsg: "최대 4-5분 소요됩니다. 계속하시겠습니까?",
+      safetyPointSearchingAttempt: "검색 중... ({current}/{total}회 시도)",
+      safetyPointAllAttemptsFailed: "결과를 찾지 못했습니다. 잠시 후 다시 시도해주세요.",
       nearbySafetyPointsHideBtn: "🏥 안전 시설 숨기기",
       safetyPointHospital: "병원",
       safetyPointPolice: "경찰서",
@@ -2876,6 +2880,8 @@
       clearHistoryBtn: "クリア",
       nearbySafetyPointsBtn: "🏥 近くの安全施設",
       safetyPointConfirmMsg: "最大 4〜5 分かかる場合があります。続行しますか？",
+      safetyPointSearchingAttempt: "検索中... (試行 {current}/{total})",
+      safetyPointAllAttemptsFailed: "結果が見つかりませんでした。しばらくしてから再試行してください。",
       nearbySafetyPointsHideBtn: "🏥 安全施設を非表示",
       safetyPointHospital: "病院",
       safetyPointPolice: "警察署",
@@ -3091,6 +3097,8 @@
       clearHistoryBtn: "清除",
       nearbySafetyPointsBtn: "🏥 附近安全设施",
       safetyPointConfirmMsg: "最多可能需要 4-5 分钟，是否继续？",
+      safetyPointSearchingAttempt: "正在搜索... (尝试 {current}/{total})",
+      safetyPointAllAttemptsFailed: "未能找到结果。请稍后重试。",
       nearbySafetyPointsHideBtn: "🏥 隐藏安全设施",
       safetyPointHospital: "医院",
       safetyPointPolice: "警察局",
@@ -4788,8 +4796,6 @@ Do NOT output any text outside the JSON object.`;
       return;
     }
 
-    showToast(t("safetyPointSearching"));
-
     const query = `[out:json][timeout:25];
 (
   node["amenity"~"^(hospital|police|pharmacy)$"](around:2000,${center.lat},${center.lng});
@@ -4804,44 +4810,55 @@ out center tags 80;`;
       "https://overpass-api.de/api/interpreter",
       "https://overpass.kumi.systems/api/interpreter",
     ];
+    // Retry the full endpoint chain up to 3 times with a 2s gap whenever the
+    // Overpass call fails OR returns zero elements (which usually means the
+    // server replied with an empty stub under load rather than truly nothing).
+    const MAX_ATTEMPTS = 3;
+    const RETRY_DELAY_MS = 2000;
     let json = null;
     let lastErr = null;
-    for (const endpoint of overpassEndpoints) {
-      // Attempt POST first (preferred for long queries), then GET with `?data=`.
-      const attempts = [
-        () => fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: "data=" + encodeURIComponent(query),
-        }),
-        () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
-      ];
-      for (const doFetch of attempts) {
-        try {
-          const response = await doFetch();
-          if (!response.ok) {
-            lastErr = new Error("HTTP " + response.status);
-            continue;
+    let elements = [];
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      showToast(t("safetyPointSearchingAttempt", { current: attempt, total: MAX_ATTEMPTS }));
+      json = null;
+      lastErr = null;
+      for (const endpoint of overpassEndpoints) {
+        // Attempt POST first (preferred for long queries), then GET with `?data=`.
+        const fetchAttempts = [
+          () => fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "data=" + encodeURIComponent(query),
+          }),
+          () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
+        ];
+        for (const doFetch of fetchAttempts) {
+          try {
+            const response = await doFetch();
+            if (!response.ok) {
+              lastErr = new Error("HTTP " + response.status);
+              continue;
+            }
+            json = await response.json();
+            lastErr = null;
+            break;
+          } catch (err) {
+            lastErr = err;
+            console.warn("[SafeTrip] Overpass attempt failed (" + endpoint + "):", err && err.message);
           }
-          json = await response.json();
-          lastErr = null;
-          break;
-        } catch (err) {
-          lastErr = err;
-          console.warn("[SafeTrip] Overpass attempt failed (" + endpoint + "):", err && err.message);
         }
+        if (json) break;
       }
-      if (json) break;
+      elements = (json && json.elements) || [];
+      if (json && elements.length > 0) break;
+      console.log(`[SafeTrip] safety points attempt ${attempt}/${MAX_ATTEMPTS} failed (json=${!!json}, elements=${elements.length})`);
+      if (attempt < MAX_ATTEMPTS) {
+        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+      }
     }
-    if (!json) {
-      console.error("[SafeTrip] Overpass all endpoints failed:", lastErr);
-      showToast(t("safetyPointFetchFailed") + " " + ((lastErr && lastErr.message) || ""));
-      return;
-    }
-
-    const elements = (json && json.elements) || [];
-    if (elements.length === 0) {
-      showToast(t("safetyPointNotFound"));
+    if (!json || elements.length === 0) {
+      console.error("[SafeTrip] Overpass all retries failed:", lastErr);
+      showToast(t("safetyPointAllAttemptsFailed"));
       return;
     }
 
