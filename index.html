@@ -531,6 +531,105 @@
   }
   .pay-list.cautions li::before { content: "⚠️"; }
 
+  /* Quick SOS Actions block at top of the SOS modal */
+  .quick-sos-section {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  .quick-sos-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #991b1b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .quick-sos-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .quick-sos-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    text-align: left;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.1s, filter 0.15s;
+  }
+  .quick-sos-btn:hover { filter: brightness(1.05); }
+  .quick-sos-btn:active { transform: translateY(1px); }
+  .quick-sos-btn.local { background: #dc2626; color: white; }
+  .quick-sos-btn.sms {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .quick-sos-btn.embassy { background: #1e293b; color: white; }
+  .quick-sos-emoji { font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .quick-sos-label {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+  .quick-sos-subtext {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.85;
+    margin-top: 2px;
+    font-family: ui-monospace, monospace;
+  }
+
+  /* Sidebar emergency-contact slots (3 rows of Name + Phone) */
+  .ec-slot {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 28px;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+  .ec-slot input {
+    padding: 7px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    color: #1e293b;
+    font-family: inherit;
+    min-width: 0;
+  }
+  .ec-slot input:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.15);
+  }
+  .ec-slot-clear {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .ec-slot-clear:hover { color: #dc2626; background: #fef2f2; }
+
   .tr-section { margin-bottom: 18px; }
   .tr-section h3 {
     font-size: 13px;
@@ -1720,6 +1819,27 @@
     color: #cbd5e1;
     border-bottom-color: #1f2a4a;
   }
+  body.dark .quick-sos-section {
+    background: linear-gradient(135deg, #2a0f12 0%, #4a1316 100%);
+    border-color: #5b1f25;
+  }
+  body.dark .quick-sos-title { color: #fca5a5; }
+  body.dark .quick-sos-btn.sms {
+    background: #16213e;
+    color: #e0e0e0;
+    border-color: #334155;
+  }
+  body.dark .ec-slot input {
+    background: #0f1626;
+    color: #e0e0e0;
+    border-color: #334155;
+  }
+  body.dark .ec-slot input:focus {
+    border-color: #f87171;
+    box-shadow: 0 0 0 3px rgba(248,113,113,0.2);
+  }
+  body.dark .ec-slot-clear { color: #64748b; }
+  body.dark .ec-slot-clear:hover { color: #fca5a5; background: #2a0f12; }
   body.dark .ec-inputs label { color: #cbd5e1; }
   body.dark .ec-inputs input {
     background: #0f1626;
@@ -2413,6 +2533,18 @@
         <label><input type="checkbox" data-cl-id="hotel" /><span data-i18n="checklistItemHotel">Hotel/accommodation confirmed</span></label>
       </div>
     </div>
+
+    <div id="emergencyContactsSection">
+      <div class="divider"></div>
+      <button type="button" class="checklist-toggle" id="emergencyContactsToggle" aria-expanded="false" aria-controls="emergencyContactsContent">
+        <span class="chevron">▶</span>
+        <span data-i18n="emergencyContactsTitle">🆘 Emergency Contacts</span>
+      </button>
+      <div class="checklist-content" id="emergencyContactsContent">
+        <p class="hint" data-i18n="emergencyContactsHint">Register up to 3 contacts. SOS will text these with your location.</p>
+        <div id="emergencyContactsSlots"></div>
+      </div>
+    </div>
   </aside>
 
   <div id="map"></div>
@@ -2708,6 +2840,16 @@
       checklistItemNumbers: "Local emergency numbers noted",
       checklistItemMeds: "Medication/prescriptions packed",
       checklistItemHotel: "Hotel/accommodation confirmed",
+      emergencyContactsTitle: "🆘 Emergency Contacts",
+      emergencyContactsHint: "Register up to 3 contacts. SOS will text these with your location.",
+      emergencyContactsNamePh: "e.g. Mom",
+      emergencyContactsPhonePh: "+82-10-1234-5678",
+      quickSosTitle: "⚡ Quick SOS Actions",
+      quickSosCallLocal: "Call Local Emergency",
+      quickSosCallEmbassy: "Call Embassy",
+      quickSosSmsContact: "SMS {name}",
+      quickSosSmsBody: "EMERGENCY: I need help. My location: {coords} {url}",
+      quickSosSmsBodyNoLocation: "EMERGENCY: I need help. (Location unavailable)",
       shareBtn: "📤 Share Results",
       shareCopied: "✓ Copied!",
       shareCopyFailed: "Copy failed",
@@ -2959,6 +3101,16 @@
       checklistItemNumbers: "현지 긴급 번호 메모",
       checklistItemMeds: "약/처방전 준비",
       checklistItemHotel: "숙박 예약 확인",
+      emergencyContactsTitle: "🆘 비상 연락처",
+      emergencyContactsHint: "최대 3명 등록. SOS 시 위치와 함께 SMS 발송.",
+      emergencyContactsNamePh: "예: 엄마",
+      emergencyContactsPhonePh: "+82-10-1234-5678",
+      quickSosTitle: "⚡ 빠른 SOS 액션",
+      quickSosCallLocal: "현지 긴급전화 발신",
+      quickSosCallEmbassy: "대사관 발신",
+      quickSosSmsContact: "{name}에게 SMS",
+      quickSosSmsBody: "긴급: 도움이 필요합니다. 제 위치: {coords} {url}",
+      quickSosSmsBodyNoLocation: "긴급: 도움이 필요합니다. (위치 확인 불가)",
       shareBtn: "📤 결과 공유",
       shareCopied: "✓ 복사됨!",
       shareCopyFailed: "복사 실패",
@@ -3210,6 +3362,16 @@
       checklistItemNumbers: "現地の緊急電話番号を控えた",
       checklistItemMeds: "薬・処方箋を準備",
       checklistItemHotel: "ホテル・宿泊先の予約確認",
+      emergencyContactsTitle: "🆘 緊急連絡先",
+      emergencyContactsHint: "最大 3 名登録可能。SOS 時に位置情報と一緒に SMS を送信。",
+      emergencyContactsNamePh: "例: お母さん",
+      emergencyContactsPhonePh: "+81-90-...",
+      quickSosTitle: "⚡ クイック SOS",
+      quickSosCallLocal: "現地緊急電話",
+      quickSosCallEmbassy: "大使館に電話",
+      quickSosSmsContact: "{name} に SMS",
+      quickSosSmsBody: "緊急: 助けが必要です。現在地: {coords} {url}",
+      quickSosSmsBodyNoLocation: "緊急: 助けが必要です。(位置情報なし)",
       shareBtn: "📤 結果を共有",
       shareCopied: "✓ コピーしました！",
       shareCopyFailed: "コピーに失敗しました",
@@ -3461,6 +3623,16 @@
       checklistItemNumbers: "已记录当地紧急电话",
       checklistItemMeds: "已准备药物/处方",
       checklistItemHotel: "已确认酒店/住宿",
+      emergencyContactsTitle: "🆘 紧急联系人",
+      emergencyContactsHint: "最多注册 3 个联系人。SOS 时将携带位置信息发送短信。",
+      emergencyContactsNamePh: "例如：妈妈",
+      emergencyContactsPhonePh: "+86-...",
+      quickSosTitle: "⚡ 快速 SOS",
+      quickSosCallLocal: "拨打当地紧急电话",
+      quickSosCallEmbassy: "拨打大使馆",
+      quickSosSmsContact: "向 {name} 发短信",
+      quickSosSmsBody: "紧急情况：我需要帮助。我的位置：{coords} {url}",
+      quickSosSmsBodyNoLocation: "紧急情况：我需要帮助。（无法获取位置）",
       shareBtn: "📤 分享结果",
       shareCopied: "✓ 已复制！",
       shareCopyFailed: "复制失败",
@@ -5870,6 +6042,9 @@ out center tags 80;`;
     const info = NATIONALITY_INFO[nationality] || NATIONALITY_INFO.korean;
 
     sosModal.classList.add("visible");
+    // Kick off a fresh GPS read so the Quick-SOS SMS link can embed coords by
+    // the time the user taps it. Runs in the background; never blocks the modal.
+    if (typeof refreshSosLocation === "function") refreshSosLocation();
     sosSubtitle.textContent = `Emergency contacts for ${currentDestinationData.destination} · ${info.flag} ${info.demonym} traveler`;
 
     currentDestinationData.sos_contacts = currentDestinationData.sos_contacts || {};
@@ -5998,6 +6173,7 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       : "";
 
     sosContent.innerHTML = `
+      ${typeof buildQuickSosHtml === "function" ? buildQuickSosHtml(c.local_police, c.home_embassy) : ""}
       <div style="font-size:12px;color:#475569;margin-bottom:12px;padding:10px;background:#f1f5f9;border-radius:6px">
         <strong>Destination country:</strong> ${escapeHtml(c.country || "Unknown")} &nbsp;·&nbsp;
         <strong>Home country:</strong> ${info.flag} ${escapeHtml(info.country)}
@@ -6094,6 +6270,162 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     });
     updateCount();
   })();
+
+  // --- Emergency Contacts + Quick SOS ---
+  const EMERGENCY_CONTACTS_KEY = "safetrip_emergency_contacts";
+  const EMERGENCY_CONTACTS_MAX = 3;
+  const ecContactsToggle = document.getElementById("emergencyContactsToggle");
+  const ecContactsContent = document.getElementById("emergencyContactsContent");
+  const ecContactsSlots = document.getElementById("emergencyContactsSlots");
+
+  function loadEmergencyContactsList() {
+    try { return JSON.parse(localStorage.getItem(EMERGENCY_CONTACTS_KEY) || "[]"); }
+    catch (_) { return []; }
+  }
+  function saveEmergencyContactsList(arr) {
+    try { localStorage.setItem(EMERGENCY_CONTACTS_KEY, JSON.stringify(arr.slice(0, EMERGENCY_CONTACTS_MAX))); }
+    catch (_) {}
+  }
+
+  function renderEmergencyContactSlots() {
+    if (!ecContactsSlots) return;
+    const list = loadEmergencyContactsList();
+    const rows = [];
+    for (let i = 0; i < EMERGENCY_CONTACTS_MAX; i++) {
+      const c = list[i] || { name: "", phone: "" };
+      rows.push(
+        `<div class="ec-slot" data-ec-idx="${i}">` +
+          `<input type="text" class="ec-name" data-i18n-placeholder="emergencyContactsNamePh" placeholder="e.g. Mom" value="${escapeHtml(c.name || "")}" maxlength="40" autocomplete="off" />` +
+          `<input type="tel" class="ec-phone" data-i18n-placeholder="emergencyContactsPhonePh" placeholder="+82-10-..." value="${escapeHtml(c.phone || "")}" maxlength="30" autocomplete="off" />` +
+          `<button type="button" class="ec-slot-clear" title="Clear" aria-label="Clear">✕</button>` +
+        `</div>`
+      );
+    }
+    ecContactsSlots.innerHTML = rows.join("");
+    // Re-apply placeholder translations since we just rebuilt the inputs.
+    document.querySelectorAll("#emergencyContactsSlots [data-i18n-placeholder]").forEach((el) => {
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+  }
+
+  function persistEmergencyContactsFromSlots() {
+    if (!ecContactsSlots) return;
+    const slots = ecContactsSlots.querySelectorAll(".ec-slot");
+    const list = [];
+    slots.forEach((s) => {
+      const name = (s.querySelector(".ec-name") || {}).value || "";
+      const phone = (s.querySelector(".ec-phone") || {}).value || "";
+      if (name.trim() || phone.trim()) {
+        list.push({ name: name.trim(), phone: phone.trim() });
+      }
+    });
+    saveEmergencyContactsList(list);
+  }
+
+  if (ecContactsToggle && ecContactsContent) {
+    ecContactsToggle.addEventListener("click", () => {
+      const expanded = ecContactsToggle.getAttribute("aria-expanded") === "true";
+      ecContactsToggle.setAttribute("aria-expanded", String(!expanded));
+      ecContactsContent.classList.toggle("open", !expanded);
+    });
+  }
+  if (ecContactsSlots) {
+    renderEmergencyContactSlots();
+    ecContactsSlots.addEventListener("input", persistEmergencyContactsFromSlots);
+    ecContactsSlots.addEventListener("click", (e) => {
+      const clearBtn = e.target.closest(".ec-slot-clear");
+      if (!clearBtn) return;
+      const slot = clearBtn.closest(".ec-slot");
+      if (!slot) return;
+      slot.querySelectorAll("input").forEach((i) => { i.value = ""; });
+      persistEmergencyContactsFromSlots();
+    });
+  }
+
+  // ---- Quick SOS state + helpers ----
+  // Latest known GPS fix used to populate the emergency SMS body.
+  let sosLatestLocation = null;
+  let sosLatestLocationAt = 0;
+
+  function refreshSosLocation() {
+    if (!("geolocation" in navigator)) return;
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          sosLatestLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          sosLatestLocationAt = Date.now();
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    } catch (_) {}
+  }
+
+  function buildQuickSosSmsBody() {
+    // Only use the cached fix if it's fresh enough (5 min).
+    if (sosLatestLocation && (Date.now() - sosLatestLocationAt) < 5 * 60 * 1000) {
+      const lat = sosLatestLocation.lat.toFixed(5);
+      const lng = sosLatestLocation.lng.toFixed(5);
+      const url = `https://maps.google.com/?q=${lat},${lng}`;
+      return t("quickSosSmsBody", { coords: `${lat},${lng}`, url });
+    }
+    return t("quickSosSmsBodyNoLocation");
+  }
+
+  function buildQuickSosHtml(localPolice, embassyContact) {
+    const list = loadEmergencyContactsList().filter((c) => c && c.phone && c.phone.trim());
+    const telSan = (n) => (n || "").replace(/[^\d+]/g, "");
+    const items = [];
+
+    if (localPolice && localPolice.number && localPolice.number !== "N/A") {
+      const num = localPolice.number;
+      items.push(
+        `<a class="quick-sos-btn local" href="tel:${escapeHtml(telSan(num))}">` +
+          `<span class="quick-sos-emoji">📞</span>` +
+          `<span class="quick-sos-label"><span>${escapeHtml(t("quickSosCallLocal"))}</span>` +
+          `<span class="quick-sos-subtext">${escapeHtml(num)}</span></span>` +
+        `</a>`
+      );
+    }
+
+    list.forEach((c) => {
+      const label = t("quickSosSmsContact", { name: c.name || c.phone });
+      items.push(
+        `<button type="button" class="quick-sos-btn sms" data-sms-phone="${escapeHtml(telSan(c.phone))}">` +
+          `<span class="quick-sos-emoji">📱</span>` +
+          `<span class="quick-sos-label"><span>${escapeHtml(label)}</span>` +
+          `<span class="quick-sos-subtext">${escapeHtml(c.phone)}</span></span>` +
+        `</button>`
+      );
+    });
+
+    if (embassyContact && embassyContact.number && embassyContact.number !== "N/A") {
+      items.push(
+        `<a class="quick-sos-btn embassy" href="tel:${escapeHtml(telSan(embassyContact.number))}">` +
+          `<span class="quick-sos-emoji">🏛️</span>` +
+          `<span class="quick-sos-label"><span>${escapeHtml(t("quickSosCallEmbassy"))}</span>` +
+          `<span class="quick-sos-subtext">${escapeHtml(embassyContact.number)}</span></span>` +
+        `</a>`
+      );
+    }
+
+    if (items.length === 0) return "";
+    return `<div class="quick-sos-section"><div class="quick-sos-title">${escapeHtml(t("quickSosTitle"))}</div><div class="quick-sos-grid">${items.join("")}</div></div>`;
+  }
+
+  // Delegated click handler for SMS buttons inside the SOS modal — builds the
+  // sms: link at click time so the latest GPS fix is included.
+  if (typeof sosContent !== "undefined" && sosContent) {
+    sosContent.addEventListener("click", (e) => {
+      const btn = e.target.closest && e.target.closest(".quick-sos-btn.sms");
+      if (!btn) return;
+      e.preventDefault();
+      const phone = btn.dataset.smsPhone;
+      if (!phone) return;
+      const body = buildQuickSosSmsBody();
+      window.location.href = `sms:${phone}?body=${encodeURIComponent(body)}`;
+    });
+  }
 
   // Initial language application (after DOM is fully wired).
   applyTranslations();
