@@ -1,6 +1,6 @@
 // SafeTrip service worker — offline-first app shell.
 // Bump CACHE_VERSION whenever app shell files change so old caches get purged.
-const CACHE_VERSION = "v31";
+const CACHE_VERSION = "v32";
 const CACHE_NAME = `safetrip-shell-${CACHE_VERSION}`;
 
 // Offline emergency info caching strategy:
