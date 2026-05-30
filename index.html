@@ -630,6 +630,93 @@
   }
   .ec-slot-clear:hover { color: #dc2626; background: #fef2f2; }
 
+  /* Shake to SOS toggle in sidebar */
+  .shake-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #991b1b;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .shake-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #dc2626;
+    cursor: pointer;
+  }
+  .shake-toggle-hint {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 10px;
+    line-height: 1.45;
+    padding: 0 2px;
+  }
+
+  /* Full-screen countdown overlay shown when shake is detected */
+  .shake-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 5000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .shake-overlay.visible { display: flex; }
+  .shake-overlay-inner {
+    text-align: center;
+    color: white;
+    max-width: 320px;
+  }
+  .shake-countdown-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    opacity: 0.95;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .shake-countdown-number {
+    font-size: 140px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 28px;
+    color: #ef4444;
+    text-shadow: 0 6px 40px rgba(239,68,68,0.65);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .shake-countdown-number.tick { animation: shake-pulse 0.5s ease-out; }
+  @keyframes shake-pulse {
+    0% { transform: scale(0.4); opacity: 0; }
+    60% { transform: scale(1.18); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .shake-cancel-btn {
+    background: white;
+    color: #1e293b;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+    font-family: inherit;
+    letter-spacing: 0.3px;
+  }
+  .shake-cancel-btn:hover { background: #f8fafc; }
+  .shake-cancel-btn:active { transform: scale(0.97); }
+
   .tr-section { margin-bottom: 18px; }
   .tr-section h3 {
     font-size: 13px;
@@ -1840,6 +1927,12 @@
   }
   body.dark .ec-slot-clear { color: #64748b; }
   body.dark .ec-slot-clear:hover { color: #fca5a5; background: #2a0f12; }
+  body.dark .shake-toggle {
+    background: #2a0f12;
+    border-color: #5b1f25;
+    color: #fca5a5;
+  }
+  body.dark .shake-toggle-hint { color: #94a3b8; }
   body.dark .ec-inputs label { color: #cbd5e1; }
   body.dark .ec-inputs input {
     background: #0f1626;
@@ -2542,6 +2635,11 @@
       </button>
       <div class="checklist-content" id="emergencyContactsContent">
         <p class="hint" data-i18n="emergencyContactsHint">Register up to 3 contacts. SOS will text these with your location.</p>
+        <label class="shake-toggle" for="shakeSosToggle">
+          <input type="checkbox" id="shakeSosToggle" />
+          <span data-i18n="shakeToggleLabel">📱 Shake to SOS</span>
+        </label>
+        <div class="shake-toggle-hint" data-i18n="shakeToggleHint">Strong shake (3+ jolts in 1s) triggers SOS with a 3-second cancel window. iOS will ask for motion permission.</div>
         <div id="emergencyContactsSlots"></div>
       </div>
     </div>
@@ -2677,6 +2775,14 @@
 </div>
 
 <div id="dangerBanner" class="danger-banner" data-i18n="dangerBannerText">⚠️ You are near a reported incident area. Stay alert!</div>
+
+<div id="shakeCountdownOverlay" class="shake-overlay" role="alertdialog" aria-live="assertive">
+  <div class="shake-overlay-inner">
+    <div class="shake-countdown-title" data-i18n="shakeCountdownTitle">SOS activating in</div>
+    <div class="shake-countdown-number" id="shakeCountdownNumber">3</div>
+    <button type="button" class="shake-cancel-btn" id="shakeCancelBtn" data-i18n="shakeCancelBtn">Cancel</button>
+  </div>
+</div>
 
 <div id="safetyPointsConfirmModal" class="modal-overlay">
   <div class="modal-content">
@@ -2850,6 +2956,13 @@
       quickSosSmsContact: "SMS {name}",
       quickSosSmsBody: "EMERGENCY: I need help. My location: {coords} {url}",
       quickSosSmsBodyNoLocation: "EMERGENCY: I need help. (Location unavailable)",
+      shakeToggleLabel: "📱 Shake to SOS",
+      shakeToggleHint: "Strong shake (3+ jolts in 1s) triggers SOS with a 3-second cancel window. iOS will ask for motion permission.",
+      shakeCountdownTitle: "SOS activating in",
+      shakeCancelBtn: "Cancel",
+      shakePermissionDenied: "Motion permission denied. Cannot enable Shake to SOS.",
+      shakeUnsupported: "Motion sensor not available on this device.",
+      shakeCancelledToast: "SOS cancelled",
       shareBtn: "📤 Share Results",
       shareCopied: "✓ Copied!",
       shareCopyFailed: "Copy failed",
@@ -3111,6 +3224,13 @@
       quickSosSmsContact: "{name}에게 SMS",
       quickSosSmsBody: "긴급: 도움이 필요합니다. 제 위치: {coords} {url}",
       quickSosSmsBodyNoLocation: "긴급: 도움이 필요합니다. (위치 확인 불가)",
+      shakeToggleLabel: "📱 흔들어서 SOS",
+      shakeToggleHint: "강하게 흔들면(1초 내 3회 이상) SOS가 발동되며 3초 카운트다운 중 취소 가능. iOS는 모션 권한이 필요합니다.",
+      shakeCountdownTitle: "SOS 발동 카운트다운",
+      shakeCancelBtn: "취소",
+      shakePermissionDenied: "모션 권한이 거부되었습니다. Shake to SOS를 켤 수 없습니다.",
+      shakeUnsupported: "이 기기는 모션 센서를 지원하지 않습니다.",
+      shakeCancelledToast: "SOS 취소됨",
       shareBtn: "📤 결과 공유",
       shareCopied: "✓ 복사됨!",
       shareCopyFailed: "복사 실패",
@@ -3372,6 +3492,13 @@
       quickSosSmsContact: "{name} に SMS",
       quickSosSmsBody: "緊急: 助けが必要です。現在地: {coords} {url}",
       quickSosSmsBodyNoLocation: "緊急: 助けが必要です。(位置情報なし)",
+      shakeToggleLabel: "📱 シェイクで SOS",
+      shakeToggleHint: "強く振ると (1 秒以内に 3 回以上) SOS が発動し、3 秒間キャンセル可能。iOS はモーション権限が必要です。",
+      shakeCountdownTitle: "SOS 発動カウントダウン",
+      shakeCancelBtn: "キャンセル",
+      shakePermissionDenied: "モーション権限が拒否されました。Shake to SOS を有効にできません。",
+      shakeUnsupported: "この端末はモーションセンサーに対応していません。",
+      shakeCancelledToast: "SOS をキャンセルしました",
       shareBtn: "📤 結果を共有",
       shareCopied: "✓ コピーしました！",
       shareCopyFailed: "コピーに失敗しました",
@@ -3633,6 +3760,13 @@
       quickSosSmsContact: "向 {name} 发短信",
       quickSosSmsBody: "紧急情况：我需要帮助。我的位置：{coords} {url}",
       quickSosSmsBodyNoLocation: "紧急情况：我需要帮助。（无法获取位置）",
+      shakeToggleLabel: "📱 摇一摇 SOS",
+      shakeToggleHint: "强力摇晃（1 秒内 3 次以上）会触发 SOS，3 秒内可取消。iOS 会请求运动权限。",
+      shakeCountdownTitle: "SOS 即将启动",
+      shakeCancelBtn: "取消",
+      shakePermissionDenied: "运动权限被拒绝。无法启用 Shake to SOS。",
+      shakeUnsupported: "此设备不支持运动传感器。",
+      shakeCancelledToast: "已取消 SOS",
       shareBtn: "📤 分享结果",
       shareCopied: "✓ 已复制！",
       shareCopyFailed: "复制失败",
@@ -6425,6 +6559,181 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       const body = buildQuickSosSmsBody();
       window.location.href = `sms:${phone}?body=${encodeURIComponent(body)}`;
     });
+  }
+
+  // --- Shake to SOS ---
+  const SHAKE_SOS_KEY = "safetrip_shake_sos_enabled";
+  // Net acceleration (after subtracting ~1g gravity baseline) considered a "spike".
+  // High enough to filter walking/typing/desk knocks; reachable with a deliberate
+  // wrist flick.
+  const SHAKE_THRESHOLD = 22;
+  // Sliding window for counting spikes.
+  const SHAKE_WINDOW_MS = 1000;
+  // How many spikes inside that window trigger the countdown.
+  const SHAKE_REQUIRED = 3;
+  // Cooldown after a trigger so the same shake can't keep firing.
+  const SHAKE_COOLDOWN_MS = 5000;
+  // Countdown length before SOS opens.
+  const SHAKE_COUNTDOWN_S = 3;
+
+  const shakeSosToggle = document.getElementById("shakeSosToggle");
+  const shakeOverlay = document.getElementById("shakeCountdownOverlay");
+  const shakeNumberEl = document.getElementById("shakeCountdownNumber");
+  const shakeCancelBtnEl = document.getElementById("shakeCancelBtn");
+
+  let shakeListenerActive = false;
+  let shakeRecentSpikes = [];
+  let shakeLastTrigger = 0;
+  let shakeCountdownTimer = null;
+  let shakeCountdownValue = 0;
+  let shakeMotionHandler = null;
+
+  function isShakeSosEnabled() {
+    try { return localStorage.getItem(SHAKE_SOS_KEY) === "1"; } catch (_) { return false; }
+  }
+  function setShakeSosEnabled(on) {
+    try { localStorage.setItem(SHAKE_SOS_KEY, on ? "1" : "0"); } catch (_) {}
+  }
+
+  async function requestMotionPermissionIfNeeded() {
+    if (typeof DeviceMotionEvent === "undefined") {
+      return { ok: false, reason: "unsupported" };
+    }
+    // iOS 13+ Safari guards DeviceMotion behind an explicit permission prompt.
+    if (typeof DeviceMotionEvent.requestPermission === "function") {
+      try {
+        const result = await DeviceMotionEvent.requestPermission();
+        return { ok: result === "granted", reason: result === "granted" ? "granted" : "denied" };
+      } catch (e) {
+        console.warn("[SafeTrip] motion permission request failed:", e);
+        return { ok: false, reason: "denied" };
+      }
+    }
+    // Other browsers — no explicit permission needed.
+    return { ok: true, reason: "granted" };
+  }
+
+  function onShakeMotionEvent(event) {
+    if (!event) return;
+    const acc = event.accelerationIncludingGravity || event.acceleration;
+    if (!acc) return;
+    const x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
+    const mag = Math.sqrt(x * x + y * y + z * z);
+    // accelerationIncludingGravity has a ~9.8 baseline; net = |mag - 9.8|.
+    // Pure `acceleration` (rare) is already net so |mag| is the right value.
+    const net = event.accelerationIncludingGravity ? Math.abs(mag - 9.8) : Math.abs(mag);
+    if (net < SHAKE_THRESHOLD) return;
+    const now = Date.now();
+    if (now - shakeLastTrigger < SHAKE_COOLDOWN_MS) return;
+    shakeRecentSpikes.push(now);
+    shakeRecentSpikes = shakeRecentSpikes.filter((t) => now - t < SHAKE_WINDOW_MS);
+    if (shakeRecentSpikes.length >= SHAKE_REQUIRED) {
+      shakeLastTrigger = now;
+      shakeRecentSpikes = [];
+      console.log("[SafeTrip] shake detected — starting SOS countdown");
+      startShakeCountdown();
+    }
+  }
+
+  function startShakeListener() {
+    if (shakeListenerActive) return;
+    if (typeof DeviceMotionEvent === "undefined") return;
+    shakeMotionHandler = onShakeMotionEvent;
+    window.addEventListener("devicemotion", shakeMotionHandler);
+    shakeListenerActive = true;
+    console.log("[SafeTrip] shake-to-SOS listener attached");
+  }
+  function stopShakeListener() {
+    if (!shakeListenerActive) return;
+    window.removeEventListener("devicemotion", shakeMotionHandler);
+    shakeMotionHandler = null;
+    shakeListenerActive = false;
+    shakeRecentSpikes = [];
+    console.log("[SafeTrip] shake-to-SOS listener removed");
+  }
+
+  function showShakeOverlay() {
+    if (!shakeOverlay) return;
+    shakeOverlay.classList.add("visible");
+  }
+  function hideShakeOverlay() {
+    if (!shakeOverlay) return;
+    shakeOverlay.classList.remove("visible");
+  }
+  function updateShakeCountdownText(n) {
+    if (!shakeNumberEl) return;
+    shakeNumberEl.textContent = String(n);
+    // Re-trigger pop animation for each tick.
+    shakeNumberEl.classList.remove("tick");
+    void shakeNumberEl.offsetWidth;
+    shakeNumberEl.classList.add("tick");
+  }
+
+  function startShakeCountdown() {
+    cancelShakeCountdown(); // safety: clear any in-flight timer
+    shakeCountdownValue = SHAKE_COUNTDOWN_S;
+    showShakeOverlay();
+    updateShakeCountdownText(shakeCountdownValue);
+    scheduleNextShakeTick();
+  }
+  function scheduleNextShakeTick() {
+    shakeCountdownTimer = setTimeout(() => {
+      shakeCountdownValue -= 1;
+      if (shakeCountdownValue > 0) {
+        updateShakeCountdownText(shakeCountdownValue);
+        scheduleNextShakeTick();
+      } else {
+        hideShakeOverlay();
+        shakeCountdownTimer = null;
+        // Use the existing SOS flow. Falls back to its own toast if no analysis yet.
+        try { openSosModal(); } catch (e) { console.error("[SafeTrip] openSosModal from shake failed:", e); }
+      }
+    }, 1000);
+  }
+  function cancelShakeCountdown() {
+    if (shakeCountdownTimer) {
+      clearTimeout(shakeCountdownTimer);
+      shakeCountdownTimer = null;
+    }
+    hideShakeOverlay();
+  }
+
+  if (shakeCancelBtnEl) {
+    shakeCancelBtnEl.addEventListener("click", () => {
+      cancelShakeCountdown();
+      showToast(t("shakeCancelledToast"));
+    });
+  }
+
+  if (shakeSosToggle) {
+    // Restore previous preference but DON'T auto-start the listener:
+    // - on iOS, motion permission requires a fresh user gesture each session
+    // - reflecting the saved state in the UI lets the user re-grant by clicking
+    shakeSosToggle.checked = isShakeSosEnabled();
+    shakeSosToggle.addEventListener("change", async (e) => {
+      const wantOn = e.target.checked;
+      if (wantOn) {
+        const perm = await requestMotionPermissionIfNeeded();
+        if (!perm.ok) {
+          e.target.checked = false;
+          setShakeSosEnabled(false);
+          showToast(t(perm.reason === "unsupported" ? "shakeUnsupported" : "shakePermissionDenied"));
+          return;
+        }
+        setShakeSosEnabled(true);
+        startShakeListener();
+      } else {
+        setShakeSosEnabled(false);
+        stopShakeListener();
+      }
+    });
+    // On non-iOS (Android Chrome, desktop with sensors), attaching the listener
+    // doesn't need a gesture so it's safe to re-attach on load when preference
+    // is on. iOS will silently no-op until the user re-toggles.
+    if (shakeSosToggle.checked && typeof DeviceMotionEvent !== "undefined" &&
+        typeof DeviceMotionEvent.requestPermission !== "function") {
+      startShakeListener();
+    }
   }
 
   // Initial language application (after DOM is fully wired).
