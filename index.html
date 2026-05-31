@@ -38,6 +38,9 @@
 />
 <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -1383,10 +1386,16 @@
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 3px #3b82f6, 0 2px 6px rgba(0,0,0,0.35);
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  /* Shared (other users') report markers get an orange outer ring instead of
+     blue. The risk-level fill color (red/orange/blue/gray) is preserved so the
+     existing risk signal isn't lost. */
+  .report-marker.others {
+    box-shadow: 0 0 0 3px #f97316, 0 2px 6px rgba(0,0,0,0.35);
   }
   .report-marker .icon { transform: rotate(45deg); font-size: 13px; line-height: 1; }
 
@@ -2836,6 +2845,153 @@
   crossorigin=""
 ></script>
 <script>
+  // --- Firebase / shared incidents ---
+  // PASTE FIREBASE CONFIG HERE: copy from Firebase console → Project Overview →
+  // Web app registration. Leave empty strings to disable cloud sync entirely —
+  // the app will work exactly as before with local-only reports.
+  const FIREBASE_CONFIG = {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: "",
+  };
+  const FIREBASE_ENABLED = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+
+  // Client-side rate limit. The real server-side guard belongs in Firestore
+  // Security Rules or a Cloud Function — this just keeps a polite UI cap.
+  const FB_RATE_LIMIT_KEY = "safetrip_fb_rate_limit";
+  const FB_RATE_LIMIT_PER_HOUR = 5;
+  function canSubmitToFirestore() {
+    try {
+      const stamps = JSON.parse(localStorage.getItem(FB_RATE_LIMIT_KEY) || "[]");
+      const hourAgo = Date.now() - 3600000;
+      const recent = stamps.filter((t) => typeof t === "number" && t > hourAgo);
+      if (recent.length >= FB_RATE_LIMIT_PER_HOUR) return false;
+      recent.push(Date.now());
+      localStorage.setItem(FB_RATE_LIMIT_KEY, JSON.stringify(recent));
+      return true;
+    } catch (_) { return true; }
+  }
+
+  let firebaseDb = null;
+  let firebaseAuth = null;
+  let firebaseUid = null;
+  let firebaseReady = false;
+  const sharedReports = [];
+
+  if (FIREBASE_ENABLED && typeof firebase !== "undefined" && firebase.initializeApp) {
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      firebaseDb = firebase.firestore();
+      firebaseAuth = firebase.auth();
+      console.log("[SafeTrip] Firebase init OK");
+      firebaseAuth.signInAnonymously()
+        .then(() => {
+          firebaseUid = (firebaseAuth.currentUser && firebaseAuth.currentUser.uid) || null;
+          firebaseReady = true;
+          console.log("[SafeTrip] Firebase anonymous auth OK, uid:", firebaseUid);
+          // Pull shared incidents now that auth is ready. Safe to call before
+          // map exists — addSharedReportMarker is robust to that case.
+          loadSharedIncidents();
+        })
+        .catch((e) => console.warn("[SafeTrip] Firebase auth failed:", e));
+    } catch (e) {
+      console.warn("[SafeTrip] Firebase init failed:", e);
+      firebaseDb = null;
+      firebaseAuth = null;
+    }
+  } else if (FIREBASE_ENABLED) {
+    console.warn("[SafeTrip] Firebase SDK not loaded (script blocked?). Skipping cloud sync.");
+  } else {
+    console.log("[SafeTrip] Firebase config empty — running in local-only mode.");
+  }
+
+  async function pushReportToFirestore(report) {
+    if (!firebaseDb || !firebaseReady) return;
+    if (!canSubmitToFirestore()) {
+      console.warn("[SafeTrip] Firestore submit blocked by client rate limit (5/hour)");
+      return;
+    }
+    try {
+      await firebaseDb.collection("incidents").add({
+        type: report.type || "other",
+        items: report.items || "",
+        description: report.description || "",
+        analysis: report.analysis || null,
+        lat: report.lat,
+        lng: report.lng,
+        destination: report.destination || null,
+        owner_uid: firebaseUid,
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      console.log("[SafeTrip] report synced to Firestore:", report.id);
+    } catch (e) {
+      console.warn("[SafeTrip] Firestore write failed:", e && e.message);
+    }
+  }
+
+  // Renders a shared-incident marker on the existing reportLayer. Uses the
+  // same shape as the local marker but with an "others" CSS class so it gets
+  // an orange outer ring instead of blue. Skips if the map isn't ready yet.
+  function addSharedReportMarker(report) {
+    if (typeof reportLayer === "undefined" || typeof L === "undefined") return;
+    const level = (report.analysis && report.analysis.risk_level) || "medium";
+    const color = (typeof REPORT_COLOR !== "undefined" && REPORT_COLOR[level]) ||
+                  (typeof REPORT_COLOR !== "undefined" && REPORT_COLOR.medium) || "#f59e0b";
+    const icon = (typeof TYPE_ICON !== "undefined" && TYPE_ICON[report.type]) || "📍";
+    const html = `<div class="report-marker others" style="background:${color}"><span class="icon">${icon}</span></div>`;
+    const divIcon = L.divIcon({
+      html,
+      className: "report-marker-wrapper",
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+      popupAnchor: [0, -28],
+    });
+    const marker = L.marker([report.lat, report.lng], { icon: divIcon })
+      .addTo(reportLayer)
+      .bindPopup(typeof reportPopupHtml === "function" ? reportPopupHtml(report) : "");
+    report._marker = marker;
+  }
+
+  async function loadSharedIncidents() {
+    if (!firebaseDb) return;
+    try {
+      const snap = await firebaseDb.collection("incidents")
+        .orderBy("created_at", "desc")
+        .limit(500)
+        .get();
+      let added = 0;
+      snap.forEach((doc) => {
+        const d = doc.data() || {};
+        // Skip my own reports — they're already in the local `reports` array.
+        if (firebaseUid && d.owner_uid === firebaseUid) return;
+        if (typeof d.lat !== "number" || typeof d.lng !== "number") return;
+        const r = {
+          id: "shared_" + doc.id,
+          type: d.type || "other",
+          items: d.items || "",
+          description: d.description || "",
+          analysis: d.analysis || null,
+          lat: d.lat,
+          lng: d.lng,
+          destination: d.destination || null,
+          timestamp: (d.created_at && d.created_at.toDate)
+            ? d.created_at.toDate().toISOString()
+            : new Date().toISOString(),
+          __shared: true,
+        };
+        sharedReports.push(r);
+        addSharedReportMarker(r);
+        added += 1;
+      });
+      console.log(`[SafeTrip] loaded ${added} shared incidents from Firestore`);
+    } catch (e) {
+      console.warn("[SafeTrip] Firestore read failed:", e && e.message);
+    }
+  }
+
   // --- i18n ---
   const translations = {
     en: {
@@ -5713,6 +5869,9 @@ Provide 3-5 exchange_methods, 3-4 payment_methods, 2-4 tips inside korean_card_t
       reports.push(report);
       saveReports();
       addReportMarker(report);
+      // Mirror the new report to Firestore so other users see it. No-op when
+      // Firebase isn't configured. Fire-and-forget; failures are logged.
+      if (typeof pushReportToFirestore === "function") pushReportToFirestore(report);
       renderReportsList();
       reportModal.classList.remove("visible");
 
@@ -6963,10 +7122,16 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
     // NOTE: NO risk-level filter here — every reported incident (Low/Medium/High/fake/unrated)
     // triggers the proximity alert. Filtering would be added here if it existed, so this
     // comment is the canonical place to remove it.
-    console.log(`[SafeTrip] checkReportZones — me: ${lat.toFixed(5)}, ${lng.toFixed(5)} | total reports: ${reports.length}`);
+    // Live-tracking proximity checks include shared (Firestore) incidents so a
+    // warning still fires near reports submitted by other users. `sharedReports`
+    // is a separate global populated by loadSharedIncidents; empty when Firebase
+    // is not configured, in which case behavior is identical to before.
+    const sharedList = (typeof sharedReports !== "undefined" && Array.isArray(sharedReports)) ? sharedReports : [];
+    const allReportsForAlert = reports.concat(sharedList);
+    console.log(`[SafeTrip] checkReportZones — me: ${lat.toFixed(5)}, ${lng.toFixed(5)} | local: ${reports.length} | shared: ${sharedList.length}`);
     const currentlyInside = new Set();
     let firstInside = null;
-    reports.forEach((r) => {
+    allReportsForAlert.forEach((r) => {
       if (typeof r.lat !== "number" || typeof r.lng !== "number") {
         console.warn("[SafeTrip]   skip report (bad coords):", r.id);
         return;
