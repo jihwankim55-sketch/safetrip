@@ -446,6 +446,27 @@
   }
   button.hidden-cam:hover { background: #fef2f2; }
 
+  button.safety-timer {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #0d9488;
+    border: 1px solid #0d9488;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.safety-timer:hover { background: #f0fdfa; }
+  button.safety-timer.is-active {
+    background: #0d9488;
+    color: white;
+  }
+  button.safety-timer.is-active:hover { background: #0f766e; }
+
   .pay-section { margin-bottom: 18px; }
   .pay-section h3 {
     font-size: 13px;
@@ -1238,7 +1259,8 @@
   .btn-grid > #ecCardBtn,
   .btn-grid > #transportGuideBtn,
   .btn-grid > #paymentGuideBtn,
-  .btn-grid > #hiddenCameraBtn {
+  .btn-grid > #hiddenCameraBtn,
+  .btn-grid > #safetyTimerBtn {
     grid-column: 1 / -1;
   }
   @media (max-width: 480px) {
@@ -1248,7 +1270,8 @@
     .btn-grid > #ecCardBtn,
     .btn-grid > #transportGuideBtn,
     .btn-grid > #paymentGuideBtn,
-    .btn-grid > #hiddenCameraBtn { grid-column: auto; }
+    .btn-grid > #hiddenCameraBtn,
+    .btn-grid > #safetyTimerBtn { grid-column: auto; }
   }
 
   .phrase-card {
@@ -1474,6 +1497,171 @@
   }
   .hc-report-section h4 { font-size: 13.5px; font-weight: 700; color: #9a3412; margin-bottom: 4px; }
   .hc-report-section p  { font-size: 12.5px; color: #334155; line-height: 1.55; margin: 0; }
+
+  /* --- Safety Timer (Check-in) modal + banner --- */
+  .modal-content.st-modal { max-width: 480px; }
+  .st-section { margin-bottom: 14px; }
+  .st-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+  .st-scenarios { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  .st-scenarios li {
+    font-size: 13px;
+    color: #334155;
+    padding: 6px 10px;
+    background: #f0fdfa;
+    border-left: 3px solid #0d9488;
+    border-radius: 4px;
+    line-height: 1.45;
+  }
+  .st-duration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .st-dur-btn {
+    padding: 10px 4px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .st-dur-btn:hover { background: #f8fafc; }
+  .st-dur-btn.active {
+    background: #0d9488;
+    border-color: #0d9488;
+    color: white;
+  }
+  .st-custom-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .st-custom-input:focus {
+    outline: none;
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+  }
+  .st-warn {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: #78350f;
+    line-height: 1.5;
+  }
+
+  .st-active-card {
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .st-active-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f766e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .st-active-countdown {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 36px;
+    font-weight: 700;
+    color: #0d9488;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .st-active-sub { font-size: 12px; color: #64748b; }
+
+  .st-expire-contact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .st-expire-contact-info { flex: 1; min-width: 0; }
+  .st-expire-contact-name { font-size: 13.5px; font-weight: 600; color: #1e293b; line-height: 1.3; }
+  .st-expire-contact-phone { font-size: 12px; color: #64748b; font-family: ui-monospace, monospace; }
+  .st-expire-send-btn {
+    padding: 8px 12px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .st-expire-send-btn:hover { background: #b91c1c; }
+  .st-expire-send-btn.sent { background: #94a3b8; }
+
+  .timer-banner {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translate(-50%, calc(-100% - 12px));
+    background: #0d9488;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(13,148,136,0.4);
+    z-index: 2900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.3s ease-out;
+    max-width: calc(100vw - 24px);
+    flex-wrap: nowrap;
+  }
+  .timer-banner.visible { transform: translate(-50%, 0); }
+  .timer-banner-icon { font-size: 14px; }
+  .timer-banner-label { display: none; }
+  .timer-banner-countdown {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  .timer-banner-safe-btn {
+    background: white;
+    color: #0d9488;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-left: 4px;
+  }
+  .timer-banner-safe-btn:hover { background: #f0fdfa; }
+  @media (min-width: 480px) {
+    .timer-banner-label { display: inline; opacity: 0.85; }
+  }
 
   .emergency-alert {
     background: #fef2f2;
@@ -2155,6 +2343,58 @@
   }
   body.dark .hc-report-section h4 { color: #fdba74; }
   body.dark .hc-report-section p  { color: #cbd5e1; }
+  body.dark button.safety-timer {
+    background: #16213e;
+    color: #5eead4;
+    border-color: #5eead4;
+  }
+  body.dark button.safety-timer:hover { background: #1f2a4a; }
+  body.dark button.safety-timer.is-active {
+    background: #0d9488;
+    color: white;
+    border-color: #0d9488;
+  }
+  body.dark .st-section-title { color: #94a3b8; }
+  body.dark .st-scenarios li {
+    background: #062a1f;
+    color: #cbd5e1;
+    border-left-color: #14b8a6;
+  }
+  body.dark .st-dur-btn {
+    background: #16213e;
+    border-color: #1f2a4a;
+    color: #cbd5e1;
+  }
+  body.dark .st-dur-btn:hover { background: #1f2a4a; }
+  body.dark .st-dur-btn.active {
+    background: #0d9488;
+    border-color: #0d9488;
+    color: white;
+  }
+  body.dark .st-custom-input {
+    background: #0f1626;
+    border-color: #1f2a4a;
+    color: #e0e0e0;
+  }
+  body.dark .st-warn {
+    background: #2a1f0e;
+    color: #fcd34d;
+    border-left-color: #f59e0b;
+  }
+  body.dark .st-active-card {
+    background: #062a1f;
+    border-color: #134e4a;
+  }
+  body.dark .st-active-label { color: #5eead4; }
+  body.dark .st-active-countdown { color: #5eead4; }
+  body.dark .st-active-sub { color: #94a3b8; }
+  body.dark .st-expire-contact {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .st-expire-contact-name { color: #e0e0e0; }
+  body.dark .st-expire-contact-phone { color: #94a3b8; }
+  body.dark .st-expire-send-btn.sent { background: #475569; }
   body.dark .pay-section h3 { color: #e0e0e0; border-bottom-color: #1f2a4a; }
   body.dark .pay-card {
     background: #0f1626;
@@ -2885,6 +3125,7 @@
       <button id="transportGuideBtn" class="transport" type="button" style="display:none" data-i18n="transportGuideBtn">🚊 Transportation Guide</button>
       <button id="paymentGuideBtn" class="payment" type="button" style="display:none" data-i18n="paymentGuideBtn">💴 Payment & Currency Guide</button>
       <button id="hiddenCameraBtn" class="hidden-cam" type="button" data-i18n="hcBtn">🔍 Hidden Camera Check</button>
+      <button id="safetyTimerBtn" class="safety-timer" type="button" data-i18n="timerBtn">⏰ Safety Timer</button>
     </div>
 
     <button id="offlineEmergencyBtn" class="offline-emergency" type="button" style="display:none" data-i18n="offlineBtn">📴 Offline Emergency Info</button>
@@ -3111,6 +3352,75 @@
       <button type="button" class="btn-primary" id="hiddenCameraClose" style="background:#dc2626" data-i18n="closeBtn">Close</button>
     </div>
   </div>
+</div>
+
+<div id="safetyTimerModal" class="modal-overlay">
+  <div class="modal-content st-modal">
+    <h2 style="color:#0d9488" data-i18n="timerTitle">⏰ Safety Check-in Timer</h2>
+    <div class="modal-sub" data-i18n="timerSub">If you don't check in by the timer's end, your Emergency Contacts get an SMS with your last known location.</div>
+
+    <div id="safetyTimerSetup">
+      <div class="st-section">
+        <div class="st-section-title" data-i18n="timerScenarioHeading">When to use</div>
+        <ul class="st-scenarios">
+          <li data-i18n="timerScenario1">Taking a taxi alone at night</li>
+          <li data-i18n="timerScenario2">Exploring an unfamiliar area</li>
+          <li data-i18n="timerScenario3">Solo hike or trek</li>
+        </ul>
+      </div>
+
+      <div class="st-section">
+        <div class="st-section-title" data-i18n="timerDurationLabel">Set duration</div>
+        <div class="st-duration-grid">
+          <button type="button" class="st-dur-btn" data-dur="30" data-i18n="timerDuration30">30 min</button>
+          <button type="button" class="st-dur-btn" data-dur="60" data-i18n="timerDuration60">1 hour</button>
+          <button type="button" class="st-dur-btn" data-dur="120" data-i18n="timerDuration120">2 hours</button>
+          <button type="button" class="st-dur-btn" data-dur="custom" data-i18n="timerDurationCustom">Custom</button>
+        </div>
+        <input type="number" id="safetyTimerCustomMin" class="st-custom-input" min="1" max="720" style="display:none" data-i18n-placeholder="timerCustomPh" placeholder="Minutes (1-720)" />
+      </div>
+
+      <div id="safetyTimerNoContactsWarn" class="st-warn" style="display:none" data-i18n="timerNoContactsWarn">No Emergency Contacts registered. Add them in the Emergency Contacts section first.</div>
+    </div>
+
+    <div id="safetyTimerActiveView" style="display:none">
+      <div class="st-active-card">
+        <div class="st-active-label" data-i18n="timerBannerLabel">Safety timer</div>
+        <div class="st-active-countdown" id="safetyTimerModalCountdown">--:--</div>
+        <div class="st-active-sub"><span data-i18n="timerStartedAtLabel">Started</span> <span id="safetyTimerStartedAt"></span></div>
+      </div>
+    </div>
+
+    <div class="modal-actions" id="safetyTimerSetupActions">
+      <button type="button" class="btn-secondary" id="safetyTimerClose" data-i18n="cancelBtn">Cancel</button>
+      <button type="button" class="btn-primary" id="safetyTimerStart" style="background:#0d9488" data-i18n="timerStartBtn">I'm going alone now — start</button>
+    </div>
+    <div class="modal-actions" id="safetyTimerActiveActions" style="display:none">
+      <button type="button" class="btn-secondary" id="safetyTimerCancel" data-i18n="timerCancelBtn">Cancel timer</button>
+      <button type="button" class="btn-primary" id="safetyTimerImSafe" style="background:#0d9488" data-i18n="timerImSafeBtn">✅ I'm Safe</button>
+    </div>
+  </div>
+</div>
+
+<div id="safetyTimerExpireModal" class="modal-overlay">
+  <div class="modal-content st-modal">
+    <h2 style="color:#dc2626" data-i18n="timerExpireTitle">⏰ Timer expired — check in!</h2>
+    <div class="modal-sub" data-i18n="timerExpireSub">You didn't check in. Send your contacts an alert with your last known location.</div>
+
+    <div id="safetyTimerExpireContacts"></div>
+    <div id="safetyTimerExpireNoContacts" class="st-warn" style="display:none" data-i18n="timerExpireNoContacts">No Emergency Contacts registered — please call for help directly.</div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="safetyTimerExpireDismiss" style="background:#475569" data-i18n="timerExpireDismiss">I'm safe — dismiss</button>
+    </div>
+  </div>
+</div>
+
+<div id="safetyTimerBanner" class="timer-banner" role="status" aria-live="polite">
+  <span class="timer-banner-icon">⏰</span>
+  <span class="timer-banner-label" data-i18n="timerBannerLabel">Safety timer</span>
+  <span class="timer-banner-countdown" id="safetyTimerBannerCountdown">--:--</span>
+  <button type="button" class="timer-banner-safe-btn" id="safetyTimerBannerSafe" data-i18n="timerImSafeBtn">✅ I'm Safe</button>
 </div>
 
 <div id="dangerBanner" class="danger-banner" data-i18n="dangerBannerText">⚠️ You are near a reported incident area. Stay alert!</div>
@@ -3531,6 +3841,39 @@
       hcReportPlatformDesc: "Airbnb: app → Trips → Help → \"Get urgent help\" → safety issue. Booking.com / Hotels.com / Agoda: contact 24/7 support and request a refund + incident record. Screenshot your booking, the photos, and any host conversation before checking out.",
       hcReportAppsTitle: "📱 Detection apps (mobile)",
       hcReportAppsDesc: "Mobile-only tools that go further than the DIY methods above: Hidden Camera Detector (iOS/Android), Glint Finder (Android lens-reflection), DontSpy 2 (iOS magnetometer + IR). Treat them as aids, not guarantees — combine with a manual scan.",
+      timerBtn: "⏰ Safety Timer",
+      timerTitle: "⏰ Safety Check-in Timer",
+      timerSub: "If you don't check in by the timer's end, your Emergency Contacts get an SMS with your last known location.",
+      timerScenarioHeading: "When to use",
+      timerScenario1: "Taking a taxi alone at night",
+      timerScenario2: "Exploring an unfamiliar area",
+      timerScenario3: "Solo hike or trek",
+      timerDurationLabel: "Set duration",
+      timerDuration30: "30 min",
+      timerDuration60: "1 hour",
+      timerDuration120: "2 hours",
+      timerDurationCustom: "Custom",
+      timerCustomPh: "Minutes (1-720)",
+      timerNoContactsWarn: "No Emergency Contacts registered. Add them in the Emergency Contacts section first — without contacts the timer can still alert you, but no one will be notified.",
+      timerStartBtn: "I'm going alone now — start",
+      timerCancelBtn: "Cancel timer",
+      timerImSafeBtn: "✅ I'm Safe",
+      timerBannerLabel: "Safety timer",
+      timerStartedAtLabel: "Started at",
+      timerStartedToast: "⏰ Safety timer started",
+      timerCancelledToast: "Safety timer cancelled",
+      timerSafeToast: "✅ Checked in — safety timer cleared",
+      timerInvalidCustom: "Enter a number of minutes between 1 and 720.",
+      timerExpireTitle: "⏰ Timer expired — check in!",
+      timerExpireSub: "You didn't check in. Send your contacts an alert with your last known location.",
+      timerSendAlertBtn: "Send alert",
+      timerSentBtn: "✓ Sent",
+      timerExpireDismiss: "I'm safe — dismiss",
+      timerExpireNoContacts: "No Emergency Contacts registered — please call for help directly.",
+      timerExpireSmsBody: "SafeTrip safety check-in missed — I haven't checked in for {duration}. My last known location: {coords} {url}",
+      timerExpireSmsBodyNoLocation: "SafeTrip safety check-in missed — I haven't checked in for {duration}. (Location unavailable)",
+      timerNMinutes: "{n} minutes",
+      timerNHours: "{n} hours",
       ecCardBtn: "🆔 Generate Emergency Card",
       transportGuideBtn: "🚊 Transportation Guide",
       transportGuideTitle: "🚊 Transportation Guide",
@@ -3871,6 +4214,39 @@
       hcReportPlatformDesc: "에어비앤비: 앱 → 여행 → 도움말 → \"긴급 지원 받기\" → 안전 문제. Booking.com / Hotels.com / Agoda: 24시간 고객센터에 연락해 환불 및 사건 기록을 요청하세요. 체크아웃 전에 예약내역, 사진, 호스트와의 대화를 모두 캡처하세요.",
       hcReportAppsTitle: "📱 탐지 앱 (모바일)",
       hcReportAppsDesc: "DIY 방법보다 더 정밀한 모바일 전용 도구: Hidden Camera Detector (iOS/Android), Glint Finder (Android 렌즈 반사), DontSpy 2 (iOS 자기장 + IR). 보조 도구일 뿐이며 절대적이지 않습니다 — 수동 점검과 병행하세요.",
+      timerBtn: "⏰ 안전 타이머",
+      timerTitle: "⏰ 안전 체크인 타이머",
+      timerSub: "타이머가 끝날 때까지 체크인하지 않으면, 사전 등록한 비상 연락처로 마지막 위치와 함께 SMS가 발송됩니다.",
+      timerScenarioHeading: "이럴 때 사용하세요",
+      timerScenario1: "밤에 혼자 택시 탈 때",
+      timerScenario2: "처음 가는 지역을 탐방할 때",
+      timerScenario3: "혼자 트레킹/하이킹할 때",
+      timerDurationLabel: "타이머 시간 설정",
+      timerDuration30: "30분",
+      timerDuration60: "1시간",
+      timerDuration120: "2시간",
+      timerDurationCustom: "직접 입력",
+      timerCustomPh: "분 (1-720)",
+      timerNoContactsWarn: "등록된 비상 연락처가 없습니다. 'Emergency Contacts' 섹션에서 먼저 등록하세요 — 연락처가 없으면 타이머는 본인 알림용으로만 작동합니다.",
+      timerStartBtn: "지금부터 혼자 이동합니다 — 시작",
+      timerCancelBtn: "타이머 취소",
+      timerImSafeBtn: "✅ 안전합니다",
+      timerBannerLabel: "안전 타이머",
+      timerStartedAtLabel: "시작 시각",
+      timerStartedToast: "⏰ 안전 타이머가 시작되었습니다",
+      timerCancelledToast: "안전 타이머가 취소되었습니다",
+      timerSafeToast: "✅ 체크인 완료 — 안전 타이머 해제",
+      timerInvalidCustom: "1부터 720 사이의 분을 입력하세요.",
+      timerExpireTitle: "⏰ 타이머 만료 — 체크인하세요!",
+      timerExpireSub: "체크인이 되지 않았습니다. 마지막 위치를 포함한 알림을 연락처에 보내세요.",
+      timerSendAlertBtn: "알림 전송",
+      timerSentBtn: "✓ 전송됨",
+      timerExpireDismiss: "안전함 — 닫기",
+      timerExpireNoContacts: "등록된 비상 연락처가 없습니다 — 직접 도움을 요청하세요.",
+      timerExpireSmsBody: "SafeTrip 안전 체크인 누락 — {duration} 동안 체크인하지 않았습니다. 마지막 위치: {coords} {url}",
+      timerExpireSmsBodyNoLocation: "SafeTrip 안전 체크인 누락 — {duration} 동안 체크인하지 않았습니다. (위치 확인 불가)",
+      timerNMinutes: "{n}분",
+      timerNHours: "{n}시간",
       ecCardBtn: "🆔 긴급 카드 생성",
       transportGuideBtn: "🚊 교통 가이드",
       transportGuideTitle: "🚊 교통 가이드",
@@ -4211,6 +4587,39 @@
       hcReportPlatformDesc: "Airbnb: アプリ → 旅行 → ヘルプ → 「緊急サポート」→ 安全上の問題。Booking.com / Hotels.com / Agoda: 24時間カスタマーサポートに連絡し返金と記録を要請。チェックアウト前に予約内容、写真、ホストとのやり取りを必ずスクショ。",
       hcReportAppsTitle: "📱 検出アプリ（モバイル）",
       hcReportAppsDesc: "DIY法より進んだモバイル専用ツール: Hidden Camera Detector (iOS/Android)、Glint Finder (Androidレンズ反射)、DontSpy 2 (iOS磁気センサー + IR)。補助ツールであり万能ではありません — 手動チェックと併用を。",
+      timerBtn: "⏰ 安全タイマー",
+      timerTitle: "⏰ 安全チェックインタイマー",
+      timerSub: "タイマー終了までにチェックインしないと、事前登録した緊急連絡先に最後の位置情報を含む SMS が送信されます。",
+      timerScenarioHeading: "こんなときに使います",
+      timerScenario1: "夜にひとりでタクシーに乗るとき",
+      timerScenario2: "初めての地域を散策するとき",
+      timerScenario3: "ひとりでハイキング・トレッキングするとき",
+      timerDurationLabel: "タイマー時間を設定",
+      timerDuration30: "30分",
+      timerDuration60: "1時間",
+      timerDuration120: "2時間",
+      timerDurationCustom: "カスタム",
+      timerCustomPh: "分 (1-720)",
+      timerNoContactsWarn: "緊急連絡先が登録されていません。「Emergency Contacts」セクションで先に登録してください — 連絡先がない場合、タイマーは本人向けの通知のみ動作します。",
+      timerStartBtn: "今からひとりで移動します — 開始",
+      timerCancelBtn: "タイマーをキャンセル",
+      timerImSafeBtn: "✅ 無事です",
+      timerBannerLabel: "安全タイマー",
+      timerStartedAtLabel: "開始時刻",
+      timerStartedToast: "⏰ 安全タイマーを開始しました",
+      timerCancelledToast: "安全タイマーをキャンセルしました",
+      timerSafeToast: "✅ チェックイン完了 — 安全タイマー解除",
+      timerInvalidCustom: "1〜720の範囲で分数を入力してください。",
+      timerExpireTitle: "⏰ タイマー満了 — チェックインしてください！",
+      timerExpireSub: "チェックインがありませんでした。最後の位置情報を連絡先に通知しましょう。",
+      timerSendAlertBtn: "通知を送信",
+      timerSentBtn: "✓ 送信済み",
+      timerExpireDismiss: "無事です — 閉じる",
+      timerExpireNoContacts: "緊急連絡先が登録されていません — 直接助けを求めてください。",
+      timerExpireSmsBody: "SafeTrip 安全チェックイン未実施 — {duration} の間チェックインしていません。最後の位置: {coords} {url}",
+      timerExpireSmsBodyNoLocation: "SafeTrip 安全チェックイン未実施 — {duration} の間チェックインしていません。(位置情報なし)",
+      timerNMinutes: "{n}分",
+      timerNHours: "{n}時間",
       ecCardBtn: "🆔 緊急カードを作成",
       transportGuideBtn: "🚊 交通ガイド",
       transportGuideTitle: "🚊 交通ガイド",
@@ -4551,6 +4960,39 @@
       hcReportPlatformDesc: "Airbnb：应用 → 旅行 → 帮助 → \"获得紧急帮助\" → 安全问题。Booking.com / Hotels.com / Agoda：联系 24 小时客服，要求退款及记录事件。退房前请截图保存订单、照片及与房东的对话。",
       hcReportAppsTitle: "📱 检测应用（移动端）",
       hcReportAppsDesc: "比手动方法更进一步的移动端工具：Hidden Camera Detector (iOS/Android)、Glint Finder (Android 镜头反光)、DontSpy 2 (iOS 磁力计 + 红外)。仅作辅助，不能保证 — 请与手动检查结合使用。",
+      timerBtn: "⏰ 安全计时器",
+      timerTitle: "⏰ 安全签到计时器",
+      timerSub: "若到时间没有签到，预先登记的紧急联系人会收到带有最后位置的短信。",
+      timerScenarioHeading: "适用场景",
+      timerScenario1: "夜间独自打车时",
+      timerScenario2: "首次前往陌生区域时",
+      timerScenario3: "独自徒步 / 远足时",
+      timerDurationLabel: "设置时长",
+      timerDuration30: "30 分钟",
+      timerDuration60: "1 小时",
+      timerDuration120: "2 小时",
+      timerDurationCustom: "自定义",
+      timerCustomPh: "分钟 (1-720)",
+      timerNoContactsWarn: "尚未登记紧急联系人。请先在 \"Emergency Contacts\" 部分添加 — 若无联系人，计时器仅作个人提醒。",
+      timerStartBtn: "我现在独自出发 — 开始",
+      timerCancelBtn: "取消计时器",
+      timerImSafeBtn: "✅ 我安全",
+      timerBannerLabel: "安全计时",
+      timerStartedAtLabel: "开始时间",
+      timerStartedToast: "⏰ 安全计时器已启动",
+      timerCancelledToast: "安全计时器已取消",
+      timerSafeToast: "✅ 已签到 — 安全计时器已解除",
+      timerInvalidCustom: "请输入 1 到 720 之间的分钟数。",
+      timerExpireTitle: "⏰ 计时器到期 — 请签到！",
+      timerExpireSub: "您未签到。请向联系人发送包含最后位置的警报。",
+      timerSendAlertBtn: "发送警报",
+      timerSentBtn: "✓ 已发送",
+      timerExpireDismiss: "我安全 — 关闭",
+      timerExpireNoContacts: "尚未登记紧急联系人 — 请直接寻求帮助。",
+      timerExpireSmsBody: "SafeTrip 安全签到漏检 — 已 {duration} 未签到。最后已知位置：{coords} {url}",
+      timerExpireSmsBodyNoLocation: "SafeTrip 安全签到漏检 — 已 {duration} 未签到。（无法获取位置）",
+      timerNMinutes: "{n} 分钟",
+      timerNHours: "{n} 小时",
       ecCardBtn: "🆔 生成紧急联系卡",
       transportGuideBtn: "🚊 交通指南",
       transportGuideTitle: "🚊 交通指南",
@@ -4891,6 +5333,39 @@
       hcReportPlatformDesc: "Airbnb : app → Voyages → Aide → « Obtenir de l’aide urgente » → problème de sécurité. Booking.com / Hotels.com / Agoda : contactez le support 24/7 et demandez un remboursement + un constat. Faites des captures de votre réservation, des photos et de la conversation avec l’hôte avant le départ.",
       hcReportAppsTitle: "📱 Applications de détection (mobile)",
       hcReportAppsDesc: "Outils mobiles plus poussés que les méthodes DIY ci-dessus : Hidden Camera Detector (iOS/Android), Glint Finder (réflexion d’objectif Android), DontSpy 2 (iOS magnétomètre + IR). Ce sont des aides, pas des garanties — combinez-les avec un examen manuel.",
+      timerBtn: "⏰ Minuteur de sécurité",
+      timerTitle: "⏰ Minuteur de check-in de sécurité",
+      timerSub: "Si vous ne confirmez pas avant la fin du minuteur, vos contacts d’urgence reçoivent un SMS avec votre dernière position connue.",
+      timerScenarioHeading: "Quand l’utiliser",
+      timerScenario1: "Prendre un taxi seul·e la nuit",
+      timerScenario2: "Explorer une zone inconnue",
+      timerScenario3: "Randonnée ou trek en solo",
+      timerDurationLabel: "Définir la durée",
+      timerDuration30: "30 min",
+      timerDuration60: "1 heure",
+      timerDuration120: "2 heures",
+      timerDurationCustom: "Personnalisé",
+      timerCustomPh: "Minutes (1-720)",
+      timerNoContactsWarn: "Aucun contact d’urgence enregistré. Ajoutez-les dans la section « Emergency Contacts » — sans contacts, le minuteur ne sert qu’à vous alerter vous-même.",
+      timerStartBtn: "Je pars seul·e maintenant — démarrer",
+      timerCancelBtn: "Annuler le minuteur",
+      timerImSafeBtn: "✅ Je suis en sécurité",
+      timerBannerLabel: "Minuteur",
+      timerStartedAtLabel: "Démarré à",
+      timerStartedToast: "⏰ Minuteur de sécurité démarré",
+      timerCancelledToast: "Minuteur de sécurité annulé",
+      timerSafeToast: "✅ Check-in effectué — minuteur levé",
+      timerInvalidCustom: "Saisissez un nombre de minutes entre 1 et 720.",
+      timerExpireTitle: "⏰ Minuteur expiré — confirmez !",
+      timerExpireSub: "Vous n’avez pas fait de check-in. Envoyez à vos contacts une alerte avec votre dernière position connue.",
+      timerSendAlertBtn: "Envoyer l’alerte",
+      timerSentBtn: "✓ Envoyée",
+      timerExpireDismiss: "Je suis en sécurité — fermer",
+      timerExpireNoContacts: "Aucun contact d’urgence enregistré — appelez directement à l’aide.",
+      timerExpireSmsBody: "SafeTrip check-in manqué — pas de confirmation depuis {duration}. Dernière position connue : {coords} {url}",
+      timerExpireSmsBodyNoLocation: "SafeTrip check-in manqué — pas de confirmation depuis {duration}. (Position indisponible)",
+      timerNMinutes: "{n} minutes",
+      timerNHours: "{n} heures",
       ecCardBtn: "🆔 Générer la carte d’urgence",
       transportGuideBtn: "🚊 Guide des transports",
       transportGuideTitle: "🚊 Guide des transports",
@@ -5231,6 +5706,39 @@
       hcReportPlatformDesc: "Airbnb: App → Reisen → Hilfe → \"Dringende Hilfe erhalten\" → Sicherheitsproblem. Booking.com / Hotels.com / Agoda: 24/7-Support kontaktieren und Rückerstattung + Vorfall-Protokoll anfordern. Buchung, Fotos und Nachrichten an Gastgeber vor dem Checkout per Screenshot sichern.",
       hcReportAppsTitle: "📱 Erkennungs-Apps (mobil)",
       hcReportAppsDesc: "Mobile Tools, die über die DIY-Methoden hinausgehen: Hidden Camera Detector (iOS/Android), Glint Finder (Android-Linsenreflexion), DontSpy 2 (iOS Magnetometer + IR). Sie sind Hilfen, keine Garantien — mit manueller Prüfung kombinieren.",
+      timerBtn: "⏰ Sicherheitstimer",
+      timerTitle: "⏰ Sicherheits-Check-in-Timer",
+      timerSub: "Wenn Sie sich vor Ablauf nicht melden, erhalten Ihre Notfallkontakte eine SMS mit Ihrem letzten bekannten Standort.",
+      timerScenarioHeading: "Wann nutzen",
+      timerScenario1: "Nachts allein im Taxi",
+      timerScenario2: "Eine unbekannte Gegend erkunden",
+      timerScenario3: "Allein wandern oder trekken",
+      timerDurationLabel: "Dauer festlegen",
+      timerDuration30: "30 Min",
+      timerDuration60: "1 Stunde",
+      timerDuration120: "2 Stunden",
+      timerDurationCustom: "Benutzerdefiniert",
+      timerCustomPh: "Minuten (1-720)",
+      timerNoContactsWarn: "Keine Notfallkontakte registriert. Fügen Sie sie zuerst im Abschnitt Emergency Contacts hinzu — ohne Kontakte warnt der Timer nur Sie selbst.",
+      timerStartBtn: "Ich gehe jetzt allein los — starten",
+      timerCancelBtn: "Timer abbrechen",
+      timerImSafeBtn: "✅ Ich bin sicher",
+      timerBannerLabel: "Sicherheitstimer",
+      timerStartedAtLabel: "Gestartet um",
+      timerStartedToast: "⏰ Sicherheitstimer gestartet",
+      timerCancelledToast: "Sicherheitstimer abgebrochen",
+      timerSafeToast: "✅ Check-in erfolgt — Timer gelöscht",
+      timerInvalidCustom: "Geben Sie eine Minutenzahl zwischen 1 und 720 ein.",
+      timerExpireTitle: "⏰ Timer abgelaufen — bitte melden!",
+      timerExpireSub: "Sie haben sich nicht gemeldet. Senden Sie Ihren Kontakten eine Warnung mit Ihrem letzten bekannten Standort.",
+      timerSendAlertBtn: "Warnung senden",
+      timerSentBtn: "✓ Gesendet",
+      timerExpireDismiss: "Ich bin sicher — schließen",
+      timerExpireNoContacts: "Keine Notfallkontakte registriert — bitte direkt Hilfe rufen.",
+      timerExpireSmsBody: "SafeTrip Sicherheits-Check-in verpasst — seit {duration} keine Bestätigung. Letzter bekannter Standort: {coords} {url}",
+      timerExpireSmsBodyNoLocation: "SafeTrip Sicherheits-Check-in verpasst — seit {duration} keine Bestätigung. (Standort nicht verfügbar)",
+      timerNMinutes: "{n} Minuten",
+      timerNHours: "{n} Stunden",
       ecCardBtn: "🆔 Notfallkarte erstellen",
       transportGuideBtn: "🚊 Verkehrsleitfaden",
       transportGuideTitle: "🚊 Verkehrsleitfaden",
@@ -5571,6 +6079,39 @@
       hcReportPlatformDesc: "Airbnb: app → Viajes → Ayuda → \"Obtener ayuda urgente\" → problema de seguridad. Booking.com / Hotels.com / Agoda: contacta soporte 24/7 y solicita reembolso + registro del incidente. Captura la reserva, las fotos y la conversación con el anfitrión antes de salir.",
       hcReportAppsTitle: "📱 Apps de detección (móvil)",
       hcReportAppsDesc: "Herramientas móviles que van más allá de los métodos DIY: Hidden Camera Detector (iOS/Android), Glint Finder (reflejo de lente Android), DontSpy 2 (iOS magnetómetro + IR). Son ayudas, no garantías — combínalas con una revisión manual.",
+      timerBtn: "⏰ Temporizador de seguridad",
+      timerTitle: "⏰ Temporizador de check-in de seguridad",
+      timerSub: "Si no haces check-in antes del final del temporizador, tus contactos de emergencia recibirán un SMS con tu última ubicación conocida.",
+      timerScenarioHeading: "Cuándo usarlo",
+      timerScenario1: "Al tomar un taxi solo/a de noche",
+      timerScenario2: "Al explorar una zona desconocida",
+      timerScenario3: "Senderismo o trekking en solitario",
+      timerDurationLabel: "Establecer duración",
+      timerDuration30: "30 min",
+      timerDuration60: "1 hora",
+      timerDuration120: "2 horas",
+      timerDurationCustom: "Personalizado",
+      timerCustomPh: "Minutos (1-720)",
+      timerNoContactsWarn: "No hay contactos de emergencia registrados. Añádelos primero en la sección Emergency Contacts — sin contactos, el temporizador solo te avisará a ti.",
+      timerStartBtn: "Salgo solo/a ahora — iniciar",
+      timerCancelBtn: "Cancelar temporizador",
+      timerImSafeBtn: "✅ Estoy a salvo",
+      timerBannerLabel: "Temporizador",
+      timerStartedAtLabel: "Iniciado a las",
+      timerStartedToast: "⏰ Temporizador de seguridad iniciado",
+      timerCancelledToast: "Temporizador de seguridad cancelado",
+      timerSafeToast: "✅ Check-in realizado — temporizador despejado",
+      timerInvalidCustom: "Introduce un número de minutos entre 1 y 720.",
+      timerExpireTitle: "⏰ Temporizador expirado — ¡haz check-in!",
+      timerExpireSub: "No hiciste check-in. Envía a tus contactos una alerta con tu última ubicación conocida.",
+      timerSendAlertBtn: "Enviar alerta",
+      timerSentBtn: "✓ Enviada",
+      timerExpireDismiss: "Estoy a salvo — cerrar",
+      timerExpireNoContacts: "No hay contactos de emergencia registrados — pide ayuda directamente.",
+      timerExpireSmsBody: "Check-in de seguridad de SafeTrip omitido — sin confirmación desde hace {duration}. Última ubicación conocida: {coords} {url}",
+      timerExpireSmsBodyNoLocation: "Check-in de seguridad de SafeTrip omitido — sin confirmación desde hace {duration}. (Ubicación no disponible)",
+      timerNMinutes: "{n} minutos",
+      timerNHours: "{n} horas",
       ecCardBtn: "🆔 Crear tarjeta de emergencia",
       transportGuideBtn: "🚊 Guía de transporte",
       transportGuideTitle: "🚊 Guía de transporte",
@@ -8477,6 +9018,328 @@ Do NOT output any text outside the JSON object.`;
           <p>${escapeHtml(t("hcReportAppsDesc"))}</p>
         </div>
       `;
+    }
+  })();
+
+  // --- Safety Timer (Check-in) (additive — no existing function is touched).
+  // State persists in localStorage so a refresh, tab close, or accidental
+  // navigation does not silently drop the timer. ---
+  (function initSafetyTimer() {
+    const TIMER_KEY = "safetrip_timer_state";
+    const TICK_MS = 1000;
+
+    const btn = document.getElementById("safetyTimerBtn");
+    const modal = document.getElementById("safetyTimerModal");
+    const closeBtn = document.getElementById("safetyTimerClose");
+    const startBtn = document.getElementById("safetyTimerStart");
+    const cancelBtn = document.getElementById("safetyTimerCancel");
+    const imSafeBtn = document.getElementById("safetyTimerImSafe");
+    const customInput = document.getElementById("safetyTimerCustomMin");
+    const noContactsWarn = document.getElementById("safetyTimerNoContactsWarn");
+    const setupView = document.getElementById("safetyTimerSetup");
+    const activeView = document.getElementById("safetyTimerActiveView");
+    const setupActions = document.getElementById("safetyTimerSetupActions");
+    const activeActions = document.getElementById("safetyTimerActiveActions");
+    const modalCountdown = document.getElementById("safetyTimerModalCountdown");
+    const modalStartedAt = document.getElementById("safetyTimerStartedAt");
+
+    const banner = document.getElementById("safetyTimerBanner");
+    const bannerCountdown = document.getElementById("safetyTimerBannerCountdown");
+    const bannerSafeBtn = document.getElementById("safetyTimerBannerSafe");
+
+    const expireModal = document.getElementById("safetyTimerExpireModal");
+    const expireContactsList = document.getElementById("safetyTimerExpireContacts");
+    const expireNoContacts = document.getElementById("safetyTimerExpireNoContacts");
+    const expireDismissBtn = document.getElementById("safetyTimerExpireDismiss");
+
+    if (!btn || !modal || !banner || !expireModal) return;
+
+    let tickHandle = null;
+    let selectedDuration = 30;
+
+    btn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    expireDismissBtn.addEventListener("click", () => {
+      expireModal.classList.remove("visible");
+    });
+    expireModal.addEventListener("click", (e) => {
+      if (e.target === expireModal) expireModal.classList.remove("visible");
+    });
+
+    modal.querySelectorAll(".st-dur-btn").forEach((b) => {
+      b.addEventListener("click", () => selectDuration(b.dataset.dur));
+    });
+
+    startBtn.addEventListener("click", startTimer);
+    cancelBtn.addEventListener("click", () => stopTimer("cancelled"));
+    imSafeBtn.addEventListener("click", () => stopTimer("safe"));
+    bannerSafeBtn.addEventListener("click", () => stopTimer("safe"));
+
+    // Restore on init (page reload, navigation back, etc.)
+    const restored = loadState();
+    if (restored && restored.active && restored.expireAt) {
+      if (Date.now() >= restored.expireAt) {
+        // Already expired while the page was closed — surface the expire modal.
+        triggerExpire(restored);
+      } else {
+        showBanner();
+        updateActiveButton(true);
+        startTicker();
+      }
+    }
+
+    function openModal() {
+      const state = loadState();
+      if (state && state.active && state.expireAt && Date.now() < state.expireAt) {
+        // Show active view (cancel / I'm safe) instead of setup.
+        setupView.style.display = "none";
+        activeView.style.display = "";
+        setupActions.style.display = "none";
+        activeActions.style.display = "";
+        modalStartedAt.textContent = formatTime(state.startedAt || (state.expireAt - state.durationMs));
+      } else {
+        setupView.style.display = "";
+        activeView.style.display = "none";
+        setupActions.style.display = "";
+        activeActions.style.display = "none";
+        selectDuration("30");
+        renderNoContactsWarn();
+      }
+      modal.classList.add("visible");
+    }
+
+    function closeModal() {
+      modal.classList.remove("visible");
+    }
+
+    function selectDuration(val) {
+      modal.querySelectorAll(".st-dur-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.dur === String(val));
+      });
+      if (val === "custom") {
+        customInput.style.display = "";
+        if (!customInput.value) customInput.value = "45";
+        customInput.focus();
+        selectedDuration = parseInt(customInput.value, 10) || 45;
+      } else {
+        customInput.style.display = "none";
+        selectedDuration = parseInt(val, 10);
+      }
+    }
+
+    if (customInput) {
+      customInput.addEventListener("input", () => {
+        const v = parseInt(customInput.value, 10);
+        if (v >= 1 && v <= 720) selectedDuration = v;
+      });
+    }
+
+    function renderNoContactsWarn() {
+      const list = loadContactsSafe();
+      noContactsWarn.style.display = list.length === 0 ? "" : "none";
+    }
+
+    function startTimer() {
+      let minutes = selectedDuration;
+      const active = modal.querySelector(".st-dur-btn.active");
+      if (active && active.dataset.dur === "custom") {
+        minutes = parseInt(customInput.value, 10) || 0;
+      }
+      if (!minutes || minutes < 1 || minutes > 720) {
+        showToastSafe(t("timerInvalidCustom"));
+        return;
+      }
+      // Best-effort: refresh GPS so the expire SMS has a recent fix.
+      if (typeof refreshSosLocation === "function") {
+        try { refreshSosLocation(); } catch (_) {}
+      }
+      const startedAt = Date.now();
+      const durationMs = minutes * 60 * 1000;
+      const state = {
+        active: true,
+        startedAt,
+        expireAt: startedAt + durationMs,
+        durationMs,
+        durationMinutes: minutes,
+      };
+      saveState(state);
+      showBanner();
+      updateActiveButton(true);
+      startTicker();
+      closeModal();
+      showToastSafe(t("timerStartedToast"));
+    }
+
+    function stopTimer(reason) {
+      const wasActive = !!loadState();
+      clearState();
+      stopTicker();
+      hideBanner();
+      updateActiveButton(false);
+      closeModal();
+      if (!wasActive) return;
+      if (reason === "safe") {
+        showToastSafe(t("timerSafeToast"));
+      } else if (reason === "cancelled") {
+        showToastSafe(t("timerCancelledToast"));
+      }
+    }
+
+    function startTicker() {
+      stopTicker();
+      tickHandle = setInterval(tick, TICK_MS);
+      tick(); // immediate
+    }
+    function stopTicker() {
+      if (tickHandle) { clearInterval(tickHandle); tickHandle = null; }
+    }
+    function tick() {
+      const state = loadState();
+      if (!state || !state.active) { stopTicker(); hideBanner(); return; }
+      const remainingMs = state.expireAt - Date.now();
+      if (remainingMs <= 0) {
+        stopTicker();
+        triggerExpire(state);
+        return;
+      }
+      const txt = formatRemaining(remainingMs);
+      bannerCountdown.textContent = txt;
+      if (modalCountdown) modalCountdown.textContent = txt;
+    }
+
+    function formatRemaining(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    }
+
+    function formatTime(ts) {
+      try { return new Date(ts).toLocaleTimeString(); }
+      catch (_) { return ""; }
+    }
+
+    function showBanner() { banner.classList.add("visible"); }
+    function hideBanner() { banner.classList.remove("visible"); }
+
+    function updateActiveButton(active) {
+      btn.classList.toggle("is-active", !!active);
+    }
+
+    function triggerExpire(state) {
+      // State is now consumed — clear so a refresh doesn't re-fire the modal.
+      clearState();
+      hideBanner();
+      updateActiveButton(false);
+
+      // Beep (best-effort, silently ignored if AudioContext unavailable).
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) {
+          const ctx = new Ctx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = "sine"; osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.0);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.05);
+        }
+      } catch (_) {}
+
+      // Build expire UI.
+      const list = loadContactsSafe();
+      const duration = formatDuration(state.durationMinutes || Math.round((state.durationMs || 0) / 60000));
+      if (list.length === 0) {
+        expireNoContacts.style.display = "";
+        expireContactsList.innerHTML = "";
+      } else {
+        expireNoContacts.style.display = "none";
+        expireContactsList.innerHTML = list.map((c, i) => {
+          const phone = (c.phone || "").replace(/[^\d+]/g, "");
+          const name = c.name || c.phone || "";
+          return `
+            <div class="st-expire-contact" data-idx="${i}">
+              <div class="st-expire-contact-info">
+                <div class="st-expire-contact-name">${escapeHtml(name)}</div>
+                <div class="st-expire-contact-phone">${escapeHtml(c.phone || "")}</div>
+              </div>
+              <button type="button" class="st-expire-send-btn" data-phone="${escapeHtml(phone)}" data-name="${escapeHtml(name)}">
+                ${escapeHtml(t("timerSendAlertBtn"))}
+              </button>
+            </div>
+          `;
+        }).join("");
+      }
+
+      expireContactsList.querySelectorAll(".st-expire-send-btn").forEach((b) => {
+        b.addEventListener("click", () => {
+          const phone = b.dataset.phone;
+          if (!phone) return;
+          const body = buildExpireSmsBody(duration);
+          window.location.href = `sms:${phone}?body=${encodeURIComponent(body)}`;
+          b.classList.add("sent");
+          b.textContent = t("timerSentBtn");
+        });
+      });
+
+      modal.classList.remove("visible");
+      expireModal.classList.add("visible");
+    }
+
+    function buildExpireSmsBody(durationStr) {
+      // Reuse the same fresh-fix policy as Quick SOS (5-min window).
+      const loc = (typeof sosLatestLocation !== "undefined") ? sosLatestLocation : null;
+      const locAt = (typeof sosLatestLocationAt !== "undefined") ? sosLatestLocationAt : 0;
+      if (loc && (Date.now() - locAt) < 5 * 60 * 1000) {
+        const lat = loc.lat.toFixed(5);
+        const lng = loc.lng.toFixed(5);
+        const url = `https://maps.google.com/?q=${lat},${lng}`;
+        return t("timerExpireSmsBody", { duration: durationStr, coords: `${lat},${lng}`, url });
+      }
+      return t("timerExpireSmsBodyNoLocation", { duration: durationStr });
+    }
+
+    function formatDuration(minutes) {
+      if (!minutes) return "";
+      if (minutes >= 60 && minutes % 60 === 0) {
+        return t("timerNHours", { n: minutes / 60 });
+      }
+      return t("timerNMinutes", { n: minutes });
+    }
+
+    function loadContactsSafe() {
+      if (typeof loadEmergencyContactsList === "function") {
+        try { return loadEmergencyContactsList().filter((c) => c && c.phone && c.phone.trim()); }
+        catch (_) { return []; }
+      }
+      return [];
+    }
+
+    function showToastSafe(msg) {
+      if (typeof showToast === "function") {
+        try { showToast(msg); } catch (_) {}
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(TIMER_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (_) { return null; }
+    }
+    function saveState(s) {
+      try { localStorage.setItem(TIMER_KEY, JSON.stringify(s)); } catch (_) {}
+    }
+    function clearState() {
+      try { localStorage.removeItem(TIMER_KEY); } catch (_) {}
     }
   })();
 
