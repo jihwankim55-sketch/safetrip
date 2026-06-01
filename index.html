@@ -1689,6 +1689,21 @@
   .api-help-content li:last-child { margin-bottom: 0; }
   .api-help-content a { color: #2563eb; font-weight: 600; }
 
+  .api-reassure {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: #78350f;
+    line-height: 1.55;
+  }
+  .api-reassure strong { display: block; margin-bottom: 6px; color: #92400e; }
+  .api-reassure ul { margin: 0; padding-left: 18px; }
+  .api-reassure li { margin-bottom: 4px; }
+  .api-reassure li:last-child { margin-bottom: 0; }
+
   /* --- Pre-trip checklist --- */
   #checklist-section { margin-top: 4px; }
   .checklist-toggle {
@@ -1791,6 +1806,12 @@
     border-left-color: #3b82f6;
   }
   body.dark .api-help-content a { color: #93c5fd; }
+  body.dark .api-reassure {
+    background: #2a1f0e;
+    border-left-color: #f59e0b;
+    color: #fde68a;
+  }
+  body.dark .api-reassure strong { color: #fcd34d; }
   body.dark .divider { background: #1f2a4a; }
   body.dark #results { color: #e0e0e0; }
   body.dark .result-section {
@@ -2553,19 +2574,29 @@
       <div class="hint" data-i18n-html="apiKeyHintHtml">
         Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Stored only in your browser.
       </div>
+      <div class="api-reassure">
+        <strong data-i18n="apiReassureTitle">💡 Good to know:</strong>
+        <ul>
+          <li data-i18n="apiReassureItem1">A single $5 top-up lasts 3+ months of typical use</li>
+          <li data-i18n="apiReassureItem2">Not a subscription — one-time payment. No auto-billing</li>
+          <li data-i18n="apiReassureItem3">Add more credit later only when you choose to</li>
+          <li data-i18n="apiReassureItem4">Even without an API key, the map, SOS, live tracking, and incident reports are free</li>
+          <li data-i18n="apiReassureItem5">Your key is stored only in your browser and never sent to SafeTrip servers</li>
+        </ul>
+      </div>
       <div class="api-help">
         <button type="button" class="api-help-toggle" id="apiHelpToggle" aria-expanded="false" aria-controls="apiHelpContent">
           <span class="chevron">▶</span>
-          <span data-i18n="apiHelpToggle">New here? How to get your API key</span>
+          <span data-i18n="apiHelpToggle">🔑 1-minute setup: How to get your API key</span>
         </button>
         <div class="api-help-content" id="apiHelpContent">
-          <p data-i18n="apiHelpIntro">No worries — it only takes a minute. Just follow these steps:</p>
+          <p data-i18n="apiHelpIntro">An API key is like a password that lets SafeTrip use AI analysis. Set it up once and you're done — your key is stored only in your browser.</p>
           <ol>
-            <li data-i18n-html="apiHelpStep1Html">Open <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> in a new tab.</li>
-            <li data-i18n="apiHelpStep2">Sign up with your Google account (one click — no password needed).</li>
-            <li data-i18n-html="apiHelpStep3Html">Once you're in, click <strong>"API keys"</strong> in the menu.</li>
-            <li data-i18n-html="apiHelpStep4Html">Click the <strong>"Create Key"</strong> button and give it any name.</li>
-            <li data-i18n="apiHelpStep5">Copy the key that appears, then paste it into the box above. Done!</li>
+            <li data-i18n-html="apiHelpStep1Html">Visit <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> (click the link).</li>
+            <li data-i18n="apiHelpStep2">Sign in with your Google account (one click — no password needed).</li>
+            <li data-i18n-html="apiHelpStep3Html">In the left menu, click <strong>"API keys"</strong>.</li>
+            <li data-i18n-html="apiHelpStep4Html">Click the <strong>"Create Key"</strong> button and enter a name.</li>
+            <li data-i18n="apiHelpStep5">Copy the displayed key and paste it into the box above. Done!</li>
           </ol>
         </div>
       </div>
@@ -3029,13 +3060,19 @@
       tagline: "Travel destination safety analysis",
       apiKeyLabel: "Anthropic API Key",
       apiKeyHintHtml: 'Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Stored only in your browser.',
-      apiHelpToggle: "New here? How to get your API key",
-      apiHelpIntro: "No worries — it only takes a minute. Just follow these steps:",
-      apiHelpStep1Html: 'Open <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> in a new tab.',
-      apiHelpStep2: "Sign up with your Google account (one click — no password needed).",
-      apiHelpStep3Html: 'Once you’re in, click <strong>"API keys"</strong> in the menu.',
-      apiHelpStep4Html: 'Click the <strong>"Create Key"</strong> button and give it any name.',
-      apiHelpStep5: "Copy the key that appears, then paste it into the box above. Done!",
+      apiHelpToggle: "🔑 1-minute setup: How to get your API key",
+      apiHelpIntro: "An API key is like a password that lets SafeTrip use AI analysis. Set it up once and you’re done — your key is stored only in your browser.",
+      apiHelpStep1Html: 'Visit <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> (click the link).',
+      apiHelpStep2: "Sign in with your Google account (one click — no password needed).",
+      apiHelpStep3Html: 'In the left menu, click <strong>"API keys"</strong>.',
+      apiHelpStep4Html: 'Click the <strong>"Create Key"</strong> button and enter a name.',
+      apiHelpStep5: "Copy the displayed key and paste it into the box above. Done!",
+      apiReassureTitle: "💡 Good to know:",
+      apiReassureItem1: "A single $5 top-up lasts 3+ months of typical use",
+      apiReassureItem2: "Not a subscription — one-time payment. No auto-billing",
+      apiReassureItem3: "Add more credit later only when you choose to",
+      apiReassureItem4: "Even without an API key, the map, SOS, live tracking, and incident reports are free",
+      apiReassureItem5: "Your key is stored only in your browser and never sent to SafeTrip servers",
       modelLabel: "Model",
       modelOpus48: "Claude Opus 4.8 (best quality)",
       modelSonnet46: "Claude Sonnet 4.6 (recommended)",
@@ -3303,13 +3340,19 @@
       tagline: "여행지 안전 분석",
       apiKeyLabel: "Anthropic API 키",
       apiKeyHintHtml: '<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>에서 발급받으세요. 브라우저에만 저장됩니다.',
-      apiHelpToggle: "처음이신가요? API 키 발급 방법",
-      apiHelpIntro: "걱정 마세요 — 1분이면 됩니다. 다음 단계를 따라하세요:",
-      apiHelpStep1Html: '새 탭에서 <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>을 여세요.',
-      apiHelpStep2: "Google 계정으로 가입하세요 (원클릭 — 비밀번호 불필요).",
-      apiHelpStep3Html: '로그인 후 메뉴에서 <strong>"API keys"</strong>를 클릭하세요.',
-      apiHelpStep4Html: '<strong>"Create Key"</strong> 버튼을 클릭하고 이름을 지정하세요.',
-      apiHelpStep5: "표시된 키를 복사하여 위 입력란에 붙여넣으세요. 완료!",
+      apiHelpToggle: "🔑 1분이면 완료! API 키 설정 방법",
+      apiHelpIntro: "API 키는 SafeTrip의 AI 분석 기능을 사용하기 위한 비밀번호 같은 것입니다. 한 번만 설정하면 끝이며, 키는 본인 브라우저에만 저장됩니다.",
+      apiHelpStep1Html: '<a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>에 접속하세요 (링크 클릭).',
+      apiHelpStep2: "Google 계정으로 로그인하세요 (원클릭, 비밀번호 불필요).",
+      apiHelpStep3Html: '왼쪽 메뉴에서 <strong>"API 키"</strong>를 클릭하세요.',
+      apiHelpStep4Html: '<strong>"API 키 받기"</strong> 버튼을 클릭하고 이름을 입력하세요.',
+      apiHelpStep5: "표시된 키를 복사하여 위 입력란에 붙여넣으세요. 끝!",
+      apiReassureTitle: "💡 알아두세요:",
+      apiReassureItem1: "$5 한 번 충전으로 3개월 이상 사용 가능",
+      apiReassureItem2: "월 구독이 아닙니다 — 한 번 결제로 끝. 자동 결제 없음",
+      apiReassureItem3: "더 쓰고 싶을 때만 직접 추가 충전하면 됩니다",
+      apiReassureItem4: "API 키 없이도 지도, SOS, 실시간 추적, 사건 신고 등 주요 기능은 무료",
+      apiReassureItem5: "키는 본인 브라우저에만 저장되며 SafeTrip 서버에 전송되지 않습니다",
       modelLabel: "모델",
       modelOpus48: "Claude Opus 4.8 (최고 품질)",
       modelSonnet46: "Claude Sonnet 4.6 (추천)",
@@ -3577,13 +3620,19 @@
       tagline: "旅行先の安全分析",
       apiKeyLabel: "Anthropic API キー",
       apiKeyHintHtml: '<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> で取得してください。ブラウザにのみ保存されます。',
-      apiHelpToggle: "初めてですか？API キーの取得方法",
-      apiHelpIntro: "ご安心ください — 1分で完了します。以下の手順に従ってください:",
-      apiHelpStep1Html: '新しいタブで <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> を開きます。',
-      apiHelpStep2: "Google アカウントで登録します（ワンクリック — パスワード不要）。",
-      apiHelpStep3Html: 'ログイン後、メニューから <strong>"API keys"</strong> をクリックします。',
-      apiHelpStep4Html: '<strong>"Create Key"</strong> ボタンをクリックして名前を付けます。',
-      apiHelpStep5: "表示されたキーをコピーして上の欄に貼り付けます。完了です！",
+      apiHelpToggle: "🔑 1分で完了！API キーの設定方法",
+      apiHelpIntro: "API キーは SafeTrip の AI 分析機能を使用するためのパスワードのようなものです。一度設定すれば完了で、キーはご自身のブラウザにのみ保存されます。",
+      apiHelpStep1Html: '<a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> にアクセスします（リンクをクリック）。',
+      apiHelpStep2: "Google アカウントでログインします（ワンクリック、パスワード不要）。",
+      apiHelpStep3Html: '左メニューで <strong>「API キー」</strong> をクリックします。',
+      apiHelpStep4Html: '<strong>「キーを作成」</strong> ボタンをクリックして名前を入力します。',
+      apiHelpStep5: "表示されたキーをコピーして、上の入力欄に貼り付けます。完了！",
+      apiReassureTitle: "💡 知っておくと安心:",
+      apiReassureItem1: "$5 を1回チャージするだけで3ヶ月以上利用可能",
+      apiReassureItem2: "月額サブスクではありません — 一度の支払いで終了。自動引き落としなし",
+      apiReassureItem3: "もっと使いたいときだけ、自分で追加チャージするだけ",
+      apiReassureItem4: "API キーなしでも、地図・SOS・ライブ追跡・事件報告など主要機能は無料",
+      apiReassureItem5: "キーはご自身のブラウザにのみ保存され、SafeTrip サーバーには送信されません",
       modelLabel: "モデル",
       modelOpus48: "Claude Opus 4.8 (最高品質)",
       modelSonnet46: "Claude Sonnet 4.6 (推奨)",
@@ -3851,13 +3900,19 @@
       tagline: "旅行目的地安全分析",
       apiKeyLabel: "Anthropic API 密钥",
       apiKeyHintHtml: '在 <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> 获取。仅存储在您的浏览器中。',
-      apiHelpToggle: "新手？如何获取 API 密钥",
-      apiHelpIntro: "别担心 — 只需一分钟。请按照以下步骤操作:",
-      apiHelpStep1Html: '在新标签页中打开 <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>。',
-      apiHelpStep2: "使用 Google 账号注册（一键完成 — 无需密码）。",
-      apiHelpStep3Html: '登录后，点击菜单中的 <strong>"API keys"</strong>。',
-      apiHelpStep4Html: '点击 <strong>"Create Key"</strong> 按钮并任意命名。',
-      apiHelpStep5: "复制显示的密钥并粘贴到上方输入框。完成！",
+      apiHelpToggle: "🔑 1分钟搞定！API 密钥设置方法",
+      apiHelpIntro: "API 密钥就像 SafeTrip AI 分析功能的密码。一次设置即可，密钥仅存储在您的浏览器中。",
+      apiHelpStep1Html: '访问 <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>（点击链接）。',
+      apiHelpStep2: "使用 Google 账号登录（一键登录，无需密码）。",
+      apiHelpStep3Html: '在左侧菜单中点击 <strong>"API 密钥"</strong>。',
+      apiHelpStep4Html: '点击 <strong>"创建密钥"</strong> 按钮并输入名称。',
+      apiHelpStep5: "复制显示的密钥并粘贴到上方输入框中。完成！",
+      apiReassureTitle: "💡 您需要知道:",
+      apiReassureItem1: "充值 $5 一次即可使用 3 个月以上",
+      apiReassureItem2: "非月度订阅 — 一次性付款，无自动扣费",
+      apiReassureItem3: "想多用时再自行额外充值即可",
+      apiReassureItem4: "即使没有 API 密钥，地图、SOS、实时追踪、事件举报等主要功能均免费",
+      apiReassureItem5: "密钥仅存储在您的浏览器中，不会发送到 SafeTrip 服务器",
       modelLabel: "模型",
       modelOpus48: "Claude Opus 4.8 (最高质量)",
       modelSonnet46: "Claude Sonnet 4.6 (推荐)",
@@ -4125,13 +4180,19 @@
       tagline: "Analyse de sécurité de votre destination",
       apiKeyLabel: "Clé API Anthropic",
       apiKeyHintHtml: 'Obtenez-en une sur <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Stockée uniquement dans votre navigateur.',
-      apiHelpToggle: "Première fois ? Comment obtenir votre clé API",
-      apiHelpIntro: "Pas d’inquiétude — cela ne prend qu’une minute. Suivez ces étapes :",
-      apiHelpStep1Html: 'Ouvrez <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> dans un nouvel onglet.',
-      apiHelpStep2: "Inscrivez-vous avec votre compte Google (un clic — sans mot de passe).",
-      apiHelpStep3Html: 'Une fois connecté, cliquez sur <strong>"API keys"</strong> dans le menu.',
-      apiHelpStep4Html: 'Cliquez sur <strong>"Create Key"</strong> et donnez-lui un nom.',
-      apiHelpStep5: "Copiez la clé affichée puis collez-la dans le champ ci-dessus. Terminé !",
+      apiHelpToggle: "🔑 Configuration en 1 minute : comment obtenir votre clé API",
+      apiHelpIntro: "Une clé API, c’est comme un mot de passe qui permet à SafeTrip d’utiliser l’analyse IA. Configurez-la une seule fois — votre clé reste stockée uniquement dans votre navigateur.",
+      apiHelpStep1Html: 'Accédez à <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> (cliquez sur le lien).',
+      apiHelpStep2: "Connectez-vous avec votre compte Google (un clic — pas de mot de passe nécessaire).",
+      apiHelpStep3Html: 'Dans le menu de gauche, cliquez sur <strong>« API keys »</strong>.',
+      apiHelpStep4Html: 'Cliquez sur le bouton <strong>« Create Key »</strong> et donnez-lui un nom.',
+      apiHelpStep5: "Copiez la clé affichée et collez-la dans le champ ci-dessus. Terminé !",
+      apiReassureTitle: "💡 Bon à savoir :",
+      apiReassureItem1: "Une seule recharge de 5 $ dure 3 mois et plus en usage normal",
+      apiReassureItem2: "Pas d’abonnement — paiement unique. Aucun prélèvement automatique",
+      apiReassureItem3: "Ajoutez du crédit plus tard uniquement quand vous le souhaitez",
+      apiReassureItem4: "Même sans clé API, la carte, le SOS, le suivi en direct et les signalements d’incidents restent gratuits",
+      apiReassureItem5: "Votre clé est stockée uniquement dans votre navigateur et n’est jamais envoyée aux serveurs SafeTrip",
       modelLabel: "Modèle",
       modelOpus48: "Claude Opus 4.8 (meilleure qualité)",
       modelSonnet46: "Claude Sonnet 4.6 (recommandé)",
@@ -4399,13 +4460,19 @@
       tagline: "Reiseziel-Sicherheitsanalyse",
       apiKeyLabel: "Anthropic API-Schlüssel",
       apiKeyHintHtml: 'Holen Sie sich einen unter <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Nur in Ihrem Browser gespeichert.',
-      apiHelpToggle: "Neu hier? So bekommen Sie Ihren API-Schlüssel",
-      apiHelpIntro: "Keine Sorge — es dauert nur eine Minute. Folgen Sie diesen Schritten:",
-      apiHelpStep1Html: 'Öffnen Sie <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> in einem neuen Tab.',
-      apiHelpStep2: "Registrieren Sie sich mit Ihrem Google-Konto (ein Klick — kein Passwort nötig).",
-      apiHelpStep3Html: 'Klicken Sie nach der Anmeldung im Menü auf <strong>"API keys"</strong>.',
-      apiHelpStep4Html: 'Klicken Sie auf <strong>"Create Key"</strong> und geben Sie ihm einen Namen.',
+      apiHelpToggle: "🔑 In 1 Minute fertig: So bekommen Sie Ihren API-Schlüssel",
+      apiHelpIntro: "Ein API-Schlüssel ist wie ein Passwort, das SafeTrip die KI-Analyse ermöglicht. Einmal einrichten und fertig — Ihr Schlüssel wird nur in Ihrem Browser gespeichert.",
+      apiHelpStep1Html: 'Öffnen Sie <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> (klicken Sie auf den Link).',
+      apiHelpStep2: "Melden Sie sich mit Ihrem Google-Konto an (ein Klick — kein Passwort nötig).",
+      apiHelpStep3Html: 'Klicken Sie im linken Menü auf <strong>„API keys"</strong>.',
+      apiHelpStep4Html: 'Klicken Sie auf <strong>„Create Key"</strong> und geben Sie einen Namen ein.',
       apiHelpStep5: "Kopieren Sie den angezeigten Schlüssel und fügen Sie ihn oben ein. Fertig!",
+      apiReassureTitle: "💡 Gut zu wissen:",
+      apiReassureItem1: "Eine einzige $5-Aufladung reicht bei normaler Nutzung für 3+ Monate",
+      apiReassureItem2: "Kein Abo — Einmalzahlung. Keine automatischen Abbuchungen",
+      apiReassureItem3: "Laden Sie nur dann nach, wenn Sie selbst möchten",
+      apiReassureItem4: "Auch ohne API-Schlüssel sind Karte, SOS, Live-Tracking und Vorfallmeldungen kostenlos",
+      apiReassureItem5: "Ihr Schlüssel wird nur in Ihrem Browser gespeichert und nie an SafeTrip-Server gesendet",
       modelLabel: "Modell",
       modelOpus48: "Claude Opus 4.8 (beste Qualität)",
       modelSonnet46: "Claude Sonnet 4.6 (empfohlen)",
@@ -4673,13 +4740,19 @@
       tagline: "Análisis de seguridad de tu destino",
       apiKeyLabel: "Clave API de Anthropic",
       apiKeyHintHtml: 'Obtén una en <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Se guarda solo en tu navegador.',
-      apiHelpToggle: "¿Primera vez? Cómo obtener tu clave API",
-      apiHelpIntro: "No te preocupes — solo toma un minuto. Sigue estos pasos:",
-      apiHelpStep1Html: 'Abre <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> en una nueva pestaña.',
-      apiHelpStep2: "Regístrate con tu cuenta de Google (un clic — sin contraseña).",
-      apiHelpStep3Html: 'Después de iniciar sesión, haz clic en <strong>"API keys"</strong> en el menú.',
-      apiHelpStep4Html: 'Haz clic en <strong>"Create Key"</strong> y dale un nombre.',
-      apiHelpStep5: "Copia la clave que aparece y pégala arriba. ¡Listo!",
+      apiHelpToggle: "🔑 Configuración en 1 minuto: cómo obtener tu clave API",
+      apiHelpIntro: "La clave API es como una contraseña que permite a SafeTrip usar el análisis con IA. Se configura una sola vez y listo — tu clave se guarda solo en tu navegador.",
+      apiHelpStep1Html: 'Accede a <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> (haz clic en el enlace).',
+      apiHelpStep2: "Inicia sesión con tu cuenta de Google (un clic — sin contraseña).",
+      apiHelpStep3Html: 'En el menú izquierdo, haz clic en <strong>"API keys"</strong>.',
+      apiHelpStep4Html: 'Haz clic en el botón <strong>"Create Key"</strong> y dale un nombre.',
+      apiHelpStep5: "Copia la clave que se muestra y pégala en el campo de arriba. ¡Listo!",
+      apiReassureTitle: "💡 Bueno saberlo:",
+      apiReassureItem1: "Una sola recarga de $5 dura 3 meses o más con uso normal",
+      apiReassureItem2: "No es suscripción — un pago único. Sin cobros automáticos",
+      apiReassureItem3: "Recarga más solo cuando quieras hacerlo",
+      apiReassureItem4: "Incluso sin clave API, el mapa, SOS, seguimiento en vivo y reportes de incidentes son gratis",
+      apiReassureItem5: "Tu clave se guarda solo en tu navegador y nunca se envía a los servidores de SafeTrip",
       modelLabel: "Modelo",
       modelOpus48: "Claude Opus 4.8 (mejor calidad)",
       modelSonnet46: "Claude Sonnet 4.6 (recomendado)",
