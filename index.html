@@ -430,6 +430,22 @@
   }
   button.payment:hover { background: #f5f3ff; }
 
+  button.hidden-cam {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  button.hidden-cam:hover { background: #fef2f2; }
+
   .pay-section { margin-bottom: 18px; }
   .pay-section h3 {
     font-size: 13px;
@@ -1221,7 +1237,8 @@
   .btn-grid > #shareBtn,
   .btn-grid > #ecCardBtn,
   .btn-grid > #transportGuideBtn,
-  .btn-grid > #paymentGuideBtn {
+  .btn-grid > #paymentGuideBtn,
+  .btn-grid > #hiddenCameraBtn {
     grid-column: 1 / -1;
   }
   @media (max-width: 480px) {
@@ -1230,7 +1247,8 @@
     .btn-grid > #shareBtn,
     .btn-grid > #ecCardBtn,
     .btn-grid > #transportGuideBtn,
-    .btn-grid > #paymentGuideBtn { grid-column: auto; }
+    .btn-grid > #paymentGuideBtn,
+    .btn-grid > #hiddenCameraBtn { grid-column: auto; }
   }
 
   .phrase-card {
@@ -1328,6 +1346,134 @@
   .modal-actions .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
   .modal-actions .btn-secondary { background: #f1f5f9; color: #334155; }
   .modal-actions .btn-secondary:hover { background: #e2e8f0; }
+
+  /* --- Hidden Camera Detection modal --- */
+  .modal-content.hc-modal { max-width: 540px; }
+  .hc-lodging-row { margin-bottom: 14px; }
+  .hc-lodging-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+  .hc-lodging-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .hc-lodging-btns button {
+    padding: 8px 4px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .hc-lodging-btns button:hover { background: #f8fafc; }
+  .hc-lodging-btns button.active {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+  }
+  .hc-risk-indicator {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    display: none;
+  }
+  .hc-risk-indicator.show { display: block; }
+  .hc-risk-indicator.level-low    { background: #ecfdf5; border-left: 3px solid #10b981; color: #065f46; }
+  .hc-risk-indicator.level-medium { background: #fffbeb; border-left: 3px solid #f59e0b; color: #92400e; }
+  .hc-risk-indicator.level-high   { background: #fef2f2; border-left: 3px solid #dc2626; color: #991b1b; }
+  .hc-risk-badge { font-weight: 700; display: block; margin-bottom: 2px; }
+
+  .hc-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 2px;
+  }
+  .hc-tab {
+    padding: 8px 6px;
+    background: transparent;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -4px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: normal;
+    line-height: 1.3;
+  }
+  .hc-tab:hover { color: #334155; }
+  .hc-tab.active {
+    color: #dc2626;
+    border-bottom-color: #dc2626;
+  }
+  .hc-tab-panel { animation: hcFade 0.18s ease-out; }
+  @keyframes hcFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .hc-intro {
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 10px;
+    line-height: 1.55;
+  }
+  .hc-check-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    align-items: flex-start;
+    transition: background 0.15s;
+  }
+  .hc-check-item:hover { background: #f1f5f9; }
+  .hc-check-item input[type="checkbox"] {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: #dc2626;
+    flex-shrink: 0;
+  }
+  .hc-check-item.checked { background: #ecfdf5; border-color: #a7f3d0; }
+  .hc-check-item.checked .hc-check-title { text-decoration: line-through; color: #64748b; }
+  .hc-check-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .hc-check-title { font-size: 13.5px; font-weight: 600; color: #1e293b; line-height: 1.35; }
+  .hc-check-hint  { font-size: 12px; color: #64748b; line-height: 1.45; }
+
+  .hc-diy-method {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .hc-diy-method h4 { font-size: 14px; font-weight: 700; color: #dc2626; margin-bottom: 8px; }
+  .hc-diy-method ol { padding-left: 20px; margin: 0; }
+  .hc-diy-method li { font-size: 13px; color: #334155; margin-bottom: 6px; line-height: 1.5; }
+  .hc-diy-method li:last-child { margin-bottom: 0; }
+
+  .hc-report-section {
+    border-left: 3px solid #dc2626;
+    background: #fff7ed;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  .hc-report-section h4 { font-size: 13.5px; font-weight: 700; color: #9a3412; margin-bottom: 4px; }
+  .hc-report-section p  { font-size: 12.5px; color: #334155; line-height: 1.55; margin: 0; }
 
   .emergency-alert {
     background: #fef2f2;
@@ -1963,6 +2109,52 @@
     border-color: #8b5cf6;
   }
   body.dark button.payment:hover { background: #1f2a4a; }
+  body.dark button.hidden-cam {
+    background: #16213e;
+    color: #fca5a5;
+    border-color: #fca5a5;
+  }
+  body.dark button.hidden-cam:hover { background: #1f2a4a; }
+  body.dark .hc-lodging-label { color: #94a3b8; }
+  body.dark .hc-lodging-btns button {
+    background: #16213e;
+    border-color: #1f2a4a;
+    color: #cbd5e1;
+  }
+  body.dark .hc-lodging-btns button:hover { background: #1f2a4a; }
+  body.dark .hc-lodging-btns button.active {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: white;
+  }
+  body.dark .hc-risk-indicator.level-low    { background: #062a1f; color: #6ee7b7; }
+  body.dark .hc-risk-indicator.level-medium { background: #2a1f0e; color: #fcd34d; }
+  body.dark .hc-risk-indicator.level-high   { background: #2a0e0e; color: #fca5a5; }
+  body.dark .hc-tabs { border-bottom-color: #1f2a4a; }
+  body.dark .hc-tab { color: #94a3b8; }
+  body.dark .hc-tab:hover { color: #cbd5e1; }
+  body.dark .hc-tab.active { color: #fca5a5; border-bottom-color: #fca5a5; }
+  body.dark .hc-intro { color: #cbd5e1; }
+  body.dark .hc-check-item {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .hc-check-item:hover { background: #1f2a4a; }
+  body.dark .hc-check-item.checked { background: #062a1f; border-color: #064e3b; }
+  body.dark .hc-check-title { color: #e0e0e0; }
+  body.dark .hc-check-hint  { color: #94a3b8; }
+  body.dark .hc-diy-method {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .hc-diy-method h4 { color: #fca5a5; }
+  body.dark .hc-diy-method li { color: #cbd5e1; }
+  body.dark .hc-report-section {
+    background: #2a1a0e;
+    border-left-color: #f59e0b;
+  }
+  body.dark .hc-report-section h4 { color: #fdba74; }
+  body.dark .hc-report-section p  { color: #cbd5e1; }
   body.dark .pay-section h3 { color: #e0e0e0; border-bottom-color: #1f2a4a; }
   body.dark .pay-card {
     background: #0f1626;
@@ -2692,6 +2884,7 @@
       <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
       <button id="transportGuideBtn" class="transport" type="button" style="display:none" data-i18n="transportGuideBtn">🚊 Transportation Guide</button>
       <button id="paymentGuideBtn" class="payment" type="button" style="display:none" data-i18n="paymentGuideBtn">💴 Payment & Currency Guide</button>
+      <button id="hiddenCameraBtn" class="hidden-cam" type="button" data-i18n="hcBtn">🔍 Hidden Camera Check</button>
     </div>
 
     <button id="offlineEmergencyBtn" class="offline-emergency" type="button" style="display:none" data-i18n="offlineBtn">📴 Offline Emergency Info</button>
@@ -2875,6 +3068,47 @@
     <div id="phrasesContent"></div>
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="phrasesClose" style="background:#ea580c" data-i18n="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="hiddenCameraModal" class="modal-overlay">
+  <div class="modal-content hc-modal">
+    <h2 style="color:#dc2626" data-i18n="hcTitle">🔍 Hidden Camera Detection Guide</h2>
+    <div class="modal-sub" data-i18n="hcSub">Protect your privacy — quick scan, DIY methods, and what to do if you find one</div>
+
+    <div class="hc-lodging-row">
+      <div class="hc-lodging-label" data-i18n="hcLodgingLabel">Your accommodation type</div>
+      <div class="hc-lodging-btns">
+        <button type="button" data-lodging="hotel" data-i18n="hcLodgingHotel">Hotel</button>
+        <button type="button" data-lodging="airbnb" data-i18n="hcLodgingAirbnb">Airbnb</button>
+        <button type="button" data-lodging="hostel" data-i18n="hcLodgingHostel">Hostel</button>
+        <button type="button" data-lodging="motel" data-i18n="hcLodgingMotel">Motel</button>
+      </div>
+      <div class="hc-risk-indicator" id="hcRiskIndicator"></div>
+    </div>
+
+    <div class="hc-tabs" role="tablist">
+      <button type="button" class="hc-tab active" data-tab="checklist" role="tab" data-i18n="hcTab1">Quick Scan Checklist</button>
+      <button type="button" class="hc-tab" data-tab="diy" role="tab" data-i18n="hcTab2">DIY Detection</button>
+      <button type="button" class="hc-tab" data-tab="report" role="tab" data-i18n="hcTab3">Report & Resources</button>
+    </div>
+
+    <div class="hc-tab-panel" data-panel="checklist">
+      <p class="hc-intro" data-i18n="hcCheckIntro">Walk through each spot when you arrive. Tap an item once you've checked it.</p>
+      <div id="hcChecklistContent"></div>
+    </div>
+    <div class="hc-tab-panel" data-panel="diy" hidden>
+      <p class="hc-intro" data-i18n="hcDiyIntro">Use your phone to check more carefully. Try at night with the room lights off.</p>
+      <div id="hcDiyContent"></div>
+    </div>
+    <div class="hc-tab-panel" data-panel="report" hidden>
+      <p class="hc-intro" data-i18n="hcReportIntro">If you find or strongly suspect a hidden camera, do this:</p>
+      <div id="hcReportContent"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="hiddenCameraClose" style="background:#dc2626" data-i18n="closeBtn">Close</button>
     </div>
   </div>
 </div>
@@ -3245,6 +3479,58 @@
       advisoryUsLabel: "U.S. State Department",
       advisoryUkLabel: "UK FCDO",
       advisoryNote: "Summarized by AI — always verify on the official government websites before traveling.",
+      hcBtn: "🔍 Hidden Camera Check",
+      hcTitle: "🔍 Hidden Camera Detection Guide",
+      hcSub: "Protect your privacy — quick scan, DIY methods, and what to do if you find one",
+      hcLodgingLabel: "Your accommodation type",
+      hcLodgingHotel: "Hotel",
+      hcLodgingAirbnb: "Airbnb",
+      hcLodgingHostel: "Hostel",
+      hcLodgingMotel: "Motel",
+      hcRiskLow: "Low risk",
+      hcRiskMedium: "Medium risk",
+      hcRiskHigh: "Higher risk",
+      hcRiskLowDesc: "Major hotels usually have strict policies, but a quick scan is still a smart habit.",
+      hcRiskMediumDesc: "Private hosts and shared rooms vary widely — scan carefully.",
+      hcRiskHighDesc: "Hidden cameras are reported more often at budget motels — scan thoroughly.",
+      hcTab1: "Quick Scan",
+      hcTab2: "DIY Detection",
+      hcTab3: "Report & Resources",
+      hcCheckIntro: "Walk through each spot when you arrive. Tap an item once you've checked it.",
+      hcCheck_smoke: "Check smoke detectors",
+      hcCheckHint_smoke: "Tiny lenses can hide inside the grille. Note unusual models or extra holes.",
+      hcCheck_clock: "Inspect clocks & alarm clocks",
+      hcCheckHint_clock: "Especially ones facing the bed. Look for pinhole lenses on the front.",
+      hcCheck_outlet: "Inspect outlets & chargers",
+      hcCheckHint_outlet: "Unfamiliar USB chargers, multi-tap adapters, or extension cords may hide cameras.",
+      hcCheck_mirror: "Bathroom mirror (fingernail test)",
+      hcCheckHint_mirror: "Press a fingernail to the glass — a gap = real glass, no gap = two-way mirror.",
+      hcCheck_vent: "AC units & air vents",
+      hcCheckHint_vent: "Look for new screws, unfamiliar wires, or holes pointing toward the bed.",
+      hcCheck_tv: "TV & set-top box area",
+      hcCheckHint_tv: "Decorative items near the TV are common hiding spots. Look for tiny lenses.",
+      hcCheck_screw: "Suspicious holes or fresh screws",
+      hcCheckHint_screw: "Pinhole-sized holes in walls, ceilings, or decor pointing toward the bed/shower.",
+      hcDiyIntro: "Use your phone to check more carefully. Try at night with the room lights off.",
+      hcDiy_infrared_title: "1. Phone-camera infrared check",
+      hcDiy_infrared_step1: "Turn off all lights and close the curtains so the room is fully dark.",
+      hcDiy_infrared_step2: "Open your phone's selfie/front camera — front cameras usually don't filter infrared.",
+      hcDiy_infrared_step3: "Slowly scan the room. Night-vision IR LEDs appear as small purple or white dots on screen.",
+      hcDiy_wifi_title: "2. Wi-Fi network scan",
+      hcDiy_wifi_step1: "Install a free network scanner like \"Fing\" or \"Network Analyzer\" and join the room Wi-Fi.",
+      hcDiy_wifi_step2: "List connected devices. Camera vendors often show as \"Hikvision\", \"Dahua\", \"Wyze\", \"Tuya\", etc.",
+      hcDiy_wifi_step3: "Note: many hidden cameras use their own SIM/hotspot. An empty Wi-Fi scan does NOT mean the room is clean.",
+      hcDiy_flashlight_title: "3. Flashlight reflection check",
+      hcDiy_flashlight_step1: "Turn off all lights and grab a strong flashlight — your phone's torch works.",
+      hcDiy_flashlight_step2: "Slowly sweep the beam across walls, vents, smoke detectors, and decor at eye level.",
+      hcDiy_flashlight_step3: "Camera lenses reflect light as a sharp, bright pinpoint — much brighter than the surface around it.",
+      hcReportIntro: "If you find or strongly suspect a hidden camera, do this:",
+      hcReportPoliceTitle: "🚓 Call local police",
+      hcReportPoliceDesc: "Do NOT remove or destroy the device — it's evidence. Photograph it in place, then call the local emergency / tourist police number. The Emergency Contacts section of your safety analysis has the right number for your destination.",
+      hcReportPlatformTitle: "🏨 Report to the lodging platform",
+      hcReportPlatformDesc: "Airbnb: app → Trips → Help → \"Get urgent help\" → safety issue. Booking.com / Hotels.com / Agoda: contact 24/7 support and request a refund + incident record. Screenshot your booking, the photos, and any host conversation before checking out.",
+      hcReportAppsTitle: "📱 Detection apps (mobile)",
+      hcReportAppsDesc: "Mobile-only tools that go further than the DIY methods above: Hidden Camera Detector (iOS/Android), Glint Finder (Android lens-reflection), DontSpy 2 (iOS magnetometer + IR). Treat them as aids, not guarantees — combine with a manual scan.",
       ecCardBtn: "🆔 Generate Emergency Card",
       transportGuideBtn: "🚊 Transportation Guide",
       transportGuideTitle: "🚊 Transportation Guide",
@@ -3533,6 +3819,58 @@
       advisoryUsLabel: "미국 국무부",
       advisoryUkLabel: "영국 FCDO",
       advisoryNote: "AI가 요약한 정보입니다 — 출국 전 반드시 각국 공식 사이트에서 확인하세요.",
+      hcBtn: "🔍 몰래카메라 점검",
+      hcTitle: "🔍 몰래카메라 탐지 가이드",
+      hcSub: "프라이버시 보호 — 빠른 점검 / DIY 탐지법 / 발견 시 대응 절차",
+      hcLodgingLabel: "숙소 유형",
+      hcLodgingHotel: "호텔",
+      hcLodgingAirbnb: "에어비앤비",
+      hcLodgingHostel: "호스텔",
+      hcLodgingMotel: "모텔",
+      hcRiskLow: "낮은 위험도",
+      hcRiskMedium: "중간 위험도",
+      hcRiskHigh: "높은 위험도",
+      hcRiskLowDesc: "주요 호텔은 보통 엄격한 정책을 운영하지만, 그래도 짧은 점검은 좋은 습관입니다.",
+      hcRiskMediumDesc: "개인 호스트나 공유 객실은 편차가 큽니다 — 주의 깊게 점검하세요.",
+      hcRiskHighDesc: "저가 모텔은 몰카 신고 사례가 많습니다 — 꼼꼼히 점검하세요.",
+      hcTab1: "빠른 점검",
+      hcTab2: "DIY 탐지법",
+      hcTab3: "신고 & 자료",
+      hcCheckIntro: "도착하면 아래 항목을 하나씩 확인하세요. 확인한 항목은 탭하여 체크하세요.",
+      hcCheck_smoke: "화재감지기 확인",
+      hcCheckHint_smoke: "그릴 안쪽에 초소형 렌즈가 숨어 있을 수 있습니다. 낯선 모델이나 추가 구멍을 살피세요.",
+      hcCheck_clock: "시계 / 알람시계 확인",
+      hcCheckHint_clock: "특히 침대 방향을 향한 시계 — 정면에 핀홀 렌즈가 있는지 확인하세요.",
+      hcCheck_outlet: "콘센트 / 충전기 확인",
+      hcCheckHint_outlet: "낯선 USB 충전기, 멀티탭, 연장선 등에 카메라가 숨겨져 있을 수 있습니다.",
+      hcCheck_mirror: "화장실 거울 (손톱 테스트)",
+      hcCheckHint_mirror: "유리에 손톱을 대보세요 — 사이가 떨어져 있으면 일반 유리, 붙어 있으면 양방향(투시) 거울.",
+      hcCheck_vent: "에어컨 / 환풍구 확인",
+      hcCheckHint_vent: "새 나사, 낯선 배선, 침대를 향한 작은 구멍이 있는지 살피세요.",
+      hcCheck_tv: "TV / 셋톱박스 주변",
+      hcCheckHint_tv: "TV 주변 장식품은 흔한 은닉 위치 — 작은 렌즈가 보이는지 살피세요.",
+      hcCheck_screw: "의심스러운 구멍 / 새 나사",
+      hcCheckHint_screw: "벽 / 천장 / 장식품에서 침대나 샤워실을 향한 핀홀 크기 구멍을 확인하세요.",
+      hcDiyIntro: "휴대폰을 활용해 더 꼼꼼히 점검하세요. 야간에 객실 조명을 끄고 시도하는 것이 효과적입니다.",
+      hcDiy_infrared_title: "1. 휴대폰 카메라 적외선 점검",
+      hcDiy_infrared_step1: "모든 조명을 끄고 커튼을 닫아 객실을 완전히 어둡게 하세요.",
+      hcDiy_infrared_step2: "휴대폰의 셀카(전면) 카메라를 켜세요 — 전면 카메라는 보통 적외선 필터가 약합니다.",
+      hcDiy_infrared_step3: "객실을 천천히 스캔하세요. 야간 카메라의 IR LED는 화면에 작은 보라색 / 흰색 점으로 나타납니다.",
+      hcDiy_wifi_title: "2. Wi-Fi 네트워크 점검",
+      hcDiy_wifi_step1: "무료 네트워크 스캐너(예: \"Fing\", \"Network Analyzer\")를 설치하고 객실 Wi-Fi에 접속하세요.",
+      hcDiy_wifi_step2: "연결된 기기 목록을 확인하세요. 카메라 제조사 \"Hikvision\", \"Dahua\", \"Wyze\", \"Tuya\" 등이 보이면 의심.",
+      hcDiy_wifi_step3: "참고: 다수의 몰카는 자체 SIM/핫스팟을 사용합니다. Wi-Fi 목록이 깨끗해도 안전을 보장하지 않습니다.",
+      hcDiy_flashlight_title: "3. 손전등 반사광 점검",
+      hcDiy_flashlight_step1: "모든 조명을 끄고 강한 손전등(휴대폰 플래시도 가능)을 준비하세요.",
+      hcDiy_flashlight_step2: "눈높이에서 벽, 환풍구, 화재감지기, 장식품을 천천히 비추세요.",
+      hcDiy_flashlight_step3: "카메라 렌즈는 주변 표면보다 훨씬 밝고 날카로운 점으로 빛을 반사합니다.",
+      hcReportIntro: "몰래카메라를 발견했거나 강하게 의심된다면 다음 절차를 따르세요:",
+      hcReportPoliceTitle: "🚓 현지 경찰 신고",
+      hcReportPoliceDesc: "기기를 제거하거나 파손하지 마세요 — 증거입니다. 위치 그대로 사진을 찍고, 현지 응급/관광경찰에 전화하세요. 분석 결과의 'Emergency Contacts' 섹션에 해당 국가의 번호가 있습니다.",
+      hcReportPlatformTitle: "🏨 숙소 플랫폼 신고",
+      hcReportPlatformDesc: "에어비앤비: 앱 → 여행 → 도움말 → \"긴급 지원 받기\" → 안전 문제. Booking.com / Hotels.com / Agoda: 24시간 고객센터에 연락해 환불 및 사건 기록을 요청하세요. 체크아웃 전에 예약내역, 사진, 호스트와의 대화를 모두 캡처하세요.",
+      hcReportAppsTitle: "📱 탐지 앱 (모바일)",
+      hcReportAppsDesc: "DIY 방법보다 더 정밀한 모바일 전용 도구: Hidden Camera Detector (iOS/Android), Glint Finder (Android 렌즈 반사), DontSpy 2 (iOS 자기장 + IR). 보조 도구일 뿐이며 절대적이지 않습니다 — 수동 점검과 병행하세요.",
       ecCardBtn: "🆔 긴급 카드 생성",
       transportGuideBtn: "🚊 교통 가이드",
       transportGuideTitle: "🚊 교통 가이드",
@@ -3821,6 +4159,58 @@
       advisoryUsLabel: "米国国務省",
       advisoryUkLabel: "英国 FCDO",
       advisoryNote: "AI による要約です — 渡航前に各国の公式サイトで必ずご確認ください。",
+      hcBtn: "🔍 隠しカメラ点検",
+      hcTitle: "🔍 隠しカメラ検出ガイド",
+      hcSub: "プライバシーを守ろう — 即時チェック / DIY検出法 / 発見時の対応",
+      hcLodgingLabel: "宿泊施設のタイプ",
+      hcLodgingHotel: "ホテル",
+      hcLodgingAirbnb: "Airbnb",
+      hcLodgingHostel: "ホステル",
+      hcLodgingMotel: "モーテル",
+      hcRiskLow: "低リスク",
+      hcRiskMedium: "中リスク",
+      hcRiskHigh: "高リスク",
+      hcRiskLowDesc: "大手ホテルは厳格な方針を持つことが多いですが、簡単な点検は良い習慣です。",
+      hcRiskMediumDesc: "個人ホストやシェアルームはばらつきが大きいため、注意深く点検しましょう。",
+      hcRiskHighDesc: "格安モーテルは隠しカメラの報告が多めです — 念入りに点検してください。",
+      hcTab1: "即時チェック",
+      hcTab2: "DIY検出法",
+      hcTab3: "通報 & 資料",
+      hcCheckIntro: "到着したら各箇所を順番に確認しましょう。確認した項目はタップしてチェック。",
+      hcCheck_smoke: "火災報知器の確認",
+      hcCheckHint_smoke: "グリル内に小型レンズが隠れている場合があります。見慣れないモデルや余分な穴を探しましょう。",
+      hcCheck_clock: "時計 / 目覚まし時計の確認",
+      hcCheckHint_clock: "特にベッドを向いた時計 — 正面のピンホールレンズを確認。",
+      hcCheck_outlet: "コンセント / 充電器の確認",
+      hcCheckHint_outlet: "見覚えのないUSB充電器、電源タップ、延長コードにカメラが内蔵されていることがあります。",
+      hcCheck_mirror: "浴室の鏡（爪テスト）",
+      hcCheckHint_mirror: "爪をガラスに当てる — 隙間あり=普通の鏡、隙間なし=マジックミラー。",
+      hcCheck_vent: "エアコン / 通気口",
+      hcCheckHint_vent: "新しいネジ、見慣れない配線、ベッドを向いた小さな穴に注意。",
+      hcCheck_tv: "テレビ / セットトップボックス周辺",
+      hcCheckHint_tv: "テレビ周辺の装飾品は隠し場所として一般的 — 小さなレンズに注意。",
+      hcCheck_screw: "不審な穴 / 新しいネジ",
+      hcCheckHint_screw: "壁・天井・装飾品でベッドやシャワーを向いたピンホール大の穴を確認。",
+      hcDiyIntro: "スマホでさらに詳しく点検しましょう。室内照明を消して夜間に行うと効果的です。",
+      hcDiy_infrared_title: "1. スマホカメラ赤外線チェック",
+      hcDiy_infrared_step1: "すべての照明を消し、カーテンを閉めて室内を完全に暗くします。",
+      hcDiy_infrared_step2: "スマホのインカメラ（自撮り用）を起動 — インカメラは赤外線フィルタが弱いことが多いです。",
+      hcDiy_infrared_step3: "ゆっくり部屋全体をスキャン。暗視カメラのIR LEDは画面上に紫または白の小さな点として表示されます。",
+      hcDiy_wifi_title: "2. Wi-Fiネットワーク確認",
+      hcDiy_wifi_step1: "「Fing」「Network Analyzer」などの無料ネットワークスキャナをインストールし、室内Wi-Fiに接続。",
+      hcDiy_wifi_step2: "接続機器を確認。「Hikvision」「Dahua」「Wyze」「Tuya」などのカメラメーカー名が見えたら要注意。",
+      hcDiy_wifi_step3: "注: 多くの隠しカメラは独自のSIMやホットスポットを使うため、Wi-Fiで見つからなくても安全とは限りません。",
+      hcDiy_flashlight_title: "3. 懐中電灯の反射チェック",
+      hcDiy_flashlight_step1: "すべての照明を消し、強い懐中電灯（スマホのフラッシュでも可）を用意。",
+      hcDiy_flashlight_step2: "目線の高さで壁、通気口、火災報知器、装飾品をゆっくり照らします。",
+      hcDiy_flashlight_step3: "カメラレンズは周囲の表面より遥かに明るく鋭い点として光を反射します。",
+      hcReportIntro: "隠しカメラを発見または強く疑った場合は、次の手順に従ってください:",
+      hcReportPoliceTitle: "🚓 現地警察へ通報",
+      hcReportPoliceDesc: "機器を取り外したり破壊したりしないでください — 証拠です。位置はそのままに写真を撮り、現地の緊急/観光警察に電話。安全分析の「Emergency Contacts」セクションに各国の番号があります。",
+      hcReportPlatformTitle: "🏨 宿泊プラットフォームへ報告",
+      hcReportPlatformDesc: "Airbnb: アプリ → 旅行 → ヘルプ → 「緊急サポート」→ 安全上の問題。Booking.com / Hotels.com / Agoda: 24時間カスタマーサポートに連絡し返金と記録を要請。チェックアウト前に予約内容、写真、ホストとのやり取りを必ずスクショ。",
+      hcReportAppsTitle: "📱 検出アプリ（モバイル）",
+      hcReportAppsDesc: "DIY法より進んだモバイル専用ツール: Hidden Camera Detector (iOS/Android)、Glint Finder (Androidレンズ反射)、DontSpy 2 (iOS磁気センサー + IR)。補助ツールであり万能ではありません — 手動チェックと併用を。",
       ecCardBtn: "🆔 緊急カードを作成",
       transportGuideBtn: "🚊 交通ガイド",
       transportGuideTitle: "🚊 交通ガイド",
@@ -4109,6 +4499,58 @@
       advisoryUsLabel: "美国国务院",
       advisoryUkLabel: "英国 FCDO",
       advisoryNote: "由 AI 总结 — 出行前请务必在各国官方网站核实。",
+      hcBtn: "🔍 偷拍设备检查",
+      hcTitle: "🔍 隐藏摄像头检测指南",
+      hcSub: "保护隐私 — 快速检查、自助检测法、发现后的处理",
+      hcLodgingLabel: "您的住宿类型",
+      hcLodgingHotel: "酒店",
+      hcLodgingAirbnb: "Airbnb",
+      hcLodgingHostel: "青年旅社",
+      hcLodgingMotel: "汽车旅馆",
+      hcRiskLow: "低风险",
+      hcRiskMedium: "中等风险",
+      hcRiskHigh: "较高风险",
+      hcRiskLowDesc: "主流酒店通常有严格政策，但快速检查仍是好习惯。",
+      hcRiskMediumDesc: "私人房东和合租房差异较大 — 请仔细检查。",
+      hcRiskHighDesc: "经济型汽车旅馆出现偷拍报告较多 — 请彻底检查。",
+      hcTab1: "快速检查",
+      hcTab2: "自助检测",
+      hcTab3: "举报 & 资源",
+      hcCheckIntro: "到达后逐一检查每个位置。点击已检查的项目即可标记。",
+      hcCheck_smoke: "检查烟雾报警器",
+      hcCheckHint_smoke: "栅格内可能藏有微型镜头。注意陌生型号或多余孔洞。",
+      hcCheck_clock: "检查时钟 / 闹钟",
+      hcCheckHint_clock: "尤其是正对床的时钟 — 注意正面是否有针孔镜头。",
+      hcCheck_outlet: "检查插座 / 充电器",
+      hcCheckHint_outlet: "陌生的 USB 充电器、插排或延长线可能藏有摄像头。",
+      hcCheck_mirror: "卫生间镜子（指甲测试）",
+      hcCheckHint_mirror: "用指甲触碰玻璃 — 有间隙=普通镜子；无间隙=双面镜。",
+      hcCheck_vent: "空调 / 通风口",
+      hcCheckHint_vent: "注意新拧的螺丝、陌生的电线或对准床的小孔。",
+      hcCheck_tv: "电视 / 机顶盒周边",
+      hcCheckHint_tv: "电视附近的装饰品是常见隐藏点 — 留意小型镜头。",
+      hcCheck_screw: "可疑孔洞 / 新螺丝",
+      hcCheckHint_screw: "检查墙面、天花板或装饰品中对准床或浴室的针孔大小孔洞。",
+      hcDiyIntro: "用手机进一步检查。建议在夜间关灯进行效果更佳。",
+      hcDiy_infrared_title: "1. 手机摄像头红外检查",
+      hcDiy_infrared_step1: "关闭所有灯光并拉上窗帘，使房间完全黑暗。",
+      hcDiy_infrared_step2: "打开手机前置摄像头 — 前置摄像头通常不过滤红外线。",
+      hcDiy_infrared_step3: "缓慢扫描房间。夜视摄像头的红外 LED 会在屏幕上显示为紫色或白色小点。",
+      hcDiy_wifi_title: "2. Wi-Fi 网络扫描",
+      hcDiy_wifi_step1: "安装免费网络扫描工具（如 \"Fing\"、\"Network Analyzer\"），连入房间 Wi-Fi。",
+      hcDiy_wifi_step2: "查看已连接设备。摄像头厂商常显示为 \"Hikvision\"、\"Dahua\"、\"Wyze\"、\"Tuya\" 等。",
+      hcDiy_wifi_step3: "注意：许多隐藏摄像头使用独立 SIM 卡或热点，Wi-Fi 扫描没问题也不代表绝对安全。",
+      hcDiy_flashlight_title: "3. 手电筒反光检查",
+      hcDiy_flashlight_step1: "关闭所有灯光，准备一支强光手电（手机闪光灯亦可）。",
+      hcDiy_flashlight_step2: "在视线高度缓慢扫过墙面、通风口、烟雾报警器和装饰品。",
+      hcDiy_flashlight_step3: "摄像头镜头会反射出比周围表面亮得多的尖锐光点。",
+      hcReportIntro: "若发现或强烈怀疑存在隐藏摄像头，请按以下步骤处理：",
+      hcReportPoliceTitle: "🚓 报警",
+      hcReportPoliceDesc: "请勿拆除或破坏设备 — 它是证据。原位拍照后拨打当地紧急 / 旅游警察电话。安全分析的 \"Emergency Contacts\" 部分有目的地的对应号码。",
+      hcReportPlatformTitle: "🏨 向住宿平台举报",
+      hcReportPlatformDesc: "Airbnb：应用 → 旅行 → 帮助 → \"获得紧急帮助\" → 安全问题。Booking.com / Hotels.com / Agoda：联系 24 小时客服，要求退款及记录事件。退房前请截图保存订单、照片及与房东的对话。",
+      hcReportAppsTitle: "📱 检测应用（移动端）",
+      hcReportAppsDesc: "比手动方法更进一步的移动端工具：Hidden Camera Detector (iOS/Android)、Glint Finder (Android 镜头反光)、DontSpy 2 (iOS 磁力计 + 红外)。仅作辅助，不能保证 — 请与手动检查结合使用。",
       ecCardBtn: "🆔 生成紧急联系卡",
       transportGuideBtn: "🚊 交通指南",
       transportGuideTitle: "🚊 交通指南",
@@ -4397,6 +4839,58 @@
       advisoryUsLabel: "Département d’État américain",
       advisoryUkLabel: "Royaume-Uni FCDO",
       advisoryNote: "Résumé par l’IA — vérifiez toujours les sites officiels des gouvernements avant de voyager.",
+      hcBtn: "🔍 Détection de caméra cachée",
+      hcTitle: "🔍 Guide de détection de caméras cachées",
+      hcSub: "Protégez votre vie privée — vérification rapide, méthodes DIY, et que faire en cas de découverte",
+      hcLodgingLabel: "Type d’hébergement",
+      hcLodgingHotel: "Hôtel",
+      hcLodgingAirbnb: "Airbnb",
+      hcLodgingHostel: "Auberge",
+      hcLodgingMotel: "Motel",
+      hcRiskLow: "Risque faible",
+      hcRiskMedium: "Risque moyen",
+      hcRiskHigh: "Risque élevé",
+      hcRiskLowDesc: "Les grands hôtels appliquent généralement des règles strictes, mais une vérification rapide reste une bonne habitude.",
+      hcRiskMediumDesc: "Les hôtes privés et chambres partagées varient beaucoup — vérifiez soigneusement.",
+      hcRiskHighDesc: "Les caméras cachées sont plus souvent signalées dans les motels économiques — vérifiez à fond.",
+      hcTab1: "Vérification rapide",
+      hcTab2: "Détection DIY",
+      hcTab3: "Signalement & Ressources",
+      hcCheckIntro: "Passez en revue chaque emplacement à votre arrivée. Touchez un élément pour le cocher.",
+      hcCheck_smoke: "Vérifier les détecteurs de fumée",
+      hcCheckHint_smoke: "De minuscules objectifs peuvent se cacher dans la grille. Notez les modèles inhabituels ou les trous supplémentaires.",
+      hcCheck_clock: "Inspecter horloges & réveils",
+      hcCheckHint_clock: "Surtout ceux orientés vers le lit. Cherchez des objectifs sténopés sur la façade.",
+      hcCheck_outlet: "Inspecter prises & chargeurs",
+      hcCheckHint_outlet: "Les chargeurs USB inconnus, multiprises ou rallonges peuvent dissimuler des caméras.",
+      hcCheck_mirror: "Miroir de salle de bain (test de l’ongle)",
+      hcCheckHint_mirror: "Pressez un ongle contre le verre — espace = vrai miroir, sans espace = miroir sans tain.",
+      hcCheck_vent: "Climatiseur & bouches d’aération",
+      hcCheckHint_vent: "Recherchez vis récentes, fils inhabituels, ou trous pointant vers le lit.",
+      hcCheck_tv: "Téléviseur & décodeur",
+      hcCheckHint_tv: "Les objets décoratifs près de la télé sont des cachettes courantes. Cherchez de petits objectifs.",
+      hcCheck_screw: "Trous suspects ou vis récentes",
+      hcCheckHint_screw: "Trous de la taille d’un sténopé dans murs, plafonds, ou décor pointant vers le lit / la douche.",
+      hcDiyIntro: "Utilisez votre téléphone pour vérifier plus en détail. Essayez la nuit avec les lumières éteintes.",
+      hcDiy_infrared_title: "1. Vérification infrarouge avec la caméra",
+      hcDiy_infrared_step1: "Éteignez toutes les lumières et fermez les rideaux pour que la pièce soit complètement noire.",
+      hcDiy_infrared_step2: "Ouvrez la caméra frontale (selfie) — elle filtre généralement moins l’infrarouge.",
+      hcDiy_infrared_step3: "Balayez lentement la pièce. Les LEDs IR des caméras de vision nocturne apparaissent comme de petits points violets ou blancs à l’écran.",
+      hcDiy_wifi_title: "2. Analyse du réseau Wi-Fi",
+      hcDiy_wifi_step1: "Installez un scanner réseau gratuit (« Fing », « Network Analyzer ») et connectez-vous au Wi-Fi de la chambre.",
+      hcDiy_wifi_step2: "Listez les appareils connectés. Les fabricants de caméras apparaissent souvent sous « Hikvision », « Dahua », « Wyze », « Tuya ».",
+      hcDiy_wifi_step3: "Note : beaucoup de caméras cachées utilisent leur propre SIM / hotspot. Un scan Wi-Fi vide ne garantit PAS que la pièce est propre.",
+      hcDiy_flashlight_title: "3. Vérification par lampe torche",
+      hcDiy_flashlight_step1: "Éteignez toutes les lumières et prenez une lampe puissante (le flash de votre téléphone fait l’affaire).",
+      hcDiy_flashlight_step2: "Balayez lentement le faisceau sur murs, bouches, détecteurs de fumée et décor à hauteur des yeux.",
+      hcDiy_flashlight_step3: "Les objectifs de caméra réfléchissent la lumière comme un point lumineux net — bien plus brillant que la surface autour.",
+      hcReportIntro: "Si vous trouvez ou suspectez fortement une caméra cachée, faites ceci :",
+      hcReportPoliceTitle: "🚓 Police locale",
+      hcReportPoliceDesc: "NE retirez PAS et ne détruisez PAS l’appareil — c’est une preuve. Photographiez-le en place, puis appelez le numéro d’urgence / police touristique locale. La section Emergency Contacts de votre analyse contient le bon numéro.",
+      hcReportPlatformTitle: "🏨 Plateforme d’hébergement",
+      hcReportPlatformDesc: "Airbnb : app → Voyages → Aide → « Obtenir de l’aide urgente » → problème de sécurité. Booking.com / Hotels.com / Agoda : contactez le support 24/7 et demandez un remboursement + un constat. Faites des captures de votre réservation, des photos et de la conversation avec l’hôte avant le départ.",
+      hcReportAppsTitle: "📱 Applications de détection (mobile)",
+      hcReportAppsDesc: "Outils mobiles plus poussés que les méthodes DIY ci-dessus : Hidden Camera Detector (iOS/Android), Glint Finder (réflexion d’objectif Android), DontSpy 2 (iOS magnétomètre + IR). Ce sont des aides, pas des garanties — combinez-les avec un examen manuel.",
       ecCardBtn: "🆔 Générer la carte d’urgence",
       transportGuideBtn: "🚊 Guide des transports",
       transportGuideTitle: "🚊 Guide des transports",
@@ -4685,6 +5179,58 @@
       advisoryUsLabel: "US-Außenministerium",
       advisoryUkLabel: "UK FCDO",
       advisoryNote: "Von KI zusammengefasst — überprüfen Sie vor der Reise immer die offiziellen Regierungsseiten.",
+      hcBtn: "🔍 Versteckte Kamera prüfen",
+      hcTitle: "🔍 Anleitung zur Erkennung versteckter Kameras",
+      hcSub: "Privatsphäre schützen — schnelle Prüfung, DIY-Methoden, und was bei einem Fund zu tun ist",
+      hcLodgingLabel: "Unterkunftstyp",
+      hcLodgingHotel: "Hotel",
+      hcLodgingAirbnb: "Airbnb",
+      hcLodgingHostel: "Hostel",
+      hcLodgingMotel: "Motel",
+      hcRiskLow: "Geringes Risiko",
+      hcRiskMedium: "Mittleres Risiko",
+      hcRiskHigh: "Höheres Risiko",
+      hcRiskLowDesc: "Große Hotels haben meist strenge Richtlinien, aber eine kurze Prüfung ist trotzdem klug.",
+      hcRiskMediumDesc: "Private Gastgeber und geteilte Zimmer variieren stark — sorgfältig prüfen.",
+      hcRiskHighDesc: "Versteckte Kameras werden in Billigmotels häufiger gemeldet — gründlich prüfen.",
+      hcTab1: "Schnellprüfung",
+      hcTab2: "DIY-Erkennung",
+      hcTab3: "Meldung & Ressourcen",
+      hcCheckIntro: "Gehen Sie nach der Ankunft jeden Punkt durch. Tippen Sie ein Element an, sobald Sie es geprüft haben.",
+      hcCheck_smoke: "Rauchmelder prüfen",
+      hcCheckHint_smoke: "Winzige Linsen können sich im Gitter verstecken. Achten Sie auf ungewöhnliche Modelle oder zusätzliche Löcher.",
+      hcCheck_clock: "Uhren & Wecker prüfen",
+      hcCheckHint_clock: "Besonders solche, die zum Bett zeigen. Achten Sie auf Stecknadellinsen vorne.",
+      hcCheck_outlet: "Steckdosen & Ladegeräte prüfen",
+      hcCheckHint_outlet: "Fremde USB-Ladegeräte, Mehrfachstecker oder Verlängerungskabel können Kameras verbergen.",
+      hcCheck_mirror: "Badezimmerspiegel (Fingernagel-Test)",
+      hcCheckHint_mirror: "Drücken Sie einen Fingernagel ans Glas — Lücke = echter Spiegel, keine Lücke = Einwegspiegel.",
+      hcCheck_vent: "Klimaanlage & Lüftungen",
+      hcCheckHint_vent: "Achten Sie auf neue Schrauben, fremde Kabel oder Löcher, die zum Bett zeigen.",
+      hcCheck_tv: "TV & Set-Top-Box",
+      hcCheckHint_tv: "Dekorationen nahe am TV sind häufige Verstecke. Achten Sie auf winzige Linsen.",
+      hcCheck_screw: "Verdächtige Löcher oder neue Schrauben",
+      hcCheckHint_screw: "Stecknadelgroße Löcher in Wänden, Decken oder Dekor, die zum Bett / zur Dusche zeigen.",
+      hcDiyIntro: "Nutzen Sie Ihr Telefon für eine genauere Prüfung. Nachts bei ausgeschaltetem Licht am effektivsten.",
+      hcDiy_infrared_title: "1. Infrarot-Check mit Handy-Kamera",
+      hcDiy_infrared_step1: "Alle Lichter ausschalten und Vorhänge zuziehen, sodass der Raum völlig dunkel ist.",
+      hcDiy_infrared_step2: "Öffnen Sie die Selfie- / Frontkamera — sie filtert in der Regel weniger Infrarot.",
+      hcDiy_infrared_step3: "Scannen Sie den Raum langsam. IR-LEDs von Nachtsichtkameras erscheinen als kleine violette / weiße Punkte am Display.",
+      hcDiy_wifi_title: "2. Wi-Fi-Netzwerk scannen",
+      hcDiy_wifi_step1: "Installieren Sie einen kostenlosen Scanner wie „Fing" oder „Network Analyzer" und verbinden Sie sich mit dem Zimmer-WLAN.",
+      hcDiy_wifi_step2: "Listen Sie verbundene Geräte. Kamerahersteller erscheinen oft als „Hikvision", „Dahua", „Wyze", „Tuya".",
+      hcDiy_wifi_step3: "Hinweis: Viele versteckte Kameras nutzen eine eigene SIM / Hotspot. Ein leerer WLAN-Scan bedeutet NICHT, dass der Raum sauber ist.",
+      hcDiy_flashlight_title: "3. Taschenlampen-Reflexionsprüfung",
+      hcDiy_flashlight_step1: "Alle Lichter ausschalten und eine starke Taschenlampe nehmen (Handy-Taschenlampe genügt).",
+      hcDiy_flashlight_step2: "Auf Augenhöhe langsam über Wände, Lüftungen, Rauchmelder und Dekor leuchten.",
+      hcDiy_flashlight_step3: "Kameralinsen reflektieren als scharfer, heller Punkt — deutlich heller als die umliegende Fläche.",
+      hcReportIntro: "Wenn Sie eine versteckte Kamera finden oder stark vermuten, gehen Sie so vor:",
+      hcReportPoliceTitle: "🚓 Örtliche Polizei",
+      hcReportPoliceDesc: "Das Gerät NICHT entfernen oder zerstören — es ist Beweismittel. Fotografieren Sie es vor Ort und rufen Sie die örtliche Notruf-/Touristenpolizei an. Im Abschnitt Emergency Contacts Ihrer Analyse finden Sie die richtige Nummer.",
+      hcReportPlatformTitle: "🏨 Unterkunftsplattform melden",
+      hcReportPlatformDesc: "Airbnb: App → Reisen → Hilfe → „Dringende Hilfe erhalten" → Sicherheitsproblem. Booking.com / Hotels.com / Agoda: 24/7-Support kontaktieren und Rückerstattung + Vorfall-Protokoll anfordern. Buchung, Fotos und Nachrichten an Gastgeber vor dem Checkout per Screenshot sichern.",
+      hcReportAppsTitle: "📱 Erkennungs-Apps (mobil)",
+      hcReportAppsDesc: "Mobile Tools, die über die DIY-Methoden hinausgehen: Hidden Camera Detector (iOS/Android), Glint Finder (Android-Linsenreflexion), DontSpy 2 (iOS Magnetometer + IR). Sie sind Hilfen, keine Garantien — mit manueller Prüfung kombinieren.",
       ecCardBtn: "🆔 Notfallkarte erstellen",
       transportGuideBtn: "🚊 Verkehrsleitfaden",
       transportGuideTitle: "🚊 Verkehrsleitfaden",
@@ -4973,6 +5519,58 @@
       advisoryUsLabel: "Departamento de Estado de EE. UU.",
       advisoryUkLabel: "Reino Unido FCDO",
       advisoryNote: "Resumido por IA — verifica siempre los sitios oficiales de los gobiernos antes de viajar.",
+      hcBtn: "🔍 Detectar cámaras ocultas",
+      hcTitle: "🔍 Guía de detección de cámaras ocultas",
+      hcSub: "Protege tu privacidad — revisión rápida, métodos DIY y qué hacer si encuentras una",
+      hcLodgingLabel: "Tipo de alojamiento",
+      hcLodgingHotel: "Hotel",
+      hcLodgingAirbnb: "Airbnb",
+      hcLodgingHostel: "Hostal",
+      hcLodgingMotel: "Motel",
+      hcRiskLow: "Riesgo bajo",
+      hcRiskMedium: "Riesgo medio",
+      hcRiskHigh: "Riesgo elevado",
+      hcRiskLowDesc: "Los grandes hoteles suelen tener políticas estrictas, pero una revisión rápida sigue siendo buena costumbre.",
+      hcRiskMediumDesc: "Los anfitriones privados y habitaciones compartidas varían mucho — revisa con cuidado.",
+      hcRiskHighDesc: "Las cámaras ocultas se reportan más en moteles económicos — revisa a fondo.",
+      hcTab1: "Revisión rápida",
+      hcTab2: "Detección DIY",
+      hcTab3: "Reporte & Recursos",
+      hcCheckIntro: "Recorre cada punto al llegar. Toca un elemento una vez que lo hayas revisado.",
+      hcCheck_smoke: "Revisar detectores de humo",
+      hcCheckHint_smoke: "Pequeñas lentes pueden esconderse en la rejilla. Fíjate en modelos extraños o agujeros adicionales.",
+      hcCheck_clock: "Inspeccionar relojes y despertadores",
+      hcCheckHint_clock: "Especialmente los orientados a la cama. Busca lentes pinhole en el frente.",
+      hcCheck_outlet: "Inspeccionar enchufes y cargadores",
+      hcCheckHint_outlet: "Cargadores USB desconocidos, regletas o alargadores pueden ocultar cámaras.",
+      hcCheck_mirror: "Espejo del baño (prueba de la uña)",
+      hcCheckHint_mirror: "Presiona una uña contra el cristal — hay espacio = espejo normal, sin espacio = espejo de doble vía.",
+      hcCheck_vent: "Aire acondicionado y rejillas de ventilación",
+      hcCheckHint_vent: "Busca tornillos nuevos, cables desconocidos o agujeros que apunten a la cama.",
+      hcCheck_tv: "TV y decodificador",
+      hcCheckHint_tv: "Los objetos decorativos cerca del TV son escondites comunes. Busca lentes diminutas.",
+      hcCheck_screw: "Agujeros sospechosos o tornillos nuevos",
+      hcCheckHint_screw: "Agujeros tamaño pinhole en paredes, techos o decoración que apunten a la cama / ducha.",
+      hcDiyIntro: "Usa tu teléfono para una revisión más detallada. Prueba de noche con las luces apagadas.",
+      hcDiy_infrared_title: "1. Comprobación infrarroja con la cámara",
+      hcDiy_infrared_step1: "Apaga todas las luces y cierra las cortinas hasta que la habitación esté completamente a oscuras.",
+      hcDiy_infrared_step2: "Abre la cámara frontal (selfie) — suele filtrar menos los infrarrojos.",
+      hcDiy_infrared_step3: "Escanea la habitación lentamente. Los LEDs IR de cámaras nocturnas aparecen como pequeños puntos morados o blancos en pantalla.",
+      hcDiy_wifi_title: "2. Escaneo de la red Wi-Fi",
+      hcDiy_wifi_step1: "Instala un escáner de red gratuito (\"Fing\", \"Network Analyzer\") y conéctate al Wi-Fi de la habitación.",
+      hcDiy_wifi_step2: "Lista los dispositivos conectados. Los fabricantes de cámaras suelen aparecer como \"Hikvision\", \"Dahua\", \"Wyze\", \"Tuya\".",
+      hcDiy_wifi_step3: "Nota: muchas cámaras ocultas usan su propia SIM / hotspot. Un escaneo Wi-Fi vacío NO significa que la habitación esté limpia.",
+      hcDiy_flashlight_title: "3. Reflejo con linterna",
+      hcDiy_flashlight_step1: "Apaga todas las luces y toma una linterna fuerte (la del teléfono sirve).",
+      hcDiy_flashlight_step2: "A la altura de los ojos, recorre lentamente paredes, rejillas, detectores de humo y decoración.",
+      hcDiy_flashlight_step3: "Las lentes de cámara reflejan la luz como un punto nítido y brillante — mucho más que la superficie circundante.",
+      hcReportIntro: "Si encuentras o sospechas firmemente de una cámara oculta, haz lo siguiente:",
+      hcReportPoliceTitle: "🚓 Policía local",
+      hcReportPoliceDesc: "NO retires ni destruyas el dispositivo — es evidencia. Fotografíalo en el lugar y llama al número local de emergencias / policía turística. La sección Emergency Contacts de tu análisis tiene el número correcto para tu destino.",
+      hcReportPlatformTitle: "🏨 Reportar en la plataforma",
+      hcReportPlatformDesc: "Airbnb: app → Viajes → Ayuda → \"Obtener ayuda urgente\" → problema de seguridad. Booking.com / Hotels.com / Agoda: contacta soporte 24/7 y solicita reembolso + registro del incidente. Captura la reserva, las fotos y la conversación con el anfitrión antes de salir.",
+      hcReportAppsTitle: "📱 Apps de detección (móvil)",
+      hcReportAppsDesc: "Herramientas móviles que van más allá de los métodos DIY: Hidden Camera Detector (iOS/Android), Glint Finder (reflejo de lente Android), DontSpy 2 (iOS magnetómetro + IR). Son ayudas, no garantías — combínalas con una revisión manual.",
       ecCardBtn: "🆔 Crear tarjeta de emergencia",
       transportGuideBtn: "🚊 Guía de transporte",
       transportGuideTitle: "🚊 Guía de transporte",
@@ -7737,6 +8335,148 @@ Do NOT output any text outside the JSON object.`;
       const parsed = extractJson(text);
       if (!parsed) throw new Error("Failed to parse advisory response.");
       return parsed;
+    }
+  })();
+
+  // --- Hidden Camera Detection Guide (additive — independent feature, no existing
+  // function is touched). Reads NATIONALITY-independent content and lives in its
+  // own IIFE so the closures and storage keys stay isolated from the rest. ---
+  (function initHiddenCameraGuide() {
+    const LODGING_KEY = "safetrip_hc_lodging";
+    const LODGING_RISK = { hotel: "low", airbnb: "medium", hostel: "medium", motel: "high" };
+    const CHECKLIST_IDS = ["smoke", "clock", "outlet", "mirror", "vent", "tv", "screw"];
+    const DIY_IDS = ["infrared", "wifi", "flashlight"];
+
+    const btn = document.getElementById("hiddenCameraBtn");
+    const modal = document.getElementById("hiddenCameraModal");
+    const closeBtn = document.getElementById("hiddenCameraClose");
+    if (!btn || !modal || !closeBtn) return;
+
+    btn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    modal.querySelectorAll(".hc-tab").forEach((tab) => {
+      tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+    });
+    modal.querySelectorAll("[data-lodging]").forEach((lbtn) => {
+      lbtn.addEventListener("click", () => setLodging(lbtn.dataset.lodging));
+    });
+
+    // Re-render content when language changes so dynamic lists pick up new strings.
+    // setLanguage() is the existing i18n switcher; we wrap it instead of modifying it.
+    if (typeof setLanguage === "function") {
+      const _origSetLanguage = setLanguage;
+      setLanguage = function (lang) {
+        _origSetLanguage(lang);
+        if (modal.classList.contains("visible")) renderAllContent();
+      };
+    }
+
+    function openModal() {
+      renderAllContent();
+      activateTab("checklist");
+      const saved = (function () {
+        try { return localStorage.getItem(LODGING_KEY) || ""; } catch (_) { return ""; }
+      })();
+      if (saved && LODGING_RISK[saved]) {
+        setLodging(saved);
+      } else {
+        clearLodging();
+      }
+      modal.classList.add("visible");
+    }
+
+    function closeModal() {
+      modal.classList.remove("visible");
+    }
+
+    function activateTab(name) {
+      modal.querySelectorAll(".hc-tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.tab === name);
+      });
+      modal.querySelectorAll(".hc-tab-panel").forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== name;
+      });
+    }
+
+    function setLodging(type) {
+      if (!LODGING_RISK[type]) return;
+      try { localStorage.setItem(LODGING_KEY, type); } catch (_) {}
+      modal.querySelectorAll("[data-lodging]").forEach((lbtn) => {
+        lbtn.classList.toggle("active", lbtn.dataset.lodging === type);
+      });
+      const level = LODGING_RISK[type];
+      const ind = document.getElementById("hcRiskIndicator");
+      ind.className = `hc-risk-indicator show level-${level}`;
+      const cap = level.charAt(0).toUpperCase() + level.slice(1);
+      ind.innerHTML =
+        `<span class="hc-risk-badge">${escapeHtml(t("hcRisk" + cap))}</span>` +
+        `<span class="hc-risk-desc">${escapeHtml(t("hcRisk" + cap + "Desc"))}</span>`;
+    }
+
+    function clearLodging() {
+      modal.querySelectorAll("[data-lodging]").forEach((lbtn) => lbtn.classList.remove("active"));
+      const ind = document.getElementById("hcRiskIndicator");
+      ind.className = "hc-risk-indicator";
+      ind.innerHTML = "";
+    }
+
+    function renderAllContent() {
+      renderChecklist();
+      renderDiy();
+      renderReport();
+    }
+
+    function renderChecklist() {
+      const el = document.getElementById("hcChecklistContent");
+      el.innerHTML = CHECKLIST_IDS.map((id) => `
+        <label class="hc-check-item" data-hc-id="${id}">
+          <input type="checkbox">
+          <span class="hc-check-body">
+            <span class="hc-check-title">${escapeHtml(t("hcCheck_" + id))}</span>
+            <span class="hc-check-hint">${escapeHtml(t("hcCheckHint_" + id))}</span>
+          </span>
+        </label>
+      `).join("");
+      el.querySelectorAll(".hc-check-item").forEach((row) => {
+        const input = row.querySelector("input");
+        input.addEventListener("change", () => {
+          row.classList.toggle("checked", input.checked);
+        });
+      });
+    }
+
+    function renderDiy() {
+      const el = document.getElementById("hcDiyContent");
+      el.innerHTML = DIY_IDS.map((id) => `
+        <div class="hc-diy-method">
+          <h4>${escapeHtml(t("hcDiy_" + id + "_title"))}</h4>
+          <ol>
+            <li>${escapeHtml(t("hcDiy_" + id + "_step1"))}</li>
+            <li>${escapeHtml(t("hcDiy_" + id + "_step2"))}</li>
+            <li>${escapeHtml(t("hcDiy_" + id + "_step3"))}</li>
+          </ol>
+        </div>
+      `).join("");
+    }
+
+    function renderReport() {
+      const el = document.getElementById("hcReportContent");
+      el.innerHTML = `
+        <div class="hc-report-section">
+          <h4>${escapeHtml(t("hcReportPoliceTitle"))}</h4>
+          <p>${escapeHtml(t("hcReportPoliceDesc"))}</p>
+        </div>
+        <div class="hc-report-section">
+          <h4>${escapeHtml(t("hcReportPlatformTitle"))}</h4>
+          <p>${escapeHtml(t("hcReportPlatformDesc"))}</p>
+        </div>
+        <div class="hc-report-section">
+          <h4>${escapeHtml(t("hcReportAppsTitle"))}</h4>
+          <p>${escapeHtml(t("hcReportAppsDesc"))}</p>
+        </div>
+      `;
     }
   })();
 
