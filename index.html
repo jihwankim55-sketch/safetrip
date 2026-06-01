@@ -1704,6 +1704,29 @@
   .api-reassure li { margin-bottom: 4px; }
   .api-reassure li:last-child { margin-bottom: 0; }
 
+  .advisory-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .advisory-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #2563eb;
+    border-radius: 8px;
+    align-items: flex-start;
+  }
+  .advisory-card[data-source="kr"] { border-left-color: #ef4444; }
+  .advisory-card[data-source="us"] { border-left-color: #3b82f6; }
+  .advisory-card[data-source="uk"] { border-left-color: #6366f1; }
+  .advisory-card.is-primary { box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+  .advisory-flag { font-size: 28px; line-height: 1; flex-shrink: 0; }
+  .advisory-body { flex: 1; min-width: 0; }
+  .advisory-source { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+  .advisory-level { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 4px; line-height: 1.3; }
+  .advisory-summary { font-size: 13px; color: #475569; line-height: 1.5; }
+  .advisory-loading { display: flex; align-items: center; gap: 8px; padding: 8px 0; color: #64748b; font-size: 13px; }
+  .advisory-note { margin-top: 10px; font-size: 12px; color: #94a3b8; font-style: italic; }
+
   /* --- Pre-trip checklist --- */
   #checklist-section { margin-top: 4px; }
   .checklist-toggle {
@@ -1812,6 +1835,13 @@
     color: #fde68a;
   }
   body.dark .api-reassure strong { color: #fcd34d; }
+  body.dark .advisory-card { background: #16213e; border-color: #1f2a4a; }
+  body.dark .advisory-source { color: #94a3b8; }
+  body.dark .advisory-level { color: #e0e0e0; }
+  body.dark .advisory-summary { color: #cbd5e1; }
+  body.dark .advisory-loading { color: #94a3b8; }
+  body.dark .advisory-note { color: #64748b; }
+  body.dark .advisory-card.is-primary { box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.25); }
   body.dark .divider { background: #1f2a4a; }
   body.dark #results { color: #e0e0e0; }
   body.dark .result-section {
@@ -3207,6 +3237,14 @@
       compareRiskCount: "{n} risk areas",
       compareErrorBoth: "Please enter both destinations.",
       localLawsTitle: "⚖️ Local Laws & Customs",
+      advisoryTitle: "🏛️ Government Travel Advisories",
+      advisoryLoading: "Checking official government advisories...",
+      advisoryError: "Could not load advisories:",
+      advisoryNeedsApiKey: "Add your API key above to load official advisories.",
+      advisoryKrLabel: "South Korea (MOFA)",
+      advisoryUsLabel: "U.S. State Department",
+      advisoryUkLabel: "UK FCDO",
+      advisoryNote: "Summarized by AI — always verify on the official government websites before traveling.",
       ecCardBtn: "🆔 Generate Emergency Card",
       transportGuideBtn: "🚊 Transportation Guide",
       transportGuideTitle: "🚊 Transportation Guide",
@@ -3487,6 +3525,14 @@
       compareRiskCount: "위험 지역 {n}곳",
       compareErrorBoth: "두 목적지를 모두 입력하세요.",
       localLawsTitle: "⚖️ 현지 법률 & 관습",
+      advisoryTitle: "🏛️ 정부 여행경보",
+      advisoryLoading: "각국 정부의 공식 여행경보를 확인하는 중...",
+      advisoryError: "여행경보를 불러올 수 없습니다:",
+      advisoryNeedsApiKey: "공식 여행경보를 보려면 위에 API 키를 입력하세요.",
+      advisoryKrLabel: "한국 외교부",
+      advisoryUsLabel: "미국 국무부",
+      advisoryUkLabel: "영국 FCDO",
+      advisoryNote: "AI가 요약한 정보입니다 — 출국 전 반드시 각국 공식 사이트에서 확인하세요.",
       ecCardBtn: "🆔 긴급 카드 생성",
       transportGuideBtn: "🚊 교통 가이드",
       transportGuideTitle: "🚊 교통 가이드",
@@ -3767,6 +3813,14 @@
       compareRiskCount: "危険ゾーン {n} 件",
       compareErrorBoth: "両方の目的地を入力してください。",
       localLawsTitle: "⚖️ 現地の法律と習慣",
+      advisoryTitle: "🏛️ 各国政府の渡航情報",
+      advisoryLoading: "各国政府の公式渡航情報を確認中...",
+      advisoryError: "渡航情報を取得できませんでした:",
+      advisoryNeedsApiKey: "公式の渡航情報を表示するには上に API キーを入力してください。",
+      advisoryKrLabel: "韓国外交部",
+      advisoryUsLabel: "米国国務省",
+      advisoryUkLabel: "英国 FCDO",
+      advisoryNote: "AI による要約です — 渡航前に各国の公式サイトで必ずご確認ください。",
       ecCardBtn: "🆔 緊急カードを作成",
       transportGuideBtn: "🚊 交通ガイド",
       transportGuideTitle: "🚊 交通ガイド",
@@ -4047,6 +4101,14 @@
       compareRiskCount: "{n} 个风险区域",
       compareErrorBoth: "请输入两个目的地。",
       localLawsTitle: "⚖️ 当地法律与习俗",
+      advisoryTitle: "🏛️ 各国政府旅游建议",
+      advisoryLoading: "正在检查各国政府官方旅游建议...",
+      advisoryError: "无法加载旅游建议:",
+      advisoryNeedsApiKey: "在上方添加 API 密钥以加载官方旅游建议。",
+      advisoryKrLabel: "韩国外交部",
+      advisoryUsLabel: "美国国务院",
+      advisoryUkLabel: "英国 FCDO",
+      advisoryNote: "由 AI 总结 — 出行前请务必在各国官方网站核实。",
       ecCardBtn: "🆔 生成紧急联系卡",
       transportGuideBtn: "🚊 交通指南",
       transportGuideTitle: "🚊 交通指南",
@@ -4327,6 +4389,14 @@
       compareRiskCount: "{n} zones à risque",
       compareErrorBoth: "Veuillez saisir les deux destinations.",
       localLawsTitle: "⚖️ Lois et coutumes locales",
+      advisoryTitle: "🏛️ Conseils officiels aux voyageurs",
+      advisoryLoading: "Vérification des conseils gouvernementaux officiels...",
+      advisoryError: "Impossible de charger les conseils :",
+      advisoryNeedsApiKey: "Ajoutez votre clé API ci-dessus pour charger les conseils officiels.",
+      advisoryKrLabel: "Corée du Sud (MOFA)",
+      advisoryUsLabel: "Département d’État américain",
+      advisoryUkLabel: "Royaume-Uni FCDO",
+      advisoryNote: "Résumé par l’IA — vérifiez toujours les sites officiels des gouvernements avant de voyager.",
       ecCardBtn: "🆔 Générer la carte d’urgence",
       transportGuideBtn: "🚊 Guide des transports",
       transportGuideTitle: "🚊 Guide des transports",
@@ -4607,6 +4677,14 @@
       compareRiskCount: "{n} Risikozonen",
       compareErrorBoth: "Bitte geben Sie beide Reiseziele ein.",
       localLawsTitle: "⚖️ Lokale Gesetze & Bräuche",
+      advisoryTitle: "🏛️ Offizielle Reisehinweise",
+      advisoryLoading: "Offizielle Reisehinweise werden geprüft...",
+      advisoryError: "Reisehinweise konnten nicht geladen werden:",
+      advisoryNeedsApiKey: "Geben Sie oben Ihren API-Schlüssel ein, um offizielle Reisehinweise zu laden.",
+      advisoryKrLabel: "Südkorea (MOFA)",
+      advisoryUsLabel: "US-Außenministerium",
+      advisoryUkLabel: "UK FCDO",
+      advisoryNote: "Von KI zusammengefasst — überprüfen Sie vor der Reise immer die offiziellen Regierungsseiten.",
       ecCardBtn: "🆔 Notfallkarte erstellen",
       transportGuideBtn: "🚊 Verkehrsleitfaden",
       transportGuideTitle: "🚊 Verkehrsleitfaden",
@@ -4887,6 +4965,14 @@
       compareRiskCount: "{n} zonas de riesgo",
       compareErrorBoth: "Por favor, introduce ambos destinos.",
       localLawsTitle: "⚖️ Leyes y costumbres locales",
+      advisoryTitle: "🏛️ Avisos oficiales para viajeros",
+      advisoryLoading: "Verificando avisos gubernamentales oficiales...",
+      advisoryError: "No se pudieron cargar los avisos:",
+      advisoryNeedsApiKey: "Añade tu clave API arriba para cargar los avisos oficiales.",
+      advisoryKrLabel: "Corea del Sur (MOFA)",
+      advisoryUsLabel: "Departamento de Estado de EE. UU.",
+      advisoryUkLabel: "Reino Unido FCDO",
+      advisoryNote: "Resumido por IA — verifica siempre los sitios oficiales de los gobiernos antes de viajar.",
       ecCardBtn: "🆔 Crear tarjeta de emergencia",
       transportGuideBtn: "🚊 Guía de transporte",
       transportGuideTitle: "🚊 Guía de transporte",
@@ -7515,6 +7601,144 @@ Use the country-appropriate emergency number (112 in most of Europe, 911 in US/C
       pdfDownloadBtn.textContent = t("pdfDownloadBtn");
     }
   }
+
+  // --- Government Travel Advisories (additive: wraps renderResults without touching
+  // the original analyze / callClaude / renderResults / compare flows) ---
+  (function initTravelAdvisories() {
+    const NATIONALITY_ORDER = {
+      korean:   ["kr", "us", "uk"],
+      american: ["us", "kr", "uk"],
+      british:  ["uk", "kr", "us"],
+    };
+    const ADVISORY_META = {
+      kr: { flag: "🇰🇷", labelKey: "advisoryKrLabel" },
+      us: { flag: "🇺🇸", labelKey: "advisoryUsLabel" },
+      uk: { flag: "🇬🇧", labelKey: "advisoryUkLabel" },
+    };
+
+    if (typeof renderResults !== "function") return;
+    const _origRenderResults = renderResults;
+    let requestId = 0;
+
+    renderResults = function (data) {
+      _origRenderResults(data);
+      if (!data || !data.destination) return;
+      requestId += 1;
+      const myId = requestId;
+      appendPlaceholder();
+      const apiKey = apiKeyInput.value.trim();
+      const model = modelSelect.value;
+      if (!apiKey) {
+        if (myId === requestId) renderError(t("advisoryNeedsApiKey"));
+        return;
+      }
+      fetchAdvisories(apiKey, model, data.destination)
+        .then((adv) => { if (myId === requestId) renderCards(adv); })
+        .catch((err) => {
+          console.error("[SafeTrip] advisory fetch failed:", err);
+          if (myId === requestId) renderError(err.message || String(err));
+        });
+    };
+
+    function appendPlaceholder() {
+      const existing = document.getElementById("advisorySection");
+      if (existing) existing.remove();
+      const section = document.createElement("div");
+      section.id = "advisorySection";
+      section.className = "result-section";
+      section.innerHTML = `
+        <h3>${escapeHtml(t("advisoryTitle"))}</h3>
+        <div class="advisory-loading">
+          <span class="spinner"></span>${escapeHtml(t("advisoryLoading"))}
+        </div>
+      `;
+      resultsDiv.appendChild(section);
+    }
+
+    function renderError(msg) {
+      const section = document.getElementById("advisorySection");
+      if (!section) return;
+      section.innerHTML = `
+        <h3>${escapeHtml(t("advisoryTitle"))}</h3>
+        <p style="color:#dc2626;font-size:13px">${escapeHtml(t("advisoryError"))} ${escapeHtml(msg)}</p>
+      `;
+    }
+
+    function renderCards(adv) {
+      const section = document.getElementById("advisorySection");
+      if (!section) return;
+      const nat = (nationalitySelect && nationalitySelect.value) || "";
+      const order = NATIONALITY_ORDER[nat] || ["kr", "us", "uk"];
+      const primary = order[0];
+      const cards = order.map((k) => {
+        const meta = ADVISORY_META[k];
+        const item = (adv && adv[k]) || {};
+        const primaryCls = k === primary && NATIONALITY_ORDER[nat] ? " is-primary" : "";
+        return `
+          <div class="advisory-card${primaryCls}" data-source="${k}">
+            <div class="advisory-flag">${meta.flag}</div>
+            <div class="advisory-body">
+              <div class="advisory-source">${escapeHtml(t(meta.labelKey))}</div>
+              <div class="advisory-level">${escapeHtml(item.level || "—")}</div>
+              <div class="advisory-summary">${escapeHtml(item.summary || "")}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+      section.innerHTML = `
+        <h3>${escapeHtml(t("advisoryTitle"))}</h3>
+        <div class="advisory-grid">${cards}</div>
+        <p class="advisory-note">${escapeHtml(t("advisoryNote"))}</p>
+      `;
+    }
+
+    async function fetchAdvisories(apiKey, model, destination) {
+      const systemPrompt = "You provide official government travel advisory levels. Respond ONLY with pure JSON — no markdown fences, no prose. All string values must be in English.";
+      const userPrompt = `Destination: "${destination}"
+
+Provide the current official government travel advisory levels for this destination from these three sources. If a source does not separately cover the destination, use the most representative country-level advisory.
+
+Sources:
+- South Korea Ministry of Foreign Affairs (외교부): one of "Travel Caution (여행유의)", "Travel Restraint (여행자제)", "Departure Advised (출국권고)", "Travel Prohibition (여행금지)", or "No advisory issued".
+- United States State Department: one of "Level 1 - Exercise Normal Precautions", "Level 2 - Exercise Increased Caution", "Level 3 - Reconsider Travel", "Level 4 - Do Not Travel".
+- United Kingdom FCDO: one of "See our travel advice", "Reconsider travel", "Advise against all but essential travel", "Advise against all travel".
+
+Return JSON matching exactly:
+{
+  "kr": { "level": "<one of the KR options above>", "summary": "<one short English sentence>" },
+  "us": { "level": "<one of the US options above>", "summary": "<one short English sentence>" },
+  "uk": { "level": "<one of the UK options above>", "summary": "<one short English sentence>" }
+}
+
+Do NOT output any text outside the JSON object.`;
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 700,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+      });
+      if (!response.ok) {
+        const errText = await response.text();
+        let msg = `HTTP ${response.status}`;
+        try { msg = JSON.parse(errText).error?.message || msg; } catch (_) { msg = errText || msg; }
+        throw new Error(msg);
+      }
+      const json = await response.json();
+      const text = json.content?.[0]?.text ?? "";
+      const parsed = extractJson(text);
+      if (!parsed) throw new Error("Failed to parse advisory response.");
+      return parsed;
+    }
+  })();
 
   // --- Pre-trip checklist ---
   (function initChecklist() {
