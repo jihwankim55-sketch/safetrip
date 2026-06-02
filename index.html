@@ -1919,6 +1919,16 @@
     font-weight: 700;
   }
   .sp-loader-chip.done { background: #dcfce7; color: #166534; }
+  .sp-loader-chip.searching {
+    background: #fef9c3;
+    color: #854d0e;
+    animation: sp-chip-pulse 1.2s infinite;
+  }
+  .sp-loader-chip.failed { background: #fee2e2; color: #991b1b; }
+  @keyframes sp-chip-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
   .sp-loader-cancel {
     margin-left: 6px;
     background: #f1f5f9;
@@ -2576,6 +2586,8 @@
   }
   body.dark .sp-loader-chip { background: #1f2a4a; color: #cbd5e1; }
   body.dark .sp-loader-chip.done { background: #14532d; color: #86efac; }
+  body.dark .sp-loader-chip.searching { background: #2a1f0e; color: #fde047; }
+  body.dark .sp-loader-chip.failed { background: #2a0e0e; color: #fca5a5; }
   body.dark .sp-loader-cancel {
     background: #1f2a4a;
     border-color: #334155;
@@ -3986,6 +3998,8 @@
       btnGroupEmergency: "Emergency",
       btnGroupInfo: "Info",
       btnGroupSave: "Save & Share",
+      safetyPointProgressTitle: "Finding nearby safety points...",
+      safetyPointSearchingCategory: "Searching {category}... ({current}/{total})",
       ecCardBtn: "🆔 Generate Emergency Card",
       transportGuideBtn: "🚊 Transportation Guide",
       transportGuideTitle: "🚊 Transportation Guide",
@@ -4363,6 +4377,8 @@
       btnGroupEmergency: "긴급",
       btnGroupInfo: "정보",
       btnGroupSave: "저장 & 공유",
+      safetyPointProgressTitle: "주변 안전 지점을 찾는 중...",
+      safetyPointSearchingCategory: "{category} 검색 중... ({current}/{total})",
       ecCardBtn: "🆔 긴급 카드 생성",
       transportGuideBtn: "🚊 교통 가이드",
       transportGuideTitle: "🚊 교통 가이드",
@@ -4740,6 +4756,8 @@
       btnGroupEmergency: "緊急",
       btnGroupInfo: "情報",
       btnGroupSave: "保存 & 共有",
+      safetyPointProgressTitle: "周辺の安全スポットを検索中...",
+      safetyPointSearchingCategory: "{category}を検索中... ({current}/{total})",
       ecCardBtn: "🆔 緊急カードを作成",
       transportGuideBtn: "🚊 交通ガイド",
       transportGuideTitle: "🚊 交通ガイド",
@@ -5117,6 +5135,8 @@
       btnGroupEmergency: "紧急",
       btnGroupInfo: "信息",
       btnGroupSave: "保存 & 分享",
+      safetyPointProgressTitle: "正在查找附近的安全地点...",
+      safetyPointSearchingCategory: "正在搜索{category}... ({current}/{total})",
       ecCardBtn: "🆔 生成紧急联系卡",
       transportGuideBtn: "🚊 交通指南",
       transportGuideTitle: "🚊 交通指南",
@@ -5494,6 +5514,8 @@
       btnGroupEmergency: "Urgence",
       btnGroupInfo: "Infos",
       btnGroupSave: "Sauvegarde & Partage",
+      safetyPointProgressTitle: "Recherche des points de sécurité à proximité...",
+      safetyPointSearchingCategory: "Recherche {category}... ({current}/{total})",
       ecCardBtn: "🆔 Générer la carte d’urgence",
       transportGuideBtn: "🚊 Guide des transports",
       transportGuideTitle: "🚊 Guide des transports",
@@ -5871,6 +5893,8 @@
       btnGroupEmergency: "Notfall",
       btnGroupInfo: "Infos",
       btnGroupSave: "Speichern & Teilen",
+      safetyPointProgressTitle: "Sicherheitspunkte in der Nähe werden gesucht...",
+      safetyPointSearchingCategory: "{category} wird gesucht... ({current}/{total})",
       ecCardBtn: "🆔 Notfallkarte erstellen",
       transportGuideBtn: "🚊 Verkehrsleitfaden",
       transportGuideTitle: "🚊 Verkehrsleitfaden",
@@ -6248,6 +6272,8 @@
       btnGroupEmergency: "Emergencia",
       btnGroupInfo: "Información",
       btnGroupSave: "Guardar & Compartir",
+      safetyPointProgressTitle: "Buscando puntos de seguridad cercanos...",
+      safetyPointSearchingCategory: "Buscando {category}... ({current}/{total})",
       ecCardBtn: "🆔 Crear tarjeta de emergencia",
       transportGuideBtn: "🚊 Guía de transporte",
       transportGuideTitle: "🚊 Guía de transporte",
@@ -9477,6 +9503,238 @@ Do NOT output any text outside the JSON object.`;
     function clearState() {
       try { localStorage.removeItem(TIMER_KEY); } catch (_) {}
     }
+  })();
+
+  // --- Sequential Nearby Safety Points (additive — reassigns
+  // `toggleSafetyPoints` at runtime. The original function body is left
+  // untouched and simply becomes unreachable after this IIFE runs.
+  // Sequential per-category Overpass queries with incremental marker
+  // plotting + per-category chip status in the existing #safetyPointsLoader
+  // overlay element. Cancel button is wired here for the first time. ---
+  (function initSafetyPointsSequential() {
+    if (typeof toggleSafetyPoints !== "function") return;
+
+    const loader = document.getElementById("safetyPointsLoader");
+    const loaderText = document.getElementById("safetyPointsLoaderText");
+    const loaderProgress = document.getElementById("safetyPointsLoaderProgress");
+    const cancelBtn = document.getElementById("safetyPointsCancelBtn");
+    if (!loader || !loaderText || !loaderProgress || !cancelBtn) return;
+
+    const CATEGORIES = ["hospital", "police", "pharmacy"];
+    const OVERPASS_ENDPOINTS = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+    ];
+    const PER_CATEGORY_MAX_ATTEMPTS = 2;
+    const PER_CATEGORY_RETRY_DELAY = 1500;
+    const HIDE_AFTER_DONE_MS = 1500;
+
+    let cancelToken = null;
+    let hideHandle = null;
+
+    cancelBtn.addEventListener("click", () => {
+      if (!cancelToken) return;
+      cancelToken.cancelled = true;
+      // Discard any partial markers so toggle state is consistent.
+      try { safetyPointsLayer.clearLayers(); } catch (_) {}
+      safetyPointsActive = false;
+      updateSafetyPointsBtnLabel();
+      hideLoader();
+      if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = false;
+      try { showToast(t("safetyPointCancelled")); } catch (_) {}
+    });
+
+    function showLoader(initialText) {
+      clearTimeout(hideHandle);
+      hideHandle = null;
+      resetChips();
+      loaderProgress.style.display = "inline-flex";
+      setLoaderText(initialText);
+      loader.classList.add("visible");
+    }
+    function hideLoader() {
+      loader.classList.remove("visible");
+    }
+    function setLoaderText(text) {
+      loaderText.textContent = text || "";
+    }
+    function resetChips() {
+      CATEGORIES.forEach((key) => {
+        const chip = loaderProgress.querySelector(`[data-sp-chip="${key}"]`);
+        if (!chip) return;
+        chip.classList.remove("searching", "done", "failed");
+        const count = chip.querySelector(`[data-sp-count="${key}"]`);
+        if (count) count.textContent = "0";
+      });
+    }
+    function setChipStatus(key, state, count) {
+      const chip = loaderProgress.querySelector(`[data-sp-chip="${key}"]`);
+      if (!chip) return;
+      chip.classList.remove("searching", "done", "failed");
+      if (state) chip.classList.add(state);
+      const countEl = chip.querySelector(`[data-sp-count="${key}"]`);
+      if (countEl && typeof count === "number") countEl.textContent = String(count);
+    }
+
+    async function fetchSingleCategory(catKey, center, tok) {
+      const query = `[out:json][timeout:25];
+(
+  node["amenity"="${catKey}"](around:2000,${center.lat},${center.lng});
+  way["amenity"="${catKey}"](around:2000,${center.lat},${center.lng});
+  relation["amenity"="${catKey}"](around:2000,${center.lat},${center.lng});
+);
+out center tags 80;`;
+      for (let attempt = 1; attempt <= PER_CATEGORY_MAX_ATTEMPTS; attempt++) {
+        if (tok.cancelled) return null;
+        for (const endpoint of OVERPASS_ENDPOINTS) {
+          if (tok.cancelled) return null;
+          const tries = [
+            () => fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: "data=" + encodeURIComponent(query),
+            }),
+            () => fetch(endpoint + "?data=" + encodeURIComponent(query)),
+          ];
+          for (const doFetch of tries) {
+            if (tok.cancelled) return null;
+            try {
+              const response = await doFetch();
+              if (!response.ok) continue;
+              const json = await response.json();
+              const elements = (json && json.elements) || [];
+              return elements;
+            } catch (err) {
+              console.warn(`[SafeTrip] safety points ${catKey}/${endpoint} attempt ${attempt} failed:`, err && err.message);
+            }
+          }
+        }
+        if (attempt < PER_CATEGORY_MAX_ATTEMPTS && !tok.cancelled) {
+          await new Promise((r) => setTimeout(r, PER_CATEGORY_RETRY_DELAY));
+        }
+      }
+      return null;
+    }
+
+    function plotCategoryMarkers(elements, catKey, accBounds) {
+      const cfg = SAFETY_POINT_CONFIG[catKey];
+      if (!cfg) return 0;
+      let added = 0;
+      elements.forEach((el) => {
+        const lat = (typeof el.lat === "number") ? el.lat : (el.center && el.center.lat);
+        const lng = (typeof el.lon === "number") ? el.lon : (el.center && el.center.lon);
+        if (typeof lat !== "number" || typeof lng !== "number") return;
+        if (el.tags && el.tags.amenity !== catKey) return;
+        const tags = el.tags || {};
+        const name = tags.name || tags["name:en"] || t("safetyPointUnnamed");
+        const address = buildSafetyPointAddress(tags);
+        const phone = tags.phone || tags["contact:phone"];
+        const popupHtml = `
+          <div style="min-width:200px">
+            <strong>${escapeHtml(name)}</strong><br/>
+            <em style="color:#64748b">${escapeHtml(t(cfg.labelKey))}</em>
+            ${address ? `<div style="margin-top:6px;font-size:12px;color:#475569">📍 ${escapeHtml(address)}</div>` : ""}
+            ${phone ? `<div style="margin-top:4px;font-size:12px"><a href="tel:${escapeHtml(phone.replace(/[^\d+]/g, ""))}">📞 ${escapeHtml(phone)}</a></div>` : ""}
+          </div>
+        `;
+        L.marker([lat, lng], { icon: safetyPointDivIcon(cfg) })
+          .addTo(safetyPointsLayer)
+          .bindPopup(popupHtml);
+        accBounds.push([lat, lng]);
+        added++;
+      });
+      return added;
+    }
+
+    // ---- Replacement function reference. Leaflet click handler calls
+    // `toggleSafetyPoints()` by name at click-time, so reassigning the
+    // binding here transparently routes through the new implementation. ----
+    toggleSafetyPoints = async function () {
+      if (safetyPointsActive) {
+        safetyPointsLayer.clearLayers();
+        safetyPointsActive = false;
+        updateSafetyPointsBtnLabel();
+        return;
+      }
+      if (!window.confirm(t("safetyPointConfirmMsg"))) return;
+      if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = true;
+
+      cancelToken = { cancelled: false };
+      const tok = cancelToken;
+      showLoader(t("safetyPointProgressTitle"));
+
+      const accBounds = [];
+      let totalAdded = 0;
+      let anyCategorySucceeded = false;
+
+      try {
+        const center = await getSafetyPointsCenter();
+        if (tok.cancelled) return;
+        if (!center) {
+          setLoaderText(t("safetyPointGeoError"));
+          try { showToast(t("safetyPointGeoError")); } catch (_) {}
+          hideHandle = setTimeout(hideLoader, HIDE_AFTER_DONE_MS);
+          return;
+        }
+
+        safetyPointsLayer.clearLayers();
+
+        for (let i = 0; i < CATEGORIES.length; i++) {
+          if (tok.cancelled) break;
+          const cat = CATEGORIES[i];
+          const catLabel = t(SAFETY_POINT_CONFIG[cat].labelKey);
+          setChipStatus(cat, "searching", 0);
+          setLoaderText(t("safetyPointSearchingCategory", {
+            category: catLabel,
+            current: i + 1,
+            total: CATEGORIES.length,
+          }));
+
+          const elements = await fetchSingleCategory(cat, center, tok);
+          if (tok.cancelled) break;
+
+          if (elements && elements.length > 0) {
+            const plotted = plotCategoryMarkers(elements, cat, accBounds);
+            if (plotted > 0) {
+              setChipStatus(cat, "done", plotted);
+              totalAdded += plotted;
+              anyCategorySucceeded = true;
+              // Pan to fit so far so the user sees results appear live.
+              if (accBounds.length >= 2) {
+                try { map.fitBounds(L.latLngBounds(accBounds).pad(0.2), { animate: true }); } catch (_) {}
+              } else if (accBounds.length === 1) {
+                try { map.setView(accBounds[0], 16, { animate: true }); } catch (_) {}
+              }
+            } else {
+              setChipStatus(cat, "failed", 0);
+            }
+          } else {
+            setChipStatus(cat, "failed", 0);
+          }
+        }
+
+        if (tok.cancelled) return;
+
+        if (totalAdded === 0) {
+          setLoaderText(t("safetyPointNotFound"));
+          try { showToast(t("safetyPointNotFound")); } catch (_) {}
+          hideHandle = setTimeout(hideLoader, HIDE_AFTER_DONE_MS);
+          return;
+        }
+
+        safetyPointsActive = true;
+        updateSafetyPointsBtnLabel();
+        setLoaderText(t("safetyPointFound", { n: totalAdded }));
+        try { showToast(t("safetyPointFound", { n: totalAdded })); } catch (_) {}
+        hideHandle = setTimeout(hideLoader, HIDE_AFTER_DONE_MS);
+      } catch (err) {
+        console.error("[SafeTrip] sequential safety points failed:", err);
+        hideLoader();
+      } finally {
+        if (safetyPointsBtnEl) safetyPointsBtnEl.disabled = false;
+        if (cancelToken === tok) cancelToken = null;
+      }
+    };
   })();
 
   // --- Sidebar button groups (additive — wraps setPdfButtonVisible to also
