@@ -1260,7 +1260,9 @@
   .btn-grid > #transportGuideBtn,
   .btn-grid > #paymentGuideBtn,
   .btn-grid > #hiddenCameraBtn,
-  .btn-grid > #safetyTimerBtn {
+  .btn-grid > #safetyTimerBtn,
+  .btn-grid > #pdfDownloadBtn,
+  .btn-grid > #insuranceBtn {
     grid-column: 1 / -1;
   }
   @media (max-width: 480px) {
@@ -1271,8 +1273,60 @@
     .btn-grid > #transportGuideBtn,
     .btn-grid > #paymentGuideBtn,
     .btn-grid > #hiddenCameraBtn,
-    .btn-grid > #safetyTimerBtn { grid-column: auto; }
+    .btn-grid > #safetyTimerBtn,
+    .btn-grid > #pdfDownloadBtn,
+    .btn-grid > #insuranceBtn { grid-column: auto; }
   }
+
+  /* --- Button groups (collapsible categories) --- */
+  .btn-group {
+    margin-top: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+  }
+  .btn-group-header {
+    width: 100%;
+    background: #f8fafc;
+    border: none;
+    border-bottom: 1px solid transparent;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.12s;
+  }
+  .btn-group-header:hover { background: #f1f5f9; }
+  .btn-group-header[aria-expanded="true"] {
+    border-bottom-color: #e2e8f0;
+    background: #f1f5f9;
+  }
+  .btn-group-header .chevron {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+    display: inline-block;
+    width: 10px;
+    flex-shrink: 0;
+  }
+  .btn-group-header[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+  .btn-group-body {
+    padding: 10px;
+  }
+  .btn-group-body.collapsed { display: none; }
+  /* Reset spacing so first child sits flush against group padding. */
+  .btn-group-body > .btn-grid { margin-top: 0; }
+  .btn-group-body > #compareToggleBtn { margin-top: 0; }
+  .btn-group-body > .btn-grid > button { margin-top: 0; }
 
   .phrase-card {
     background: #f8fafc;
@@ -2169,6 +2223,20 @@
     color: #fde68a;
   }
   body.dark .api-reassure strong { color: #fcd34d; }
+  body.dark .btn-group {
+    background: #16213e;
+    border-color: #1f2a4a;
+  }
+  body.dark .btn-group-header {
+    background: #0f1626;
+    color: #94a3b8;
+  }
+  body.dark .btn-group-header:hover { background: #16213e; }
+  body.dark .btn-group-header[aria-expanded="true"] {
+    background: #16213e;
+    border-bottom-color: #1f2a4a;
+  }
+  body.dark .btn-group-header .chevron { color: #64748b; }
   body.dark .advisory-card { background: #16213e; border-color: #1f2a4a; }
   body.dark .advisory-source { color: #94a3b8; }
   body.dark .advisory-level { color: #e0e0e0; }
@@ -3109,23 +3177,63 @@
     </div>
 
     <button id="analyze" data-i18n="analyzeBtn">Analyze Safety</button>
-    <button id="compareToggleBtn" class="compare-toggle" type="button" data-i18n="compareToggle">⚖️ Compare Destinations</button>
-    <div class="form-group" id="destinationBGroup" style="display:none; margin-top:8px">
-      <label for="destinationB" data-i18n="compareWithLabel">Compare with</label>
-      <input type="text" id="destinationB" data-i18n-placeholder="compareWithPlaceholder" placeholder="e.g. Tokyo, Japan" />
+
+    <div class="btn-group" data-group="analyze">
+      <button type="button" class="btn-group-header" aria-expanded="false">
+        <span class="chevron">▶</span>
+        <span class="btn-group-label" data-i18n="btnGroupAnalyze">Analysis</span>
+      </button>
+      <div class="btn-group-body">
+        <button id="compareToggleBtn" class="compare-toggle" type="button" data-i18n="compareToggle">⚖️ Compare Destinations</button>
+        <div class="form-group" id="destinationBGroup" style="display:none; margin-top:8px">
+          <label for="destinationB" data-i18n="compareWithLabel">Compare with</label>
+          <input type="text" id="destinationB" data-i18n-placeholder="compareWithPlaceholder" placeholder="e.g. Tokyo, Japan" />
+        </div>
+      </div>
     </div>
-    <div class="btn-grid">
-      <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
-      <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
-      <button id="pdfDownloadBtn" class="secondary" type="button" style="display:none" data-i18n="pdfDownloadBtn">📄 Download Safety Report (PDF)</button>
-      <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
-      <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
-      <button id="shareBtn" class="share" type="button" style="display:none" data-i18n="shareBtn">📤 Share Results</button>
-      <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
-      <button id="transportGuideBtn" class="transport" type="button" style="display:none" data-i18n="transportGuideBtn">🚊 Transportation Guide</button>
-      <button id="paymentGuideBtn" class="payment" type="button" style="display:none" data-i18n="paymentGuideBtn">💴 Payment & Currency Guide</button>
-      <button id="hiddenCameraBtn" class="hidden-cam" type="button" data-i18n="hcBtn">🔍 Hidden Camera Check</button>
-      <button id="safetyTimerBtn" class="safety-timer" type="button" data-i18n="timerBtn">⏰ Safety Timer</button>
+
+    <div class="btn-group" data-group="emergency">
+      <button type="button" class="btn-group-header" aria-expanded="true">
+        <span class="chevron">▶</span>
+        <span class="btn-group-label" data-i18n="btnGroupEmergency">Emergency</span>
+      </button>
+      <div class="btn-group-body">
+        <div class="btn-grid">
+          <button id="reportModeBtn" class="secondary" type="button" data-i18n="enableReportMode">📍 Enable Report Mode</button>
+          <button id="liveTrackBtn" class="secondary" type="button" data-i18n="startLiveTracking">🛰️ Start Live Tracking</button>
+          <button id="safetyTimerBtn" class="safety-timer" type="button" data-i18n="timerBtn">⏰ Safety Timer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-group" data-group="info">
+      <button type="button" class="btn-group-header" aria-expanded="false">
+        <span class="chevron">▶</span>
+        <span class="btn-group-label" data-i18n="btnGroupInfo">Info</span>
+      </button>
+      <div class="btn-group-body">
+        <div class="btn-grid">
+          <button id="phrasesBtn" class="phrases" type="button" style="display:none" data-i18n="phrasesBtn">🆘 Emergency Phrases</button>
+          <button id="transportGuideBtn" class="transport" type="button" style="display:none" data-i18n="transportGuideBtn">🚊 Transportation Guide</button>
+          <button id="paymentGuideBtn" class="payment" type="button" style="display:none" data-i18n="paymentGuideBtn">💴 Payment & Currency Guide</button>
+          <button id="hiddenCameraBtn" class="hidden-cam" type="button" data-i18n="hcBtn">🔍 Hidden Camera Check</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-group" data-group="save">
+      <button type="button" class="btn-group-header" aria-expanded="false">
+        <span class="chevron">▶</span>
+        <span class="btn-group-label" data-i18n="btnGroupSave">Save &amp; Share</span>
+      </button>
+      <div class="btn-group-body">
+        <div class="btn-grid">
+          <button id="pdfDownloadBtn" class="secondary" type="button" style="display:none" data-i18n="pdfDownloadBtn">📄 Download Safety Report (PDF)</button>
+          <button id="shareBtn" class="share" type="button" style="display:none" data-i18n="shareBtn">📤 Share Results</button>
+          <button id="ecCardBtn" class="emergency-card" type="button" style="display:none" data-i18n="ecCardBtn">🆔 Generate Emergency Card</button>
+          <button id="insuranceBtn" class="insurance" type="button" style="display:none" data-i18n="insuranceBtn">🛡️ Get Travel Insurance</button>
+        </div>
+      </div>
     </div>
 
     <button id="offlineEmergencyBtn" class="offline-emergency" type="button" style="display:none" data-i18n="offlineBtn">📴 Offline Emergency Info</button>
@@ -3874,6 +3982,10 @@
       timerExpireSmsBodyNoLocation: "SafeTrip safety check-in missed — I haven't checked in for {duration}. (Location unavailable)",
       timerNMinutes: "{n} minutes",
       timerNHours: "{n} hours",
+      btnGroupAnalyze: "Analysis",
+      btnGroupEmergency: "Emergency",
+      btnGroupInfo: "Info",
+      btnGroupSave: "Save & Share",
       ecCardBtn: "🆔 Generate Emergency Card",
       transportGuideBtn: "🚊 Transportation Guide",
       transportGuideTitle: "🚊 Transportation Guide",
@@ -4247,6 +4359,10 @@
       timerExpireSmsBodyNoLocation: "SafeTrip 안전 체크인 누락 — {duration} 동안 체크인하지 않았습니다. (위치 확인 불가)",
       timerNMinutes: "{n}분",
       timerNHours: "{n}시간",
+      btnGroupAnalyze: "분석",
+      btnGroupEmergency: "긴급",
+      btnGroupInfo: "정보",
+      btnGroupSave: "저장 & 공유",
       ecCardBtn: "🆔 긴급 카드 생성",
       transportGuideBtn: "🚊 교통 가이드",
       transportGuideTitle: "🚊 교통 가이드",
@@ -4620,6 +4736,10 @@
       timerExpireSmsBodyNoLocation: "SafeTrip 安全チェックイン未実施 — {duration} の間チェックインしていません。(位置情報なし)",
       timerNMinutes: "{n}分",
       timerNHours: "{n}時間",
+      btnGroupAnalyze: "分析",
+      btnGroupEmergency: "緊急",
+      btnGroupInfo: "情報",
+      btnGroupSave: "保存 & 共有",
       ecCardBtn: "🆔 緊急カードを作成",
       transportGuideBtn: "🚊 交通ガイド",
       transportGuideTitle: "🚊 交通ガイド",
@@ -4993,6 +5113,10 @@
       timerExpireSmsBodyNoLocation: "SafeTrip 安全签到漏检 — 已 {duration} 未签到。（无法获取位置）",
       timerNMinutes: "{n} 分钟",
       timerNHours: "{n} 小时",
+      btnGroupAnalyze: "分析",
+      btnGroupEmergency: "紧急",
+      btnGroupInfo: "信息",
+      btnGroupSave: "保存 & 分享",
       ecCardBtn: "🆔 生成紧急联系卡",
       transportGuideBtn: "🚊 交通指南",
       transportGuideTitle: "🚊 交通指南",
@@ -5366,6 +5490,10 @@
       timerExpireSmsBodyNoLocation: "SafeTrip check-in manqué — pas de confirmation depuis {duration}. (Position indisponible)",
       timerNMinutes: "{n} minutes",
       timerNHours: "{n} heures",
+      btnGroupAnalyze: "Analyse",
+      btnGroupEmergency: "Urgence",
+      btnGroupInfo: "Infos",
+      btnGroupSave: "Sauvegarde & Partage",
       ecCardBtn: "🆔 Générer la carte d’urgence",
       transportGuideBtn: "🚊 Guide des transports",
       transportGuideTitle: "🚊 Guide des transports",
@@ -5739,6 +5867,10 @@
       timerExpireSmsBodyNoLocation: "SafeTrip Sicherheits-Check-in verpasst — seit {duration} keine Bestätigung. (Standort nicht verfügbar)",
       timerNMinutes: "{n} Minuten",
       timerNHours: "{n} Stunden",
+      btnGroupAnalyze: "Analyse",
+      btnGroupEmergency: "Notfall",
+      btnGroupInfo: "Infos",
+      btnGroupSave: "Speichern & Teilen",
       ecCardBtn: "🆔 Notfallkarte erstellen",
       transportGuideBtn: "🚊 Verkehrsleitfaden",
       transportGuideTitle: "🚊 Verkehrsleitfaden",
@@ -6112,6 +6244,10 @@
       timerExpireSmsBodyNoLocation: "Check-in de seguridad de SafeTrip omitido — sin confirmación desde hace {duration}. (Ubicación no disponible)",
       timerNMinutes: "{n} minutos",
       timerNHours: "{n} horas",
+      btnGroupAnalyze: "Análisis",
+      btnGroupEmergency: "Emergencia",
+      btnGroupInfo: "Información",
+      btnGroupSave: "Guardar & Compartir",
       ecCardBtn: "🆔 Crear tarjeta de emergencia",
       transportGuideBtn: "🚊 Guía de transporte",
       transportGuideTitle: "🚊 Guía de transporte",
@@ -9340,6 +9476,72 @@ Do NOT output any text outside the JSON object.`;
     }
     function clearState() {
       try { localStorage.removeItem(TIMER_KEY); } catch (_) {}
+    }
+  })();
+
+  // --- Sidebar button groups (additive — wraps setPdfButtonVisible to also
+  // hide / show the entire "save" group based on whether any of its buttons
+  // are visible. Original function reference is preserved). ---
+  (function initBtnGroups() {
+    const STORAGE_KEY = "safetrip_btn_groups";
+    // First-time defaults per user spec: only 긴급 expanded.
+    const DEFAULTS = { analyze: false, emergency: true, info: false, save: false };
+
+    let state = Object.assign({}, DEFAULTS);
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) state = Object.assign({}, DEFAULTS, JSON.parse(raw));
+    } catch (_) {}
+
+    const groups = Array.from(document.querySelectorAll(".btn-group"));
+    if (!groups.length) return;
+
+    groups.forEach((group) => {
+      const name = group.dataset.group;
+      const header = group.querySelector(".btn-group-header");
+      const body = group.querySelector(".btn-group-body");
+      if (!header || !body || !name) return;
+
+      setExpanded(group, !!state[name]);
+
+      header.addEventListener("click", () => {
+        const isOpen = header.getAttribute("aria-expanded") === "true";
+        setExpanded(group, !isOpen);
+        state[name] = !isOpen;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      });
+    });
+
+    // Wrap setPdfButtonVisible so save-group container hides until at least
+    // one of its buttons is visible. The original function still runs first.
+    if (typeof setPdfButtonVisible === "function") {
+      const _origSetPdfButtonVisible = setPdfButtonVisible;
+      setPdfButtonVisible = function (visible) {
+        _origSetPdfButtonVisible(visible);
+        updateGroupVisibility();
+      };
+    }
+
+    // Initial pass — pre-analysis the save group should already be hidden.
+    updateGroupVisibility();
+
+    function setExpanded(group, open) {
+      const header = group.querySelector(".btn-group-header");
+      const body = group.querySelector(".btn-group-body");
+      if (!header || !body) return;
+      header.setAttribute("aria-expanded", String(!!open));
+      body.classList.toggle("collapsed", !open);
+    }
+
+    function updateGroupVisibility() {
+      groups.forEach((group) => {
+        // Compare visibility of leaf buttons inside the body, ignoring the
+        // header button itself.
+        const buttons = group.querySelectorAll(".btn-group-body button");
+        if (buttons.length === 0) return;
+        const anyVisible = Array.from(buttons).some((b) => b.style.display !== "none");
+        group.style.display = anyVisible ? "" : "none";
+      });
     }
   })();
 
